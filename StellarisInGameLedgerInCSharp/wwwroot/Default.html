@@ -1,0 +1,102 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+    <script src="https://d3js.org/d3.v5.min.js" charset="utf-8"></script>
+</head>
+<body>
+    <!--Div that will hold the pie chart-->
+    <div id="chart_div"></div>
+    <script>
+        "use strict";
+
+        var data = [{
+            "tag": "0",
+            "name": "地球联合国",
+            "technologyCount": 72,
+            "militaryPower": 1539.09249,
+            "colonyCount": 10,
+            "civilianStations": 36,
+            "population": 99,
+            "energy": 3098.002,
+            "minerals": 490.121,
+            "food": 200.0,
+            "influence": 713.896,
+            "unity": 3558.644,
+            "energyIncome": -5.271,
+            "mineralsIncome": 55.109,
+            "foodIncome": 0.065,
+            "influenceIncome": 5.464,
+            "unityIncome": 0.0,
+            "physicsResearchIncome": 42.277,
+            "societyResearchIncome": 74.673,
+            "engineeringResearchIncome": 33.874
+        },
+        {
+            "tag": "1",
+            "name": "赞玛帕克帝国",
+            "technologyCount": 81,
+            "militaryPower": 2592.89398,
+            "colonyCount": 6,
+            "civilianStations": 70,
+            "population": 64,
+            "energy": 11326.744,
+            "minerals": 770.363,
+            "food": 1000.0,
+            "influence": 782.17,
+            "unity": 2758.045,
+            "energyIncome": 35.969,
+            "mineralsIncome": 82.274,
+            "foodIncome": 4.593,
+            "influenceIncome": 3.188,
+            "unityIncome": 0.0,
+            "physicsResearchIncome": 34.929,
+            "societyResearchIncome": 35.067,
+            "engineeringResearchIncome": 51.272
+        }
+        ];
+
+
+        function tabulate(data) {
+            var table = d3.select('body').append('table');
+            var thead = table.append('thead');
+            var tbody = table.append('tbody');
+
+            // append the header row
+            thead.append('tr')
+                .selectAll('th')
+                .data(Object.getOwnPropertyNames(data[0])).enter()
+                .append('th')
+                .text(function (column) { return column; });
+
+            // create a row for each object in the data
+            var rows = tbody.selectAll('tr')
+                .data(data)
+                .enter()
+                .append('tr');
+
+            // create a cell in each row for each column
+            var cells = rows.selectAll('td')
+                .data(function (row) {
+                    var d = [];
+                    for (var p in row)
+                        d.push({ column: p, value: row[p] });
+                    return d;
+                })
+                .enter()
+                .append('td')
+                .text(function (d) { return d.value; });
+
+            return table;
+        }
+
+
+        tabulate(data);
+
+        //d3.json('/api/Countries', function (error, data) {
+        //});
+    </script>
+
+</body>
+</html>

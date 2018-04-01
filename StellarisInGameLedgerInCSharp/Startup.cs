@@ -34,6 +34,7 @@ namespace StellarisInGameLedgerInCSharp
                 app.UseDeveloperExceptionPage();
             }
 
+            app.UseStaticFiles();
             app.UseMvc();
         }
     }

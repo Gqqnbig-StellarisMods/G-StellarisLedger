@@ -11,14 +11,15 @@
     "IIS Express": {
       "commandName": "IISExpress",
       "launchBrowser": true,
-      "launchUrl": "api/Countries",
+      "launchUrl": "Default.html",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
     "StellarisInGameLedgerInCSharp": {
       "commandName": "Project",
-      "launchUrl": "api/Countries",
+      "launchBrowser": true,
+      "launchUrl": "Default.html",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
