@@ -17,9 +17,55 @@
 
 
         function getColumnHeader(name) {
+            switch (name) {
+                case "colonyCount":
+                    return '<img src="https://stellaris.paradoxwikis.com/images/6/6e/Planet_gaia.png" title="Colonies">';
+                case "energy":
+                    return '<img src="https://stellaris.paradoxwikis.com/images/5/58/Energy_Credits.png" title="Energy">';
+                case "energyIncome":
+                    return '<img src="https://stellaris.paradoxwikis.com/images/5/58/Energy_Credits.png" title="Energy"> Income';
+                case "minerals":
+                    return '<img src="https://stellaris.paradoxwikis.com/images/1/10/Minerals.png" title="Minerals">';
+                case "mineralsIncome":
+                    return '<img src="https://stellaris.paradoxwikis.com/images/1/10/Minerals.png" title="Minerals"> Income';
+                case "food":
+                    return '<img src="https://stellaris.paradoxwikis.com/images/c/c6/Food.png" title="Food">';
+                case "foodIncome":
+                    return '<img src="https://stellaris.paradoxwikis.com/images/c/c6/Food.png" title="Food"> Income';
+                case "influence":
+                    return '<img src="https://stellaris.paradoxwikis.com/images/9/91/Influence.png" title="Influence">';
+                case "influenceIncome":
+                    return '<img src="https://stellaris.paradoxwikis.com/images/9/91/Influence.png" title="Influence"> Income';
+                case "unity":
+                    return '<img src="https://stellaris.paradoxwikis.com/images/3/3d/Unity.png" title="Unity">';
+                case "unityIncome":
+                    return '<img src="https://stellaris.paradoxwikis.com/images/3/3d/Unity.png" title="Unity"> Income';
+                //case "physicsResearchIncome":
+                //    return '<img src="https://stellaris.paradoxwikis.com/images/b/b3/Research_speed_%28Physics%29.png" title="Physics Income with Penalty">';
+                //case "societyResearchIncome":
+                //    return '<img src="https://stellaris.paradoxwikis.com/images/4/4f/Research_speed_%28Society%29.png" title="Society Income with Penalty">';
+                case "population":
+                    return '<img src="https://stellaris.paradoxwikis.com/images/7/71/Pop.png" title="Population">';
+
+                default:
+            }
+
+
             return _.startCase(name);
         }
 
+        function formatCellValue(value) {
+            if (_.isInteger(value))
+                return value.toFixed(0);
+            else if (_.isNumber(value)) {
+                if (value > 0)
+                    return `<span class="positive">${value.toFixed(2)}</span>`;
+                else
+                    return `<span class="negative">${value.toFixed(2)}</span>`;
+            }
+            else
+                return value;
+        }
 
 
         function drawTable() {
@@ -34,7 +80,7 @@
 
                 var rows = json.map(item => {
                     var cells = propertyNames.map(p => {
-                        return item[p];
+                        return { v: item[p], f: formatCellValue(item[p]) };
                     });
                     return cells;
                 });
@@ -47,11 +93,21 @@
                 // Instantiate and draw our chart, passing in some options.
                 var table = new google.visualization.Table(document.getElementById('table_div'));
 
-                table.draw(data);
+                table.draw(data, { allowHtml: true });
 
             });
         }
     </script>
+
+    <style type="text/css">
+        thead th img {
+            max-height: 32px;
+        }
+
+        .negative {
+            color: red;
+        }
+    </style>
 </head>
 
 <body>
