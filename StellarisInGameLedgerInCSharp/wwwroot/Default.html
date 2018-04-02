@@ -75,7 +75,15 @@
         function drawTable() {
 
             jsonPromise.then(response => response.json()).then(json => {
+                json.forEach(item => {
+                    Object.defineProperty(item, 'totalResearchIncomeWithPenalty',
+                        {
+                            get: function() {
+                                return this.physicsResearchIncomeWithPenalty + this.societyResearchIncomeWithPenalty + this.engineeringResearchIncomeWithPenalty;
+                            }
+                        });
 
+                });
 
 
 
