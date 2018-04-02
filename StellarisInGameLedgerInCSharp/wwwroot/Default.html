@@ -18,6 +18,8 @@
 
         function getColumnHeader(name) {
             switch (name) {
+                case "technologyCount":
+                    return "Technologies";
                 case "colonyCount":
                     return '<img src="https://stellaris.paradoxwikis.com/images/6/6e/Planet_gaia.png" title="Colonies">';
                 case "energy":
@@ -88,6 +90,7 @@
 
 
                 data.addRows(rows);
+
 
 
                 // Instantiate and draw our chart, passing in some options.
