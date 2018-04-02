@@ -75,8 +75,16 @@
         function drawTable() {
 
             jsonPromise.then(response => response.json()).then(json => {
+
+
+
+
+
                 const data = new google.visualization.DataTable();
-                const propertyNames = Object.getOwnPropertyNames(json[0]);
+                let propertyNames = Object.getOwnPropertyNames(json[0]);
+
+                propertyNames = propertyNames.filter(p => ["physicsResearchIncome", "societyResearchIncome", "engineeringResearchIncome"].indexOf(p) === -1);
+
                 propertyNames.forEach(p => {
                     data.addColumn({ type: typeof (json[0][p]), label: getColumnHeader(p) });
                 });
