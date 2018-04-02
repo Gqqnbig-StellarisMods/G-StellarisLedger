@@ -5,6 +5,7 @@
     <title></title>
     <!--Load the AJAX API-->
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.0/lodash.min.js"></script>
     <script type="text/javascript">
         const jsonPromise = fetch("/api/Countries");
 
@@ -16,14 +17,14 @@
 
 
         function getColumnHeader(name) {
-            return name[0].toUpperCase() + name.substr(1);
+            return _.startCase(name);
         }
 
 
 
         function drawTable() {
 
-            jsonPromise.then(response=>response.json()).then(json => {
+            jsonPromise.then(response => response.json()).then(json => {
                 var data = new google.visualization.DataTable();
                 var propertyNames = Object.getOwnPropertyNames(json[0]);
                 propertyNames.forEach(p => {
@@ -46,7 +47,7 @@
                 // Instantiate and draw our chart, passing in some options.
                 var table = new google.visualization.Table(document.getElementById('table_div'));
 
-                table.draw(data, { showRowNumber: true, width: '100%', height: '100%' });
+                table.draw(data);
 
             });
         }
