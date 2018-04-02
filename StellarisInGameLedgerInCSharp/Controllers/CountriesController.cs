@@ -114,6 +114,8 @@ namespace StellarisInGameLedgerInCSharp.Controllers
                 var influenceIncome = GetValue(last_month, "influence");
                 country.InfluenceIncome = Convert.ToDouble(influenceIncome.GetChild(1).GetText());
 
+                var unityIncome = GetValue(last_month, "unity");
+                country.UnityIncome = Convert.ToDouble(unityIncome.GetChild(1).GetText());
 
                 var physics_research = GetValue(last_month, "physics_research");
                 country.PhysicsResearchIncome = Convert.ToDouble(physics_research.GetChild(1).GetText());
