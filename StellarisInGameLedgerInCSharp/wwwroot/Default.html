@@ -75,15 +75,15 @@
         function drawTable() {
 
             jsonPromise.then(response => response.json()).then(json => {
-                var data = new google.visualization.DataTable();
-                var propertyNames = Object.getOwnPropertyNames(json[0]);
+                const data = new google.visualization.DataTable();
+                const propertyNames = Object.getOwnPropertyNames(json[0]);
                 propertyNames.forEach(p => {
                     data.addColumn({ type: typeof (json[0][p]), label: getColumnHeader(p) });
                 });
 
 
-                var rows = json.map(item => {
-                    var cells = propertyNames.map(p => {
+                const rows = json.map(item => {
+                    const cells = propertyNames.map(p => {
                         return { v: item[p], f: formatCellValue(item[p]) };
                     });
                     return cells;
@@ -96,7 +96,7 @@
 
 
                 // Instantiate and draw our chart, passing in some options.
-                var table = new google.visualization.Table(document.getElementById('table_div'));
+                const table = new google.visualization.Table(document.getElementById('table_div'));
 
                 table.draw(data, { allowHtml: true });
 
