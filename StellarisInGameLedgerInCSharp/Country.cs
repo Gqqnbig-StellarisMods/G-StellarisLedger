@@ -28,5 +28,15 @@ namespace StellarisInGameLedgerInCSharp
         public double PhysicsResearchIncome { get; internal set; }
         public double SocietyResearchIncome { get; set; }
         public double EngineeringResearchIncome { get; internal set; }
+
+        public double PhysicsResearchIncomeWithPenalty => PhysicsResearchIncome / GetPenalty();
+        public double SocietyResearchIncomeWithPenalty => SocietyResearchIncome / GetPenalty();
+        public double EngineeringResearchIncomeWithPenalty => EngineeringResearchIncome / GetPenalty();
+
+
+        private double GetPenalty()
+        {
+            return 1 + (ColonyCount - 1) * 0.1 + Math.Max(0, Population - 10) * 0.01;
+        }
     }
 }
