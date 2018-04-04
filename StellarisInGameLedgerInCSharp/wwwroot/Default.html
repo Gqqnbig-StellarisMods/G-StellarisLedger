@@ -6,6 +6,7 @@
     <!--Load the AJAX API-->
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.0/lodash.min.js"></script>
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.3.1.slim.min.js" ></script>
     <script type="text/javascript">
         const countriesPromise = fetch("/api/Countries");
 
@@ -87,12 +88,7 @@
             });
         }
 
-        /**
-         *
-         * @param {Array} countries
-         * @param {HTMLElement} placeHolder
-         */
-        function drawTableFromJson(countries, placeHolder)
+        function addCalculatedProperties(countries)
         {
             countries.forEach(item =>
             {
@@ -102,17 +98,35 @@
                             return this.physicsResearchIncomeWithPenalty + this.societyResearchIncomeWithPenalty + this.engineeringResearchIncomeWithPenalty;
                         }
                     });
-
             });
+        }
+
+        /**
+         *
+         * @param {Array} countries
+         * @param {HTMLElement} placeHolder
+         */
+        function drawTableFromJson(countries, placeHolder)
+        {
+            addCalculatedProperties(countries);
 
             const data = new google.visualization.DataTable();
             let propertyNames = Object.getOwnPropertyNames(countries[0]);
 
-            propertyNames = propertyNames.filter(p => ["physicsResearchIncome", "societyResearchIncome", "engineeringResearchIncome"].indexOf(p) === -1);
+            //propertyNames = propertyNames.filter(p => ["physicsResearchIncome", "societyResearchIncome", "engineeringResearchIncome"].indexOf(p) === -1);
 
             propertyNames.forEach(p =>
             {
                 data.addColumn({ type: typeof (countries[0][p]), label: getColumnHeader(p) });
+            });
+
+            propertyNames.forEach((p, i) =>
+            {
+                const checkBox = $("<input type='checkbox'>");
+                checkBox.attr("name", i);
+                const label = $(`<label>${_.startCase(p)}</label>`);
+                label.prepend(checkBox);
+                $("#visibleColumnsForTable").append(label);
             });
 
 
@@ -156,6 +170,15 @@
         .negative {
             color: red;
         }
+
+        #visibleColumnsForTable {
+            column-count:3;
+        }
+
+        #visibleColumnsForTable label {
+            float: left; /* 不用display:block因为这样会使label占据大量空间，光标点击空白区会意外勾选多选框。 */
+            clear: left;
+        }
     </style>
 </head>
 
@@ -163,6 +186,10 @@
     <!--Div that will hold the pie chart-->
     <div id="table_div"></div>
 
+    <fieldset>
+        <legend>Show following columns</legend>
+        <div id="visibleColumnsForTable"></div>
+    </fieldset>
 
     <script>
         fetch("/api/RecentSaves").then(response => response.json()).then(recentSaves =>
