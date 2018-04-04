@@ -7,6 +7,7 @@ using Antlr4.Runtime;
 using Antlr4.Runtime.Tree;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
+using System.IO.Compression;
 
 namespace StellarisInGameLedgerInCSharp.Controllers
 {
@@ -18,8 +19,12 @@ namespace StellarisInGameLedgerInCSharp.Controllers
         [HttpGet]
         public IList<Country> Get()
         {
+            var mostRecentSave = GetMostRecentSave();
+            var zipArchive = ZipFile.Open(mostRecentSave, ZipArchiveMode.Read);
+            var gamestate = zipArchive.GetEntry("gamestate");
             string content;
-            using (var sr = new StreamReader(@"D:\Documents\Paradox Interactive\Stellaris\save games\2_333029590\2259.05.18\gamestate", System.Text.Encoding.UTF8))
+            
+            using (var sr = new StreamReader(gamestate.Open(), System.Text.Encoding.UTF8))
             {
                 content = sr.ReadToEnd();
             }
@@ -137,6 +142,27 @@ namespace StellarisInGameLedgerInCSharp.Controllers
             Console.WriteLine($"生成数据用时{sw.ElapsedMilliseconds}ms");
 
             return countries;
+        }
+
+        private static string GetMostRecentSave()
+        {
+            var saveGamesPath = @"D:\Documents\Paradox Interactive\Stellaris\save games";
+
+            var saveGamesDirectory = new DirectoryInfo(saveGamesPath);
+            var directories = saveGamesDirectory.GetDirectories();
+            if (directories.Any() == false)
+                throw new ArgumentException($"存档目录\"{saveGamesPath}\"不包含子文件夹");
+
+            var mostRecentWriteTime = directories.Max(d => d.LastWriteTime);
+            var mostRecentPlayDirectory = directories.First(d => d.LastAccessTime == mostRecentWriteTime);
+
+            var files = mostRecentPlayDirectory.GetFiles("*.sav");
+            if (files.Any() == false)
+                throw new ArgumentException($"存档目录\"{mostRecentPlayDirectory.FullName}\"不包含游戏存档文件(*.sav)");
+
+            mostRecentWriteTime = files.Max(f => f.LastWriteTime);
+            var mostRecentSave = files.First(f => f.LastWriteTime == mostRecentWriteTime);
+            return mostRecentSave.FullName;
         }
 
         private static int GetPopulation(IParseTree owned_planets, IParseTree planetsData)
