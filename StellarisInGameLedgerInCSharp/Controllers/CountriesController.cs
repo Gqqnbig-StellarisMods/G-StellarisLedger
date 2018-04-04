@@ -17,8 +17,8 @@ namespace StellarisInGameLedgerInCSharp.Controllers
         [HttpGet("Countries")]
         public IList<Country> Get()
         {
-            var mostRecentSave = GetMostRecentSave();
-            var content = GetGameSaveContent(mostRecentSave);
+            var mostRecentSave = GetMostRecentSaves().First();
+            var content = GetGameSaveContent(System.IO.Path.Combine(saveGamesPath, mostRecentSave));
 
             return Analysis.GetCountries(content);
         }
@@ -51,9 +51,13 @@ namespace StellarisInGameLedgerInCSharp.Controllers
             return Analysis.GetCountries(content);
         }
 
-
-
-        private static string GetMostRecentSave()
+        /// <summary>
+        /// 获取最近的limit个游戏存档
+        /// </summary>
+        /// <param name="limit"></param>
+        /// <returns>第0个是最近的</returns>
+        [HttpGet("RecentSaves")]
+        public IEnumerable<string> GetMostRecentSaves([FromQuery]int? limit = null)
         {
 
             var saveGamesDirectory = new DirectoryInfo(saveGamesPath);
@@ -68,15 +72,28 @@ namespace StellarisInGameLedgerInCSharp.Controllers
             if (files.Any() == false)
                 throw new ArgumentException($"存档目录\"{mostRecentPlayDirectory.FullName}\"不包含游戏存档文件(*.sav)");
 
-            mostRecentWriteTime = files.Max(f => f.LastWriteTime);
-            var mostRecentSave = files.First(f => f.LastWriteTime == mostRecentWriteTime);
-            return mostRecentSave.FullName;
+            var orderedFiles = files.OrderByDescending(f => f.LastWriteTime).ToList();
+            //排除文件名日期顺序不符的
+
+            DateTime lastDate = DateTime.MaxValue;
+            for (int i = 0; i < orderedFiles.Count; i++)
+            {
+                var dateString = System.IO.Path.GetFileNameWithoutExtension(orderedFiles[i].Name);
+                var d = DateTime.ParseExact(dateString, "yyyy.MM.dd", System.Globalization.CultureInfo.InvariantCulture);
+                if (d < lastDate)
+                    lastDate = d;
+                else
+                    orderedFiles.RemoveAt(i--);
+            }
+
+
+
+            var result = orderedFiles.Select(f => f.FullName.Substring(saveGamesPath.Length).Trim(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar));
+            if (limit == null)
+                return result;
+            else
+                return result.Take(limit.Value);
         }
-
-        //private static string[] GetPreviousSaves(string fileName, DateTime writeTime)
-        //{
-
-        //}
 
         // GET api/values/5
         [HttpGet("{id}")]
