@@ -2,11 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
-using Antlr4.Runtime;
-using Antlr4.Runtime.Tree;
 using Microsoft.AspNetCore.Mvc;
-using System.Diagnostics;
 using System.IO.Compression;
 
 namespace StellarisInGameLedgerInCSharp.Controllers
@@ -41,8 +37,7 @@ namespace StellarisInGameLedgerInCSharp.Controllers
             return content;
         }
 
-        // GET api/values/5
-        [HttpGet("{gameId}/{saveName}/Countries")]
+        [HttpGet(@"{gameId:regex(^[[\d_-]]+$)}/{saveName:regex(^[[\d.]]+\.sav$)}/Countries")]
         public IList<Country> Get(string gameId, string saveName)
         {
             var fileName = System.IO.Path.Combine(saveGamesPath, gameId, saveName);
@@ -53,9 +48,7 @@ namespace StellarisInGameLedgerInCSharp.Controllers
             }
 
             var content = GetGameSaveContent(fileName);
-
-
-            throw new NotImplementedException();
+            return Analysis.GetCountries(content);
         }
 
 
