@@ -18,7 +18,7 @@ namespace StellarisInGameLedgerInCSharp.Controllers
         public IList<Country> Get()
         {
             var mostRecentSave = GetMostRecentSaves().First();
-            var content = GetGameSaveContent(System.IO.Path.Combine(saveGamesPath, mostRecentSave));
+            var content = GetGameSaveContent(Path.Combine(saveGamesPath, mostRecentSave));
 
             return Analysis.GetCountries(content);
         }
@@ -40,7 +40,7 @@ namespace StellarisInGameLedgerInCSharp.Controllers
         [HttpGet(@"{gameId:regex(^[[\d_-]]+$)}/{saveName:regex(^[[\d.]]+\.sav$)}/Countries")]
         public IList<Country> Get(string gameId, string saveName)
         {
-            var fileName = System.IO.Path.Combine(saveGamesPath, gameId, saveName);
+            var fileName = Path.Combine(saveGamesPath, gameId, saveName);
             if (System.IO.File.Exists(fileName) == false)
             {
                 Response.StatusCode = 404;
@@ -78,28 +78,19 @@ namespace StellarisInGameLedgerInCSharp.Controllers
             DateTime lastDate = DateTime.MaxValue;
             for (int i = 0; i < orderedFiles.Count; i++)
             {
-                var dateString = System.IO.Path.GetFileNameWithoutExtension(orderedFiles[i].Name);
+                var dateString = Path.GetFileNameWithoutExtension(orderedFiles[i].Name);
                 var d = DateTime.ParseExact(dateString, "yyyy.MM.dd", System.Globalization.CultureInfo.InvariantCulture);
                 if (d < lastDate)
                     lastDate = d;
                 else
                     orderedFiles.RemoveAt(i--);
             }
-
-
-
+            
             var result = orderedFiles.Select(f => f.FullName.Substring(saveGamesPath.Length).Trim(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar));
             if (limit == null)
                 return result;
             else
                 return result.Take(limit.Value);
-        }
-
-        // GET api/values/5
-        [HttpGet("{id}")]
-        public string Get(int id)
-        {
-            return "value";
         }
     }
 }
