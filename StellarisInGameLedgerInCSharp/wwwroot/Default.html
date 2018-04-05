@@ -44,14 +44,9 @@
         let googleTable;
         let tableData;
 
-        const countriesPromise = fetch("/api/Countries");
 
         // Load the Visualization API and the corechart package.
         google.charts.load('current', { 'packages': ['corechart', 'table'] });
-
-        // Set a callback to run when the Google Visualization API is loaded.
-        google.charts.setOnLoadCallback(drawTable);
-
 
         function getColumnHeader(name) {
             switch (name) {
@@ -115,15 +110,6 @@
                 return undefined;
         }
 
-
-        function drawTable()
-        {
-            countriesPromise.then(response => response.json()).then(countries =>
-            {
-                drawTableFromJson(countries);
-            });
-        }
-
         function addCalculatedProperties(countries)
         {
             countries.forEach(item =>
@@ -152,7 +138,6 @@
          */
         function drawTableFromJson(countries)
         {
-            addCalculatedProperties(countries);
 
             tableData = new google.visualization.DataTable();
             let propertyNames = Object.getOwnPropertyNames(countries[0]);
@@ -238,6 +223,9 @@
                     history = history.sort((x, y) => Date.parse(x.date) - Date.parse(y.date));
                     history.forEach(item => addCalculatedProperties(item.content));
 
+                    
+                    drawTableFromJson(history[0].content);
+
 
                     let propertyNames = Object.getOwnPropertyNames(history[0].content[0]);
 
@@ -250,9 +238,9 @@
                     tags = jQuery.uniqueSort(tags);
                     tags = tags.map(tag =>
                     {
-                        for (let snapshot of history)
+                        for (let i = history.length - 1; i >= 0; i--)
                         {
-                            for (let country of snapshot.content)
+                            for (let country of history[i].content)
                             {
                                 if (country.tag === tag)
                                     return { tag: tag, name: country.name };
