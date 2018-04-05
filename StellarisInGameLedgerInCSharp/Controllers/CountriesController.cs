@@ -37,6 +37,7 @@ namespace StellarisInGameLedgerInCSharp.Controllers
             return content;
         }
 
+        [ResponseCache(Duration = 3600 * 24 * 30)]
         [HttpGet(@"{gameId:regex(^[[\d_-]]+$)}/{saveName:regex(^[[\d.]]+\.sav$)}/Countries")]
         public IList<Country> Get(string gameId, string saveName)
         {
