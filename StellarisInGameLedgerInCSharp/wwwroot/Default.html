@@ -213,10 +213,8 @@
         }
     </script>
 
-    <div id="graphDiv"></div>
+    <div id="historyPanel"></div>
     <script>
-        let googleLineChart;
-
         fetch("/api/RecentSaves").then(response => response.json()).then(recentSaves =>
         {
             //recentSaves.splice(0, 1);
@@ -290,14 +288,20 @@
                     lineChartData.addRows(rows);
 
                     var options = {
-                        title: getColumnHeader(property),
-                        legend: { position: 'bottom' }
+                        title: _.startCase(property),
+                        legend: { position: 'bottom' },
+                        width: "100%",
+                        height: 500,
                     };
 
-                    googleLineChart = new google.visualization.LineChart(document.getElementById('graphDiv'));
+                    const container = $("<div></div>");
+                    const chartDiv = $("<div></div>");
+
+                    container.append(chartDiv);
+                    $("#historyPanel").append(container);
+                    const googleLineChart = new google.visualization.LineChart(chartDiv[0]);
 
                     googleLineChart.draw(lineChartData, options);
-                    return;
                 }
             });
         });
