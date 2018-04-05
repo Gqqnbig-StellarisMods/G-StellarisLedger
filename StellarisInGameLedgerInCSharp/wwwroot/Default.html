@@ -7,7 +7,40 @@
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.0/lodash.min.js"></script>
     <script type="text/javascript" src="https://code.jquery.com/jquery-3.3.1.slim.min.js" ></script>
+
+
+    <style type="text/css">
+        thead th img {
+            max-height: 32px;
+        }
+
+        .negative {
+            color: red;
+        }
+
+        #visibleColumnsForTable {
+            column-count: 3;
+        }
+
+            #visibleColumnsForTable label {
+                float: left; /* 不用display:block因为这样会使label占据大量空间，光标点击空白区会意外勾选多选框。 */
+                clear: left;
+            }
+    </style>
+</head>
+
+<body>
+    <!--Div that will hold the pie chart-->
+    <div id="table_div"></div>
+
+
+    <fieldset>
+        <legend>Show following columns</legend>
+        <div id="visibleColumnsForTable"></div>
+    </fieldset>
     <script type="text/javascript">
+        "use strict";
+
         let googleTable;
         let tableData;
 
@@ -128,6 +161,7 @@
 
             propertyNames.forEach(p => tableData.addColumn({ type: typeof (countries[0][p]), label: getColumnHeader(p) }));
 
+            //创建多选框控制列的显隐
             propertyNames.forEach((p, i) =>
             {
                 const checkBox = $("<input type='checkbox'>");
@@ -179,51 +213,92 @@
         }
     </script>
 
-    <style type="text/css">
-        thead th img {
-            max-height: 32px;
-        }
-
-        .negative {
-            color: red;
-        }
-
-        #visibleColumnsForTable {
-            column-count:3;
-        }
-
-        #visibleColumnsForTable label {
-            float: left; /* 不用display:block因为这样会使label占据大量空间，光标点击空白区会意外勾选多选框。 */
-            clear: left;
-        }
-    </style>
-</head>
-
-<body>
-    <!--Div that will hold the pie chart-->
-    <div id="table_div"></div>
-
-    <fieldset>
-        <legend>Show following columns</legend>
-        <div id="visibleColumnsForTable"></div>
-    </fieldset>
-
+    <div id="graphDiv"></div>
     <script>
+        let googleLineChart;
+
         fetch("/api/RecentSaves").then(response => response.json()).then(recentSaves =>
         {
-            recentSaves.splice(0, 1);
-            recentSaves.forEach(path =>
+            //recentSaves.splice(0, 1);
+            const promises = recentSaves.map(path => fetch(`/api/${path.replace("\\", "/")}/Countries`).then(r =>
             {
-                path = path.replace("\\", "/");
-
-                fetch(`/api/${path}/Countries`).then(r => r.json()).then(countries =>
+                const i = path.indexOf("\\") + 1;
+                //定义一个新的承诺，当r.json()承诺实现时，新的承诺也实现。
+                return new Promise(function (resolve, reject)
                 {
-                    let div = document.createElement("div");
-                    let body = document.getElementsByTagName("body")[0];
-                    body.appendChild(div);
-
-                    drawTableFromJson(countries, div);
+                    r.json().then(json => resolve({
+                        date: path.substr(i, path.length - i - ".sav".length),
+                        content: json
+                    }));
                 });
+            }));
+
+            Promise.all(promises).then(history =>
+            {
+                history = history.sort((x, y) => Date.parse(x.date) > Date.parse(y.date));
+                history.forEach(item => addCalculatedProperties(item.content));
+
+
+                let propertyNames = Object.getOwnPropertyNames(history[0].content[0]);
+
+                let tags = [];
+                for (let snapshot of history)
+                {
+                    for (let country of snapshot.content)
+                        tags.push(country.tag);
+                }
+                tags = jQuery.uniqueSort(tags);
+                tags = tags.map(tag =>
+                {
+                    for (let snapshot of history)
+                    {
+                        for (let country of snapshot.content)
+                        {
+                            if (country.tag === tag)
+                                return { tag: tag, name: country.name };
+                        }
+                    }
+                    throw new Error();
+                });
+                for (let property of propertyNames.filter(p => ["tag", "name"].indexOf(p) === -1))
+                {
+                    //const propertyNames = [
+                    //    "physicsResearchIncomeWithPenalty", "societyResearchIncomeWithPenalty",
+                    //    "engineeringResearchIncomeWithPenalty", "totalResearchIncomeWithPenalty"
+                    //];
+                    
+                    const lineChartData = new google.visualization.DataTable();
+                    lineChartData.addColumn({ type: "date", label: "date" });
+                    for (let tag of tags)
+                        lineChartData.addColumn({ type: "number", label: tag.name });
+
+                    const rows = history.map(item =>
+                    {
+                        const row = [new Date(Date.parse(item.date))];
+                        for (let tag of tags)
+                        {
+                            const country = item.content.find(c => c.tag === tag.tag);
+                            if (country)
+                            {
+                                row.push(country[property]);
+                            } else
+                                row.push(undefined);
+                        }
+                        return row;
+                    });
+
+                    lineChartData.addRows(rows);
+
+                    var options = {
+                        title: getColumnHeader(property),
+                        legend: { position: 'bottom' }
+                    };
+
+                    googleLineChart = new google.visualization.LineChart(document.getElementById('graphDiv'));
+
+                    googleLineChart.draw(lineChartData, options);
+                    return;
+                }
             });
         });
     </script>
