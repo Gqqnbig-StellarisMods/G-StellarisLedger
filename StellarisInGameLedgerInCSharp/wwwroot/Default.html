@@ -8,10 +8,13 @@
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.0/lodash.min.js"></script>
     <script type="text/javascript" src="https://code.jquery.com/jquery-3.3.1.slim.min.js" ></script>
     <script type="text/javascript">
+        let googleTable;
+        let tableData;
+
         const countriesPromise = fetch("/api/Countries");
 
         // Load the Visualization API and the corechart package.
-        google.charts.load('current', { 'packages': ['table'] });
+        google.charts.load('current', { 'packages': ['corechart', 'table'] });
 
         // Set a callback to run when the Google Visualization API is loaded.
         google.charts.setOnLoadCallback(drawTable);
@@ -84,7 +87,7 @@
         {
             countriesPromise.then(response => response.json()).then(countries =>
             {
-                drawTableFromJson(countries, document.getElementById('table_div'));
+                drawTableFromJson(countries);
             });
         }
 
@@ -101,29 +104,44 @@
             });
         }
 
+        function getDefaultColumnVisibility(columnName)
+        {
+            if (["physicsResearchIncome", "societyResearchIncome", "engineeringResearchIncome"].indexOf(columnName) == -1)
+                return true;
+            else
+                return false;
+        }
+
         /**
          *
          * @param {Array} countries
          * @param {HTMLElement} placeHolder
          */
-        function drawTableFromJson(countries, placeHolder)
+        function drawTableFromJson(countries)
         {
             addCalculatedProperties(countries);
 
-            const data = new google.visualization.DataTable();
+            tableData = new google.visualization.DataTable();
             let propertyNames = Object.getOwnPropertyNames(countries[0]);
 
             //propertyNames = propertyNames.filter(p => ["physicsResearchIncome", "societyResearchIncome", "engineeringResearchIncome"].indexOf(p) === -1);
 
-            propertyNames.forEach(p =>
-            {
-                data.addColumn({ type: typeof (countries[0][p]), label: getColumnHeader(p) });
-            });
+            propertyNames.forEach(p => tableData.addColumn({ type: typeof (countries[0][p]), label: getColumnHeader(p) }));
 
             propertyNames.forEach((p, i) =>
             {
                 const checkBox = $("<input type='checkbox'>");
                 checkBox.attr("name", i);
+                checkBox.change(function ()
+                {
+                    localStorage.setItem("table-" + $(this).attr("name"), $(this).prop("checked"));
+                    updateTableView();
+                });
+
+                let isChecked = localStorage.getItem("table-" + i);
+                if (isChecked == undefined)
+                    isChecked = getDefaultColumnVisibility(p);
+                checkBox.prop("checked", isChecked);
                 const label = $(`<label>${_.startCase(p)}</label>`);
                 label.prepend(checkBox);
                 $("#visibleColumnsForTable").append(label);
@@ -132,33 +150,32 @@
 
             const rows = countries.map(item =>
             {
-                const cells = propertyNames.map(p =>
+                return propertyNames.map(p =>
                 {
                     const f = formatCellText(item[p]);
                     return f ? { v: item[p], f: f } : item[p];
                 });
-                return cells;
             });
 
 
 
-            data.addRows(rows);
+            tableData.addRows(rows);
 
-            const view = new google.visualization.DataView(data);
+
+            updateTableView();
+        }
+
+        function updateTableView()
+        {
+            const view = new google.visualization.DataView(tableData);
             var columns = view.getViewColumns();
-            //columns.push({
-            //    calc: (dataTable, rowIndex) => {
-            //        var row = dataTable[rowIndex];
-            //    },
-            //    type: "number"
-            //});
-            //view.setColumns(columns);
+            columns = columns.filter(c => $(`#visibleColumnsForTable input[name="${c}"]`).prop("checked"));
+            view.setColumns(columns);
 
             // Instantiate and draw our chart, passing in some options.
-            const table = new google.visualization.Table(placeHolder);
+            googleTable = new google.visualization.Table(document.getElementById('table_div'));
 
-            table.draw(view, { allowHtml: true });
-
+            googleTable.draw(view, { allowHtml: true });
         }
     </script>
 
