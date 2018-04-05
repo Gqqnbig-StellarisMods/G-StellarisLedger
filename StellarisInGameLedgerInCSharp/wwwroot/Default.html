@@ -215,94 +215,92 @@
 
     <div id="historyPanel"></div>
     <script>
-        fetch("/api/RecentSaves").then(response => response.json()).then(recentSaves =>
+        google.charts.setOnLoadCallback(() =>
         {
-            //recentSaves.splice(0, 1);
-            const promises = recentSaves.map(path => fetch(`/api/${path.replace("\\", "/")}/Countries`).then(r =>
+            fetch("/api/RecentSaves").then(response => response.json()).then(recentSaves =>
             {
-                const i = path.indexOf("\\") + 1;
-                //定义一个新的承诺，当r.json()承诺实现时，新的承诺也实现。
-                return new Promise(function (resolve, reject)
+                //recentSaves.splice(0, 1);
+                const promises = recentSaves.map(path => fetch(`/api/${path.replace("\\", "/")}/Countries`).then(r =>
                 {
-                    r.json().then(json => resolve({
-                        date: path.substr(i, path.length - i - ".sav".length),
-                        content: json
-                    }));
-                });
-            }));
+                    const i = path.indexOf("\\") + 1;
+                    //定义一个新的承诺，当r.json()承诺实现时，新的承诺也实现。
+                    return new Promise(function (resolve, reject)
+                    {
+                        r.json().then(json => resolve({
+                            date: path.substr(i, path.length - i - ".sav".length),
+                            content: json
+                        }));
+                    });
+                }));
 
-            Promise.all(promises).then(history =>
-            {
-                history = history.sort((x, y) => Date.parse(x.date) > Date.parse(y.date));
-                history.forEach(item => addCalculatedProperties(item.content));
-
-
-                let propertyNames = Object.getOwnPropertyNames(history[0].content[0]);
-
-                let tags = [];
-                for (let snapshot of history)
+                Promise.all(promises).then(history =>
                 {
-                    for (let country of snapshot.content)
-                        tags.push(country.tag);
-                }
-                tags = jQuery.uniqueSort(tags);
-                tags = tags.map(tag =>
-                {
+                    history = history.sort((x, y) => Date.parse(x.date) - Date.parse(y.date));
+                    history.forEach(item => addCalculatedProperties(item.content));
+
+
+                    let propertyNames = Object.getOwnPropertyNames(history[0].content[0]);
+
+                    let tags = [];
                     for (let snapshot of history)
                     {
                         for (let country of snapshot.content)
-                        {
-                            if (country.tag === tag)
-                                return { tag: tag, name: country.name };
-                        }
+                            tags.push(country.tag);
                     }
-                    throw new Error();
-                });
-                for (let property of propertyNames.filter(p => ["tag", "name"].indexOf(p) === -1))
-                {
-                    //const propertyNames = [
-                    //    "physicsResearchIncomeWithPenalty", "societyResearchIncomeWithPenalty",
-                    //    "engineeringResearchIncomeWithPenalty", "totalResearchIncomeWithPenalty"
-                    //];
-                    
-                    const lineChartData = new google.visualization.DataTable();
-                    lineChartData.addColumn({ type: "date", label: "date" });
-                    for (let tag of tags)
-                        lineChartData.addColumn({ type: "number", label: tag.name });
-
-                    const rows = history.map(item =>
+                    tags = jQuery.uniqueSort(tags);
+                    tags = tags.map(tag =>
                     {
-                        const row = [new Date(Date.parse(item.date))];
-                        for (let tag of tags)
+                        for (let snapshot of history)
                         {
-                            const country = item.content.find(c => c.tag === tag.tag);
-                            if (country)
+                            for (let country of snapshot.content)
                             {
-                                row.push(country[property]);
-                            } else
-                                row.push(undefined);
+                                if (country.tag === tag)
+                                    return { tag: tag, name: country.name };
+                            }
                         }
-                        return row;
+                        throw new Error();
                     });
+                    for (let property of propertyNames.filter(p => ["tag", "name"].indexOf(p) === -1))
+                    {
+                        const lineChartData = new google.visualization.DataTable();
+                        lineChartData.addColumn({ type: "date", label: "date" });
+                        for (let tag of tags)
+                            lineChartData.addColumn({ type: "number", label: tag.name });
 
-                    lineChartData.addRows(rows);
+                        const rows = history.map(item =>
+                        {
+                            const row = [new Date(Date.parse(item.date))];
+                            for (let tag of tags)
+                            {
+                                const country = item.content.find(c => c.tag === tag.tag);
+                                if (country)
+                                {
+                                    row.push(country[property]);
+                                } else
+                                    row.push(undefined);
+                            }
+                            return row;
+                        });
 
-                    var options = {
-                        title: _.startCase(property),
-                        legend: { position: 'bottom' },
-                        width: "100%",
-                        height: 500,
-                    };
+                        lineChartData.addRows(rows);
 
-                    const container = $("<div></div>");
-                    const chartDiv = $("<div></div>");
+                        var options = {
+                            title: _.startCase(property),
+                            legend: { position: 'bottom' },
+                            width: "100%",
+                            height: 500,
+                        };
 
-                    container.append(chartDiv);
-                    $("#historyPanel").append(container);
-                    const googleLineChart = new google.visualization.LineChart(chartDiv[0]);
+                        const container = $("<div></div>");
+                        const chartDiv = $("<div></div>");
 
-                    googleLineChart.draw(lineChartData, options);
-                }
+                        container.append(chartDiv);
+                        $("#historyPanel").append(container);
+                        const googleLineChart = new google.visualization.LineChart(chartDiv[0]);
+
+                        googleLineChart.draw(lineChartData, options);
+                    }
+                });
             });
         });
     </script>
