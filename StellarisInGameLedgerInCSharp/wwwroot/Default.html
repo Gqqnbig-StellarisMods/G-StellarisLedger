@@ -256,7 +256,7 @@
                     for (let tag of tags)
                     {
                         const label= $(`<label>${tag.name}</label>`);
-                        const checkBox = $(`<input type='checkbox' name='${tag.tag}'>`);
+                        const checkBox = $(`<input type='checkbox' name='${tag.name}'>`);
                         let v = localStorage.getItem("history-" + tag.name);
                         if (v == undefined)
                             v = true;
@@ -317,7 +317,7 @@
 
                 const view = new google.visualization.DataView(lineChartData);
                 var columns = view.getViewColumns();
-                //columns = columns.filter(c => $(`#countryFilterPanel input[name="${c}"]`).prop("checked"));
+                columns = columns.filter(columnIndex => $(`#countryFilterPanel input[name="${view.getColumnLabel(columnIndex)}"]`).prop("checked"));
                 view.setColumns(columns);
 
 
