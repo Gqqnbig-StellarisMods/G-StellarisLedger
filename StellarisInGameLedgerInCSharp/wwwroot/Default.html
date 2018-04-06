@@ -200,7 +200,9 @@
         }
     </script>
 
-    <div id="historyPanel"></div>
+    <div id="historyPanel">
+        <div id="countryFilterPanel"></div>
+    </div>
     <script>
         let historyData;
         let tags = [];
@@ -250,11 +252,17 @@
                         throw new Error();
                     });
 
-                    const filterPanel = $("#filterPanel");
+                    const filterPanel = $("#countryFilterPanel");
                     for (let tag of tags)
                     {
                         const label= $(`<label>${tag.name}</label>`);
-                        const checkBox= $(`<input type='checkbox' name='${tag.tag}'>`);
+                        const checkBox = $(`<input type='checkbox' name='${tag.tag}'>`);
+                        let v = localStorage.getItem("history-" + tag.name);
+                        if (v == undefined)
+                            v = true;
+                        else
+                            v = v == "true";
+                        checkBox.prop("checked", v);
                         label.prepend(checkBox);
                         filterPanel.append(label);
                     }
@@ -300,14 +308,22 @@
                     pointSize: 5,
                 };
 
-                const container = $("<div></div>");
-                const chartDiv = $("<div></div>");
+                let chartDiv = $(`#${property}Chart`);
+                if (chartDiv.length === 0)
+                {
+                    chartDiv = $(`<div id="${property}Chart"></div>`);
+                    $("#historyPanel").append(chartDiv);
+                }
 
-                container.append(chartDiv);
-                $("#historyPanel").append(container);
+                const view = new google.visualization.DataView(lineChartData);
+                var columns = view.getViewColumns();
+                //columns = columns.filter(c => $(`#countryFilterPanel input[name="${c}"]`).prop("checked"));
+                view.setColumns(columns);
+
+
                 const googleLineChart = new google.visualization.LineChart(chartDiv[0]);
 
-                googleLineChart.draw(lineChartData, options);
+                googleLineChart.draw(view, options);
             }
         }
     </script>
