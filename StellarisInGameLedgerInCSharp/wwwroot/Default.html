@@ -202,6 +202,9 @@
 
     <div id="historyPanel"></div>
     <script>
+        let historyData;
+        let tags = [];
+
         google.charts.setOnLoadCallback(() =>
         {
             fetch("/api/RecentSaves").then(response => response.json()).then(recentSaves =>
@@ -224,14 +227,10 @@
                 {
                     history = history.sort((x, y) => Date.parse(x.date) - Date.parse(y.date));
                     history.forEach(item => addCalculatedProperties(item.content));
-
+                    historyData = history;
 
                     drawTableFromJson(history[0].content);
-
-
-                    let propertyNames = Object.getOwnPropertyNames(history[0].content[0]);
-
-                    let tags = [];
+                    
                     for (let snapshot of history)
                     {
                         for (let country of snapshot.content)
@@ -250,50 +249,67 @@
                         }
                         throw new Error();
                     });
-                    for (let property of propertyNames.filter(p => ["tag", "name"].indexOf(p) === -1))
+
+                    const filterPanel = $("#filterPanel");
+                    for (let tag of tags)
                     {
-                        const lineChartData = new google.visualization.DataTable();
-                        lineChartData.addColumn({ type: "date", label: "date" });
-                        for (let tag of tags)
-                            lineChartData.addColumn({ type: "number", label: tag.name });
-
-                        const rows = history.map(item =>
-                        {
-                            const row = [new Date(Date.parse(item.date))];
-                            for (let tag of tags)
-                            {
-                                const country = item.content.find(c => c.tag === tag.tag);
-                                if (country)
-                                {
-                                    row.push(country[property]);
-                                } else
-                                    row.push(undefined);
-                            }
-                            return row;
-                        });
-
-                        lineChartData.addRows(rows);
-
-                        var options = {
-                            title: _.startCase(property),
-                            legend: { position: 'bottom' },
-                            width: "100%",
-                            height: 500,
-                            pointSize: 5,
-                        };
-
-                        const container = $("<div></div>");
-                        const chartDiv = $("<div></div>");
-
-                        container.append(chartDiv);
-                        $("#historyPanel").append(container);
-                        const googleLineChart = new google.visualization.LineChart(chartDiv[0]);
-
-                        googleLineChart.draw(lineChartData, options);
+                        const label= $(`<label>${tag.name}</label>`);
+                        const checkBox= $(`<input type='checkbox' name='${tag.tag}'>`);
+                        label.prepend(checkBox);
+                        filterPanel.append(label);
                     }
+
+                    updateHistoryCharts();
                 });
             });
         });
+
+
+        function updateHistoryCharts()
+        {
+            let propertyNames = Object.getOwnPropertyNames(historyData[0].content[0]);
+            for (let property of propertyNames.filter(p => ["tag", "name"].indexOf(p) === -1))
+            {
+                const lineChartData = new google.visualization.DataTable();
+                lineChartData.addColumn({ type: "date", label: "date" });
+                for (let tag of tags)
+                    lineChartData.addColumn({ type: "number", label: tag.name });
+
+                const rows = historyData.map(item =>
+                {
+                    const row = [new Date(Date.parse(item.date))];
+                    for (let tag of tags)
+                    {
+                        const country = item.content.find(c => c.tag === tag.tag);
+                        if (country)
+                        {
+                            row.push(country[property]);
+                        } else
+                            row.push(undefined);
+                    }
+                    return row;
+                });
+
+                lineChartData.addRows(rows);
+
+                var options = {
+                    title: _.startCase(property),
+                    legend: { position: 'bottom' },
+                    width: "100%",
+                    height: 500,
+                    pointSize: 5,
+                };
+
+                const container = $("<div></div>");
+                const chartDiv = $("<div></div>");
+
+                container.append(chartDiv);
+                $("#historyPanel").append(container);
+                const googleLineChart = new google.visualization.LineChart(chartDiv[0]);
+
+                googleLineChart.draw(lineChartData, options);
+            }
+        }
     </script>
 </body>
 </html>
