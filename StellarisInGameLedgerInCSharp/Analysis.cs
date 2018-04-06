@@ -82,11 +82,11 @@ namespace StellarisInGameLedgerInCSharp
                     country.Influence = Convert.ToDouble(influence.GetText());
 
 
-                var unity = GetValue(resources, "unity");
-                if (unity is ParadoxParser.ScopeContext)
-                    country.Unity = Convert.ToDouble(unity.GetChild(1).GetText());
-                else
-                    country.Unity = Convert.ToDouble(unity.GetText());
+                //var unity = GetValue(resources, "unity");
+                //if (unity is ParadoxParser.ScopeContext)
+                //    country.Unity = Convert.ToDouble(unity.GetChild(1).GetText());
+                //else
+                //    country.Unity = Convert.ToDouble(unity.GetText());
 
                 // ReSharper disable InconsistentNaming
                 var last_month = GetValue(standard_economy_module, "last_month").GetChild(1);
