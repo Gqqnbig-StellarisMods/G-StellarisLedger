@@ -257,12 +257,20 @@
                     {
                         const label= $(`<label>${tag.name}</label>`);
                         const checkBox = $(`<input type='checkbox' name='${tag.name}'>`);
+
                         let v = localStorage.getItem("history-" + tag.name);
                         if (v == undefined)
                             v = true;
                         else
                             v = v == "true";
                         checkBox.prop("checked", v);
+
+                        checkBox.change(function ()
+                        {
+                            localStorage.setItem("history-" + $(this).attr("name"), $(this).prop("checked"));
+                            updateHistoryCharts();
+                        });
+
                         label.prepend(checkBox);
                         filterPanel.append(label);
                     }
@@ -317,7 +325,7 @@
 
                 const view = new google.visualization.DataView(lineChartData);
                 var columns = view.getViewColumns();
-                columns = columns.filter(columnIndex => $(`#countryFilterPanel input[name="${view.getColumnLabel(columnIndex)}"]`).prop("checked"));
+                columns = columns.filter(columnIndex => columnIndex===0 || $(`#countryFilterPanel input[name="${view.getColumnLabel(columnIndex)}"]`).prop("checked"));
                 view.setColumns(columns);
 
 
