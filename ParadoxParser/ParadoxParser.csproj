@@ -43,8 +43,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Loader.cs" />
-    <Compile Include="ParadoxBaseListener.cs" />
     <Compile Include="ParadoxLexer.cs" />
     <Compile Include="ParadoxListener.cs" />
     <Compile Include="ParadoxParser.cs" />
