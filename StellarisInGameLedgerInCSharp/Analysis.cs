@@ -97,7 +97,8 @@ namespace StellarisInGameLedgerInCSharp
                 country.MineralsIncome = Convert.ToDouble(mineralsIncome.GetChild(1).GetText());
 
                 var foodIncome = GetValue(last_month, "food");
-                country.FoodIncome = Convert.ToDouble(foodIncome.GetChild(1).GetText());
+                if (foodIncome != null)
+                    country.FoodIncome = Convert.ToDouble(foodIncome.GetChild(1).GetText());
 
 
                 var influenceIncome = GetValue(last_month, "influence");

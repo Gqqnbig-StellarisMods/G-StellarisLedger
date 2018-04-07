@@ -22,7 +22,7 @@ namespace StellarisInGameLedgerInCSharp
         //public double Unity { get; set; }
         public double EnergyIncome { get; set; }
         public double MineralsIncome { get; internal set; }
-        public double FoodIncome { get; internal set; }
+        public double? FoodIncome { get; internal set; }
         public double InfluenceIncome { get; internal set; }
         public double UnityIncome { get; internal set; }
         public double PhysicsResearchIncome { get; internal set; }
