@@ -18,14 +18,10 @@
             color: red;
         }
 
-        #visibleColumnsForTable {
-            column-count: 3;
+        #visibleColumnsForTable label {
+            float: left; /* 不用display:block因为这样会使label占据大量空间，光标点击空白区会意外勾选多选框。 */
+            clear: left;
         }
-
-            #visibleColumnsForTable label {
-                float: left; /* 不用display:block因为这样会使label占据大量空间，光标点击空白区会意外勾选多选框。 */
-                clear: left;
-            }
     </style>
 </head>
 
@@ -153,6 +149,15 @@
                 label.prepend(checkBox);
                 $("#visibleColumnsForTable").append(label);
             });
+
+            let maxLabelWidth = 0;
+            $("#visibleColumnsForTable label").each(function ()
+            {
+                let w = $(this).outerWidth();
+                if (w > maxLabelWidth)
+                    maxLabelWidth = w;
+            });
+            $("#visibleColumnsForTable").css("column-width", `${maxLabelWidth + 20}px`);
 
 
             const rows = countries.map(item =>
