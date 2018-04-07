@@ -48,47 +48,31 @@
         // Load the Visualization API and the corechart package.
         google.charts.load('current', { 'packages': ['corechart', 'table'] });
 
-        function getColumnHeader(name) {
-            switch (name) {
-                case "technologyCount":
-                    return "Technologies";
-                case "colonyCount":
-                    return '<img src="https://stellaris.paradoxwikis.com/images/6/6e/Planet_gaia.png" title="Colonies">';
-                case "energy":
-                    return '<img src="https://stellaris.paradoxwikis.com/images/5/58/Energy_Credits.png" title="Energy">';
-                case "energyIncome":
-                    return '<img src="https://stellaris.paradoxwikis.com/images/5/58/Energy_Credits.png" title="Energy"> Income';
-                case "minerals":
-                    return '<img src="https://stellaris.paradoxwikis.com/images/1/10/Minerals.png" title="Minerals">';
-                case "mineralsIncome":
-                    return '<img src="https://stellaris.paradoxwikis.com/images/1/10/Minerals.png" title="Minerals"> Income';
-                case "food":
-                    return '<img src="https://stellaris.paradoxwikis.com/images/c/c6/Food.png" title="Food">';
-                case "foodIncome":
-                    return '<img src="https://stellaris.paradoxwikis.com/images/c/c6/Food.png" title="Food"> Income';
-                case "influence":
-                    return '<img src="https://stellaris.paradoxwikis.com/images/9/91/Influence.png" title="Influence">';
-                case "influenceIncome":
-                    return '<img src="https://stellaris.paradoxwikis.com/images/9/91/Influence.png" title="Influence"> Income';
-                case "unity":
-                    return '<img src="https://stellaris.paradoxwikis.com/images/3/3d/Unity.png" title="Unity">';
-                case "unityIncome":
-                    return '<img src="https://stellaris.paradoxwikis.com/images/3/3d/Unity.png" title="Unity"> Income';
-                case "physicsResearchIncomeWithPenalty":
-                    return '<img src="https://stellaris.paradoxwikis.com/images/b/b3/Research_speed_%28Physics%29.png" title="Physics Income with Penalty">';
-                case "societyResearchIncomeWithPenalty":
-                    return '<img src="https://stellaris.paradoxwikis.com/images/4/4f/Research_speed_%28Society%29.png" title="Society Income with Penalty">';
-                case "engineeringResearchIncomeWithPenalty":
-                    return '<img src="https://stellaris.paradoxwikis.com/images/e/ec/Research_speed_%28Engineering%29.png" title="Engineering Income with Penalty">';
-                case "population":
-                    return '<img src="https://stellaris.paradoxwikis.com/images/7/71/Pop.png" title="Population">';
+        function getColumnHeader(name)
+        {
+            name = _.startCase(name).replace(/\bWith\b/, "with");
 
-                default:
+            switch (name)
+            {
+                case "Technology Count":
+                    return "Technologies";
+                case "Colony Count":
+                    return '<img src="https://stellaris.paradoxwikis.com/images/6/6e/Planet_gaia.png" title="Colonies">';
             }
 
+            name = name.replace("Energy", '<img src="https://stellaris.paradoxwikis.com/images/5/58/Energy_Credits.png" title="Energy">')
+                .replace("Minerals", '<img src="https://stellaris.paradoxwikis.com/images/1/10/Minerals.png" title="Minerals">')
+                .replace("Food", '<img src="https://stellaris.paradoxwikis.com/images/c/c6/Food.png" title="Food">')
+                .replace("Influence", '<img src="https://stellaris.paradoxwikis.com/images/9/91/Influence.png" title="Influence">')
+                .replace("Unity", '<img src="https://stellaris.paradoxwikis.com/images/3/3d/Unity.png" title="Unity">')
+                .replace("Physics Research Income with Penalty", '<img src="https://stellaris.paradoxwikis.com/images/b/b3/Research_speed_%28Physics%29.png" title="Physics Income with Penalty">')
+                .replace("Society Research Income with Penalty", '<img src="https://stellaris.paradoxwikis.com/images/4/4f/Research_speed_%28Society%29.png" title="Society Income with Penalty">')
+                .replace("Engineering Research Income with Penalty", '<img src="https://stellaris.paradoxwikis.com/images/e/ec/Research_speed_%28Engineering%29.png" title="Engineering Income with Penalty">')
+                .replace("Population", '<img src="https://stellaris.paradoxwikis.com/images/7/71/Pop.png" title="Population">');
 
-            return _.startCase(name);
+            return name;
         }
+
 
         /**
          *
@@ -163,7 +147,7 @@
                 else
                     isChecked = isChecked == "true";
                 checkBox.prop("checked", isChecked);
-                const label = $(`<label>${_.startCase(p)}</label>`);
+                const label = $(`<label>${_.startCase(p).replace(/\bWith\b/, "with")}</label>`);
                 label.prepend(checkBox);
                 $("#visibleColumnsForTable").append(label);
             });
@@ -309,7 +293,7 @@
                 lineChartData.addRows(rows);
 
                 var options = {
-                    title: _.startCase(property),
+                    title: _.startCase(property).replace(/\bWith\b/, "with"),
                     legend: { position: 'bottom' },
                     width: "100%",
                     height: 500,
