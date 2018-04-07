@@ -25,6 +25,13 @@ namespace StellarisInGameLedgerInCSharp
         public double? FoodIncome { get; internal set; }
         public double InfluenceIncome { get; internal set; }
         public double UnityIncome { get; internal set; }
+        
+        /// <summary>
+        /// 实际的凝聚力惩罚包括已树立的传统数、人口、星球数等等
+        /// </summary>
+        public double UnityIncomeWithPenalty => UnityIncome / (1 + (ColonyCount-1) * 25);
+
+
         public double PhysicsResearchIncome { get; internal set; }
         public double SocietyResearchIncome { get; set; }
         public double EngineeringResearchIncome { get; internal set; }
