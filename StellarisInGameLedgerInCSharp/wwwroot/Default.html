@@ -216,12 +216,16 @@
                     });
                 }));
 
+                promises[0].then(data =>
+                {
+                    drawTableFromJson(data.content);
+                });
+
                 Promise.all(promises).then(history =>
                 {
                     history = history.sort((x, y) => Date.parse(x.date) - Date.parse(y.date));
                     historyData = history;
 
-                    drawTableFromJson(history[history.length - 1].content);
 
                     for (let snapshot of history)
                     {
