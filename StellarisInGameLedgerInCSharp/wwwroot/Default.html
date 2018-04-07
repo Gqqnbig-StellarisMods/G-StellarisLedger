@@ -231,8 +231,8 @@
                     history.forEach(item => addCalculatedProperties(item.content));
                     historyData = history;
 
-                    drawTableFromJson(history[0].content);
-                    
+                    drawTableFromJson(history[history.length - 1].content);
+
                     for (let snapshot of history)
                     {
                         for (let country of snapshot.content)
