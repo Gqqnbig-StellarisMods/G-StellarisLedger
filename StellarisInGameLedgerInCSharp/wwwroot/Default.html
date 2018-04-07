@@ -98,17 +98,15 @@
                 return undefined;
         }
 
-        function addCalculatedProperties(countries)
+        function addCalculatedProperties(country)
         {
-            countries.forEach(item =>
-            {
-                Object.defineProperty(item, 'totalResearchIncomeWithPenalty',
+            Object.defineProperty(country, 'totalResearchIncomeWithPenalty',
+                {
+                    get: function ()
                     {
-                            get: function() {
-                            return this.physicsResearchIncomeWithPenalty + this.societyResearchIncomeWithPenalty + this.engineeringResearchIncomeWithPenalty;
-                        }
-                    });
-            });
+                        return this.physicsResearchIncomeWithPenalty + this.societyResearchIncomeWithPenalty + this.engineeringResearchIncomeWithPenalty;
+                    }
+                });
         }
 
         function getDefaultColumnVisibility(columnName)
@@ -206,17 +204,21 @@
                     //定义一个新的承诺，当r.json()承诺实现时，新的承诺也实现。
                     return new Promise(function (resolve, reject)
                     {
-                        r.json().then(json => resolve({
-                            date: path.substr(i, path.length - i - ".sav".length),
-                            content: json
-                        }));
+                        r.json().then(json =>
+                        {
+                            json.forEach(addCalculatedProperties);
+
+                            resolve({
+                                date: path.substr(i, path.length - i - ".sav".length),
+                                content: json
+                            });
+                        });
                     });
                 }));
 
                 Promise.all(promises).then(history =>
                 {
                     history = history.sort((x, y) => Date.parse(x.date) - Date.parse(y.date));
-                    history.forEach(item => addCalculatedProperties(item.content));
                     historyData = history;
 
                     drawTableFromJson(history[history.length - 1].content);
