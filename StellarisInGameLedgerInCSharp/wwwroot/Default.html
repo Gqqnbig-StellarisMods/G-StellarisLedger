@@ -79,8 +79,12 @@
          * @param value
          * @returns undefined 如果value可以原样显示
          */
-        function formatCellText(value)
+        function formatCellText(value, propertyName)
         {
+            if (propertyName === "unityIncomeWithPenalty")
+                return "≈" + value.toFixed(3);
+
+
             if (_.isInteger(value))
                 return value.toFixed(0);
             else if (_.isNumber(value))
@@ -157,7 +161,7 @@
             {
                 return propertyNames.map(p =>
                 {
-                    const f = formatCellText(item[p]);
+                    const f = formatCellText(item[p],p);
                     return f ? { v: item[p], f: f } : item[p];
                 });
             });
