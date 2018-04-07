@@ -22,6 +22,10 @@
             float: left; /* 不用display:block因为这样会使label占据大量空间，光标点击空白区会意外勾选多选框。 */
             clear: left;
         }
+
+        label {
+            padding-right: 3em;
+        }
     </style>
 </head>
 
@@ -157,7 +161,7 @@
                 if (w > maxLabelWidth)
                     maxLabelWidth = w;
             });
-            $("#visibleColumnsForTable").css("column-width", `${maxLabelWidth + 20}px`);
+            $("#visibleColumnsForTable").css("column-width", `${maxLabelWidth}px`);
 
 
             const rows = countries.map(item =>
