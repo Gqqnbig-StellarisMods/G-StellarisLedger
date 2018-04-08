@@ -206,6 +206,12 @@
         {
             fetch("/api/RecentSaves").then(response => response.json()).then(recentSaves =>
             {
+                if (recentSaves.length === 0)
+                {
+                    $("body").html("No savegames");
+                    return;
+                }
+
                 //recentSaves.splice(0, 1);
                 const promises = recentSaves.map(path => fetch(`/api/${path.replace("\\", "/")}/Countries`).then(r =>
                 {
