@@ -107,6 +107,12 @@ namespace StellarisInGameLedgerInCSharp
                 var unityIncome = GetValue(last_month, "unity");
                 country.UnityIncome = Convert.ToDouble(unityIncome.GetChild(1).GetText());
 
+                var traditions = GetValue(rightValue.GetChild(1), "traditions");
+                for (int j = 1; j < traditions?.ChildCount-1; j++)
+                {
+                    country.Traditions.Add(traditions.GetChild(j).GetText().Trim('"'));
+                }
+
                 var physics_research = GetValue(last_month, "physics_research");
                 country.PhysicsResearchIncome = Convert.ToDouble(physics_research.GetChild(1).GetText());
 
