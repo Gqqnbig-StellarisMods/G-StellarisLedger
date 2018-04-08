@@ -76,11 +76,12 @@ namespace StellarisInGameLedgerInCSharp.Controllers
             var orderedFiles = files.OrderByDescending(f => f.LastWriteTime).ToList();
             //排除文件名日期顺序不符的
 
-            DateTime lastDate = DateTime.MaxValue;
+            int lastDate = int.MaxValue;
             for (int i = 0; i < orderedFiles.Count; i++)
             {
                 var dateString = Path.GetFileNameWithoutExtension(orderedFiles[i].Name);
-                var d = DateTime.ParseExact(dateString, "yyyy.MM.dd", System.Globalization.CultureInfo.InvariantCulture);
+                dateString = dateString.Replace(".", "");
+                int d = Convert.ToInt32(dateString);
                 if (d < lastDate)
                     lastDate = d;
                 else
