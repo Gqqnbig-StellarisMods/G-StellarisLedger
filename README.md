@@ -1,4 +1,4 @@
-# Stellaris Ledger
+# G-Stellaris Ledger 群星统计器・极
 
 Watch [Stellaris Ledger Performance Comparison](https://www.youtube.com/watch?v=hKqeLxOMQMs)
 
