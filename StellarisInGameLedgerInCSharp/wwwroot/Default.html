@@ -323,9 +323,9 @@
 
                 var options = {
                     title: _.startCase(property).replace(/\bWith\b/, "with"),
-                    legend: { position: 'bottom' },
-                    width: "100%",
-                    height: 500,
+                    legend: { position: 'right' },
+                    width: document.getElementsByTagName("body")[0].clientWidth - 50,
+                    height: Math.max(400, 100 * Math.ceil(tags.length / 2.0)),
                     pointSize: 5,
                 };
 
