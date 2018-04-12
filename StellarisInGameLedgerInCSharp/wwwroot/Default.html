@@ -321,6 +321,10 @@
 
                 lineChartData.addRows(rows);
 
+
+                var dateFormatter = new google.visualization.DateFormat({ pattern: "yyyy.MM.dd" });
+                dateFormatter.format(lineChartData, 0);
+
                 var options = {
                     title: _.startCase(property).replace(/\bWith\b/, "with"),
                     legend: { position: 'right' },
