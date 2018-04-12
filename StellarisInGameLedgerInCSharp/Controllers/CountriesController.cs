@@ -80,12 +80,19 @@ namespace StellarisInGameLedgerInCSharp.Controllers
             for (int i = 0; i < orderedFiles.Count; i++)
             {
                 var dateString = Path.GetFileNameWithoutExtension(orderedFiles[i].Name);
-                dateString = dateString.Replace(".", "");
-                int d = Convert.ToInt32(dateString);
-                if (d < lastDate)
-                    lastDate = d;
-                else
+                try
+                {
+                    dateString = dateString.Replace(".", "");
+                    int d = Convert.ToInt32(dateString);
+                    if (d < lastDate)
+                        lastDate = d;
+                    else
+                        orderedFiles.RemoveAt(i--);
+                }
+                catch
+                {
                     orderedFiles.RemoveAt(i--);
+                }
             }
             
             var result = orderedFiles.Select(f => f.FullName.Substring(saveGamesPath.Length).Trim(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar));
