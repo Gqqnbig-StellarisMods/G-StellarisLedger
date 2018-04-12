@@ -1,4 +1,6 @@
 # G-Stellaris Ledger 群星统计器・极
+[![Build status](https://ci.appveyor.com/api/projects/status/9d682arbbq245nsw?svg=true)](https://ci.appveyor.com/project/gqqnbig/stellarisingameledgerincsharp)
+
 
 Watch [Stellaris Ledger Performance Comparison](https://www.youtube.com/watch?v=hKqeLxOMQMs)
 
