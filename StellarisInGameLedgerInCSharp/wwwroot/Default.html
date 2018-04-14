@@ -231,6 +231,10 @@
                                 date: path.substr(i, path.length - i - ".sav".length),
                                 content: json
                             });
+                        }).catch(function (ex)
+                        {
+                            $("body").text("Error");
+                            throw ex;
                         });
                     });
                 }));
