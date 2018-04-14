@@ -69,7 +69,9 @@ namespace StellarisInGameLedgerInCSharp
                     country.Minerals = Convert.ToDouble(minerals.GetText());
 
                 var food = GetValue(resources, "food");
-                if (food is ParadoxParser.ScopeContext)
+                if (food is null)
+                    country.Food = 0;
+                else if (food is ParadoxParser.ScopeContext)
                     country.Food = Convert.ToDouble(food.GetChild(1).GetText());
                 else
                     country.Food = Convert.ToDouble(food.GetText());
