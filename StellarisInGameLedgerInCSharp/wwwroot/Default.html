@@ -208,7 +208,7 @@
 
         google.charts.setOnLoadCallback(() =>
         {
-            fetch("/api/RecentSaves").then(response => response.json()).then(recentSaves =>
+            fetch("/api/RecentSaves?limit=25").then(response => response.json()).then(recentSaves =>
             {
                 if (recentSaves.length === 0)
                 {
