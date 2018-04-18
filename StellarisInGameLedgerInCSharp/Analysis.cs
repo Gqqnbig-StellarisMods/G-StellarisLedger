@@ -91,39 +91,39 @@ namespace StellarisInGameLedgerInCSharp
                 //    country.Unity = Convert.ToDouble(unity.GetText());
 
                 // ReSharper disable InconsistentNaming
-                var last_month = GetValue(standard_economy_module, "last_month").GetChild(1);
-                var energyIncome = GetValue(last_month, "energy");
-                country.EnergyIncome = Convert.ToDouble(energyIncome.GetChild(1).GetText());
-
-                var mineralsIncome = GetValue(last_month, "minerals");
-                country.MineralsIncome = Convert.ToDouble(mineralsIncome.GetChild(1).GetText());
-
-                var foodIncome = GetValue(last_month, "food");
-                if (foodIncome != null)
-                    country.FoodIncome = Convert.ToDouble(foodIncome.GetChild(1).GetText());
-
-
-                var influenceIncome = GetValue(last_month, "influence");
-                country.InfluenceIncome = Convert.ToDouble(influenceIncome.GetChild(1).GetText());
-
-                var unityIncome = GetValue(last_month, "unity");
-                country.UnityIncome = Convert.ToDouble(unityIncome.GetChild(1).GetText());
-
-                var traditions = GetValue(rightValue.GetChild(1), "traditions");
-                for (int j = 1; j < traditions?.ChildCount-1; j++)
+                var last_month = GetValue(standard_economy_module, "last_month")?.GetChild(1);
+                if (last_month != null)
                 {
-                    country.Traditions.Add(traditions.GetChild(j).GetText().Trim('"'));
+                    var energyIncome = GetValue(last_month, "energy");
+                    country.EnergyIncome = Convert.ToDouble(energyIncome.GetChild(1).GetText());
+
+                    var mineralsIncome = GetValue(last_month, "minerals");
+                    country.MineralsIncome = Convert.ToDouble(mineralsIncome.GetChild(1).GetText());
+
+                    var foodIncome = GetValue(last_month, "food");
+                    if (foodIncome != null)
+                        country.FoodIncome = Convert.ToDouble(foodIncome.GetChild(1).GetText());
+
+
+                    var influenceIncome = GetValue(last_month, "influence");
+                    country.InfluenceIncome = Convert.ToDouble(influenceIncome.GetChild(1).GetText());
+
+                    var unityIncome = GetValue(last_month, "unity");
+                    country.UnityIncome = Convert.ToDouble(unityIncome.GetChild(1).GetText());
+
+                    var traditions = GetValue(rightValue.GetChild(1), "traditions");
+                    for (int j = 1; j < traditions?.ChildCount - 1; j++)
+                        country.Traditions.Add(traditions.GetChild(j).GetText().Trim('"'));
+
+                    var physics_research = GetValue(last_month, "physics_research");
+                    country.PhysicsResearchIncome = Convert.ToDouble(physics_research.GetChild(1).GetText());
+
+                    var society_research = GetValue(last_month, "society_research");
+                    country.SocietyResearchIncome = Convert.ToDouble(society_research.GetChild(1).GetText());
+
+                    var engineering_research = GetValue(last_month, "engineering_research");
+                    country.EngineeringResearchIncome = Convert.ToDouble(engineering_research.GetChild(1).GetText());
                 }
-
-                var physics_research = GetValue(last_month, "physics_research");
-                country.PhysicsResearchIncome = Convert.ToDouble(physics_research.GetChild(1).GetText());
-
-                var society_research = GetValue(last_month, "society_research");
-                country.SocietyResearchIncome = Convert.ToDouble(society_research.GetChild(1).GetText());
-
-                var engineering_research = GetValue(last_month, "engineering_research");
-                country.EngineeringResearchIncome = Convert.ToDouble(engineering_research.GetChild(1).GetText());
-
 
                 // ReSharper restore InconsistentNaming
                 countries.Add(country);
