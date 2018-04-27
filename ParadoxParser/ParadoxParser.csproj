@@ -44,7 +44,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ParadoxLexer.cs" />
-    <Compile Include="ParadoxListener.cs" />
     <Compile Include="ParadoxParser.cs" />
     <Compile Include="ParadoxYamlLexer.cs" />
     <Compile Include="ParadoxYamlParser.cs" />
@@ -59,4 +58,8 @@
     <None Include="ParadoxYaml.tokens" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>cd /d "$(ProjectDir)"
+antlr4.bat -Dlanguage=CSharp  -no-listener -no-visitor  Paradox.g4 ParadoxYaml.g4</PreBuildEvent>
+  </PropertyGroup>
 </Project>
