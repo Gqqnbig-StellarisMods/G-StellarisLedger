@@ -60,6 +60,7 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PreBuildEvent>cd /d "$(ProjectDir)"
+set CLASSPATH=%25CLASSPATH%25;$(ProjectDir)antlr-4.7.1-complete.jar
 antlr4.bat -Dlanguage=CSharp  -no-listener -no-visitor  Paradox.g4 ParadoxYaml.g4</PreBuildEvent>
   </PropertyGroup>
 </Project>
