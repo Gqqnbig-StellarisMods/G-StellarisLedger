@@ -209,8 +209,8 @@ namespace StellarisInGameLedgerInCSharp
                 ITokenStream tokens = new CommonTokenStream(lexer);
                 var parser = new ParadoxParser(tokens);
 
-                var data = parser.paradox().children;
-                return data[0].GetChild(2).GetChild(1);
+                var data = parser.kvPair().children;
+                return data[2].GetChild(1);
             });
             return d;
         }
