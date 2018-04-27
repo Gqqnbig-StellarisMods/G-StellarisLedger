@@ -1,5 +1,9 @@
 grammar Paradox;
 
+//开头是小写的规则是语法规则
+//开头是大写的规则是词法规则
+
+
 paradox:
   kvPair+;
 
