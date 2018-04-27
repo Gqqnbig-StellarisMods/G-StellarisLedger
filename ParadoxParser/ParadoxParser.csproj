@@ -46,6 +46,8 @@
     <Compile Include="ParadoxLexer.cs" />
     <Compile Include="ParadoxListener.cs" />
     <Compile Include="ParadoxParser.cs" />
+    <Compile Include="ParadoxYamlLexer.cs" />
+    <Compile Include="ParadoxYamlParser.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -53,6 +55,8 @@
     <None Include="Paradox.g4" />
     <None Include="Paradox.tokens" />
     <None Include="ParadoxLexer.tokens" />
+    <None Include="ParadoxYaml.g4" />
+    <None Include="ParadoxYaml.tokens" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
