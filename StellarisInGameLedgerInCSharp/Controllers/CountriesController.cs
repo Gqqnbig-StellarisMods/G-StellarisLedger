@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using System.IO.Compression;
+using Microsoft.Extensions.Options;
 
 namespace StellarisInGameLedgerInCSharp.Controllers
 {
@@ -11,7 +12,13 @@ namespace StellarisInGameLedgerInCSharp.Controllers
     [Route("api/")]
     public class CountriesController : Controller
     {
-        private static string saveGamesPath = @"D:\Documents\Paradox Interactive\Stellaris\save games";
+		private string saveGamesPath;
+
+		public CountriesController(IOptions<AppSettings> appSettings)
+		{
+			saveGamesPath = appSettings.Value.SaveGamesPath;
+		}
+
 
         // GET api/values
         [HttpGet("Countries")]
