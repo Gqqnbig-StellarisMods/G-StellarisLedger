@@ -16,7 +16,7 @@ namespace StellarisInGameLedgerInCSharp.Controllers
 
 		public CountriesController(IOptions<AppSettings> appSettings)
 		{
-			saveGamesPath = appSettings.Value.SaveGamesPath;
+			saveGamesPath =Path.GetFullPath(appSettings.Value.SaveGamesPath);
 		}
 
 
