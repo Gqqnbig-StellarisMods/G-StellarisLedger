@@ -7,7 +7,7 @@
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.0/lodash.min.js"></script>
     <script type="text/javascript" src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
-
+	<script src="content/Column.js"></script>
 
     <style type="text/css">
         thead th img {
@@ -48,33 +48,30 @@
         // Load the Visualization API and the corechart package.
         google.charts.load('current', { 'packages': ['corechart', 'table'] });
 
-        function getColumnHeader(name)
-        {
-            name = _.startCase(name).replace(/\bWith\b/, "with");
 
-            switch (name)
-            {
-                case "Technology Count":
-                    return "Technologies";
-                case "Colony Count":
-                    return '<img src="https://stellaris.paradoxwikis.com/images/6/6e/Planet_gaia.png" title="Colonies">';
-                case "Tradition Count":
-                    return "Traditions";
-            }
+		const columns = [new Column("Technology Count", "Technologies"),
+						new Column("Colony Count", '<img src="https://stellaris.paradoxwikis.com/images/6/6e/Planet_gaia.png" title="Colonies">'),
+						new Column("Tradition Count", "Traditions"),
+						new Column("Energy", '<img src="https://stellaris.paradoxwikis.com/images/5/58/Energy_Credits.png" title="Energy">'),
+						new Column("Minerals", '<img src="https://stellaris.paradoxwikis.com/images/1/10/Minerals.png" title="Minerals">'),
+						new Column("Food", '<img src="https://stellaris.paradoxwikis.com/images/c/c6/Food.png" title="Food">'),
+						new Column("Influence", '<img src="https://stellaris.paradoxwikis.com/images/9/91/Influence.png" title="Influence">'),
+						new Column("Unity", '<img src="https://stellaris.paradoxwikis.com/images/3/3d/Unity.png" title="Unity">'),
+						new Column("Physics Research Income with Penalty", '<img src="https://stellaris.paradoxwikis.com/images/b/b3/Research_speed_%28Physics%29.png" title="Physics Income with Penalty">'),
+						new Column("Society Research Income with Penalty", '<img src="https://stellaris.paradoxwikis.com/images/4/4f/Research_speed_%28Society%29.png" title="Society Income with Penalty">'),
+						new Column("Engineering Research Income with Penalty", '<img src="https://stellaris.paradoxwikis.com/images/e/ec/Research_speed_%28Engineering%29.png" title="Engineering Income with Penalty">'),
+						new Column("Population", '<img src="https://stellaris.paradoxwikis.com/images/7/71/Pop.png" title="Population">'),
+						new Column("Total Research Income with Penalty", "<span title='Total Research Income with Penalty'><img src='https://stellaris.paradoxwikis.com/images/b/b3/Research_speed_%28Physics%29.png'> + <img src='https://stellaris.paradoxwikis.com/images/4/4f/Research_speed_%28Society%29.png'> + <img src='https://stellaris.paradoxwikis.com/images/e/ec/Research_speed_%28Engineering%29.png'></span>")];
 
-            name = name.replace("Energy", '<img src="https://stellaris.paradoxwikis.com/images/5/58/Energy_Credits.png" title="Energy">')
-                .replace("Minerals", '<img src="https://stellaris.paradoxwikis.com/images/1/10/Minerals.png" title="Minerals">')
-                .replace("Food", '<img src="https://stellaris.paradoxwikis.com/images/c/c6/Food.png" title="Food">')
-                .replace("Influence", '<img src="https://stellaris.paradoxwikis.com/images/9/91/Influence.png" title="Influence">')
-                .replace("Unity", '<img src="https://stellaris.paradoxwikis.com/images/3/3d/Unity.png" title="Unity">')
-                .replace("Physics Research Income with Penalty", '<img src="https://stellaris.paradoxwikis.com/images/b/b3/Research_speed_%28Physics%29.png" title="Physics Income with Penalty">')
-                .replace("Society Research Income with Penalty", '<img src="https://stellaris.paradoxwikis.com/images/4/4f/Research_speed_%28Society%29.png" title="Society Income with Penalty">')
-                .replace("Engineering Research Income with Penalty", '<img src="https://stellaris.paradoxwikis.com/images/e/ec/Research_speed_%28Engineering%29.png" title="Engineering Income with Penalty">')
-                .replace("Population", '<img src="https://stellaris.paradoxwikis.com/images/7/71/Pop.png" title="Population">')
-                .replace("Total Research Income with Penalty","<span title='Total Research Income with Penalty'><img src='https://stellaris.paradoxwikis.com/images/b/b3/Research_speed_%28Physics%29.png'> + <img src='https://stellaris.paradoxwikis.com/images/4/4f/Research_speed_%28Society%29.png'> + <img src='https://stellaris.paradoxwikis.com/images/e/ec/Research_speed_%28Engineering%29.png'></span>");
 
-            return name;
-        }
+		function getColumnHeader(name)
+		{
+			var c = columns.find(v => v.name = name);
+			if (c)
+				return c.header;
+			else
+				return _.startCase(name).replace(/\bWith\b/, "with");;
+		}
 
 
         /**
