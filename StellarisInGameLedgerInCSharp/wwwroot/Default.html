@@ -128,10 +128,8 @@
 
 			const rows = countries.map(country =>
 			{
-				return propertyNames.map(p =>
-				{
-					return country[p];
-				});
+				//把json对象转换为数组
+				return propertyNames.map(p => country[p]);
 			});
 
 
