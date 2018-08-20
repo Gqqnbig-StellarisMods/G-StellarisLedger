@@ -316,6 +316,13 @@
                 var dateFormatter = new google.visualization.DateFormat({ pattern: "yyyy.MM.dd" });
                 dateFormatter.format(lineChartData, 0);
 
+				var c = columns.find(c => c.name === property);
+				if (c && c.formatter)
+				{
+					for (var i = 0; i < tags.length; i++)
+						c.formatter.format(lineChartData, 1+i);
+				}
+
                 var options = {
                     title: _.startCase(property).replace(/\bWith\b/, "with"),
                     legend: { position: 'right' },
@@ -331,10 +338,10 @@
                     $("#historyPanel").append(chartDiv);
                 }
 
-                const view = new google.visualization.DataView(lineChartData);
-                var columns = view.getViewColumns();
-                columns = columns.filter(columnIndex => columnIndex===0 || $(`#countryFilterPanel input[name="${view.getColumnLabel(columnIndex)}"]`).prop("checked"));
-                view.setColumns(columns);
+				const view = new google.visualization.DataView(lineChartData);
+				var viewColumns = view.getViewColumns();
+				viewColumns = viewColumns.filter(columnIndex => columnIndex === 0 || $(`#countryFilterPanel input[name="${view.getColumnLabel(columnIndex)}"]`).prop("checked"));
+				view.setColumns(viewColumns);
 
 
                 const googleLineChart = new google.visualization.LineChart(chartDiv[0]);
