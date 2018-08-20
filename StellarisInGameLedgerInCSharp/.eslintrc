@@ -32,8 +32,7 @@
     "semi": 1,
     "semi-spacing": 1,
     "valid-jsdoc": [
-      2,
-      { "requireReturn": false }
+      1
     ],
 
     "import/extensions": 1,
