@@ -288,8 +288,32 @@
         function updateHistoryCharts()
         {
             let propertyNames = Object.getOwnPropertyNames(historyData[0].content[0]);
-            for (let property of propertyNames.filter(p => ["tag", "name"].indexOf(p) === -1))
-            {
+
+			let dataPropertyNames = propertyNames.filter(p => ["tag", "name"].indexOf(p) === -1);
+
+
+			let partition = _.partition(dataPropertyNames, p => _.includes(["physicsResearchIncomeWithPenalty", "societyResearchIncomeWithPenalty", "engineeringResearchIncomeWithPenalty", "totalResearchIncomeWithPenalty"], p));
+			let researchIncomeWithPenaltyProperties = partition[0];
+			let regularProperties = partition[1];
+
+			partition = _.partition(regularProperties, p => _.includes(["physicsResearchIncome", "societyResearchIncome", "engineeringResearchIncome", "totalResearchIncome"], p));
+			let researchIncomeProperties = partition[0];
+			regularProperties = partition[1];
+
+			updateSinglePropertyCharts(regularProperties);
+
+			updateCombinedPropertyChart("ResearchIncome", "Research Income", researchIncomeProperties);
+		}
+
+		/**
+		 * 本方法为每一个属性绘制一张折线图
+		 * @param properties {string[]}
+		 */
+		function updateSinglePropertyCharts(properties)
+		{
+
+			for (let property of properties)
+			{
                 const lineChartData = new google.visualization.DataTable();
                 lineChartData.addColumn({ type: "date", label: "date" });
                 for (let tag of tags)
@@ -328,7 +352,7 @@
                     legend: { position: 'right' },
                     width: document.getElementsByTagName("body")[0].clientWidth - 50,
                     height: Math.max(400, 100 * Math.ceil(tags.length / 2.0)),
-                    pointSize: 5,
+					pointSize: 5
                 };
 
                 let chartDiv = $(`#${property}Chart`);
@@ -349,6 +373,96 @@
                 googleLineChart.draw(view, options);
             }
         }
-    </script>
+
+		/**
+		 * 本方法把所有属性绘制在同一张折线图里
+		 * @param properties {string[]}
+		 */
+		function updateCombinedPropertyChart(id, title, properties)
+		{
+			const lineChartData = new google.visualization.DataTable();
+			lineChartData.addColumn({ type: "date", label: "date" });
+			for (let tag of tags)
+			{
+				for (let p of properties)
+					lineChartData.addColumn({ type: "number", label: tag.name + "-" + p });
+			}
+
+			const rows = historyData.map(item =>
+			{
+				const row = [new Date(Date.parse(item.date))];
+				for (let tag of tags)
+				{
+					for (let p of properties)
+					{
+						const country = item.content.find(c => c.tag === tag.tag);
+						if (country)
+							row.push(country[p]);
+						else
+							row.push(undefined);
+					}
+				}
+				return row;
+			});
+
+			lineChartData.addRows(rows);
+
+
+			var dateFormatter = new google.visualization.DateFormat({ pattern: "yyyy.MM.dd" });
+			dateFormatter.format(lineChartData, 0);
+
+
+			let index = 0;
+			for (let tag of tags)
+			{
+				for (let p of properties)
+				{
+					var c = columns.find(c => c.name === p);
+					if (c && c.formatter)
+					{
+						c.formatter.format(lineChartData, 1 + index);
+					}
+					index++;
+				}
+			}
+
+			var options = {
+				title: title,
+				legend: { position: 'right' },
+				width: document.getElementsByTagName("body")[0].clientWidth - 50,
+				height: Math.max(400, 100 * Math.ceil(tags.length / 2.0)),
+				pointSize: 5
+			};
+
+			let chartDiv = $(`#${id}Chart`);
+			if (chartDiv.length === 0)
+			{
+				chartDiv = $(`<div id="${id}Chart"></div>`);
+				$("#historyPanel").append(chartDiv);
+			}
+
+			const view = new google.visualization.DataView(lineChartData);
+			var viewColumns = view.getViewColumns();
+			viewColumns = viewColumns.filter(columnIndex =>
+			{
+				if (columnIndex === 0)
+					return true;
+
+				let label = view.getColumnLabel(columnIndex);
+				return $("#countryFilterPanel input[name]").is(function()
+				{
+					return $(this).prop("checked") && _.startsWith(label, $(this).attr("name"));
+				});
+			});
+			view.setColumns(viewColumns);
+
+
+			const googleLineChart = new google.visualization.LineChart(chartDiv[0]);
+
+			googleLineChart.draw(view, options);
+		}
+
+
+	</script>
 </body>
 </html>
