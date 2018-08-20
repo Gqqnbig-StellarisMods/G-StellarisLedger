@@ -15,10 +15,6 @@
             vertical-align: middle;
         }
 
-        .negative {
-            color: red;
-        }
-
         #visibleColumnsForTable label {
             float: left; /* 不用display:block因为这样会使label占据大量空间，光标点击空白区会意外勾选多选框。 */
             clear: left;
@@ -43,60 +39,26 @@
 
         let googleTable;
         let tableData;
+		let columns;
 
 
         // Load the Visualization API and the corechart package.
         google.charts.load('current', { 'packages': ['corechart', 'table'] });
 
 
-		const columns = [new Column("Technology Count", "Technologies"),
-						new Column("Colony Count", '<img src="https://stellaris.paradoxwikis.com/images/6/6e/Planet_gaia.png" title="Colonies">'),
-						new Column("Tradition Count", "Traditions"),
-						new Column("Energy", '<img src="https://stellaris.paradoxwikis.com/images/5/58/Energy_Credits.png" title="Energy">'),
-						new Column("Minerals", '<img src="https://stellaris.paradoxwikis.com/images/1/10/Minerals.png" title="Minerals">'),
-						new Column("Food", '<img src="https://stellaris.paradoxwikis.com/images/c/c6/Food.png" title="Food">'),
-						new Column("Influence", '<img src="https://stellaris.paradoxwikis.com/images/9/91/Influence.png" title="Influence">'),
-						new Column("Unity", '<img src="https://stellaris.paradoxwikis.com/images/3/3d/Unity.png" title="Unity">'),
-						new Column("Physics Research Income with Penalty", '<img src="https://stellaris.paradoxwikis.com/images/b/b3/Research_speed_%28Physics%29.png" title="Physics Income with Penalty">'),
-						new Column("Society Research Income with Penalty", '<img src="https://stellaris.paradoxwikis.com/images/4/4f/Research_speed_%28Society%29.png" title="Society Income with Penalty">'),
-						new Column("Engineering Research Income with Penalty", '<img src="https://stellaris.paradoxwikis.com/images/e/ec/Research_speed_%28Engineering%29.png" title="Engineering Income with Penalty">'),
-						new Column("Population", '<img src="https://stellaris.paradoxwikis.com/images/7/71/Pop.png" title="Population">'),
-						new Column("Total Research Income with Penalty", "<span title='Total Research Income with Penalty'><img src='https://stellaris.paradoxwikis.com/images/b/b3/Research_speed_%28Physics%29.png'> + <img src='https://stellaris.paradoxwikis.com/images/4/4f/Research_speed_%28Society%29.png'> + <img src='https://stellaris.paradoxwikis.com/images/e/ec/Research_speed_%28Engineering%29.png'></span>")];
+
 
 
 		function getColumnHeader(name)
 		{
-			var c = columns.find(v => v.name = name);
-			if (c)
+			var c = columns.find(v => v.name === name);
+			if (c && c.header)
 				return c.header;
 			else
-				return _.startCase(name).replace(/\bWith\b/, "with");;
+				return _.startCase(name);
 		}
 
 
-        /**
-         *
-         * @param value
-         * @returns undefined 如果value可以原样显示
-         */
-        function formatCellText(value, propertyName)
-        {
-            if (propertyName === "unityIncomeWithPenalty")
-                return "≈" + value.toFixed(3);
-
-
-            if (_.isInteger(value))
-                return value.toFixed(0);
-            else if (_.isNumber(value))
-            {
-                if (value > 0)
-                    return `<span class="positive">${value.toFixed(2)}</span>`;
-                else
-                    return `<span class="negative">${value.toFixed(2)}</span>`;
-            }
-            else
-                return undefined;
-        }
 
         function addCalculatedProperties(country)
         {
@@ -164,18 +126,27 @@
             $("#visibleColumnsForTable").css("column-width", `${maxLabelWidth}px`);
 
 
-            const rows = countries.map(item =>
-            {
-                return propertyNames.map(p =>
-                {
-                    const f = formatCellText(item[p],p);
-                    return f ? { v: item[p], f: f } : item[p];
-                });
-            });
+			const rows = countries.map(country =>
+			{
+				return propertyNames.map(p =>
+				{
+					return country[p];
+				});
+			});
 
 
 
-            tableData.addRows(rows);
+			tableData.addRows(rows);
+
+			propertyNames.forEach((p, i) =>
+			{
+				var c = columns.find(v => v.name === p);
+				if (c && c.formatter)
+				{
+					c.formatter.format(tableData, i);
+				}
+			});
+
 
 
             updateTableView();
@@ -204,6 +175,28 @@
 
         google.charts.setOnLoadCallback(() =>
         {
+			columns = [new Column("militaryPower", undefined, new google.visualization.NumberFormat({ fractionDigits: 0, groupingSymbol: "" })),
+			new Column("technologyCount", "Technologies"),
+			new Column("colonyCount", '<img src="https://stellaris.paradoxwikis.com/images/6/6e/Planet_gaia.png" title="Colonies">'),
+			new Column("traditionCount", "Traditions"),
+			new Column("energy", '<img src="https://stellaris.paradoxwikis.com/images/5/58/Energy_Credits.png" title="Energy">', new google.visualization.NumberFormat({ fractionDigits: 0, groupingSymbol: "" })),
+			new Column("minerals", '<img src="https://stellaris.paradoxwikis.com/images/1/10/Minerals.png" title="Minerals">', new google.visualization.NumberFormat({ fractionDigits: 0, groupingSymbol: "" })),
+			new Column("food", '<img src="https://stellaris.paradoxwikis.com/images/c/c6/Food.png" title="Food">', new google.visualization.NumberFormat({ fractionDigits: 0, groupingSymbol: "" })),
+			new Column("influence", '<img src="https://stellaris.paradoxwikis.com/images/9/91/Influence.png" title="Influence">', new google.visualization.NumberFormat({ fractionDigits: 2, groupingSymbol: "" })),
+			new Column("energyIncome", undefined, new google.visualization.NumberFormat({ fractionDigits: 2, groupingSymbol: "", negativeColor: "red" })),
+			new Column("mineralsIncome", undefined, new google.visualization.NumberFormat({ fractionDigits: 2, groupingSymbol: "", negativeColor: "red" })),
+			new Column("foodIncome", undefined, new google.visualization.NumberFormat({ fractionDigits: 2, groupingSymbol: "", negativeColor: "red" })),
+			new Column("influenceIncome", undefined, new google.visualization.NumberFormat({ fractionDigits: 2, groupingSymbol: "" })),
+			new Column("unity", '<img src="https://stellaris.paradoxwikis.com/images/3/3d/Unity.png" title="Unity">'),
+			new Column("unityIncomeWithPenalty", "Unity Income with Penalty", new google.visualization.NumberFormat({ fractionDigits: 2 })),
+			new Column("physicsResearchIncomeWithPenalty", '<img src="https://stellaris.paradoxwikis.com/images/b/b3/Research_speed_%28Physics%29.png" title="Physics Income with Penalty">', new google.visualization.NumberFormat({ fractionDigits: 2 })),
+			new Column("societyResearchIncomeWithPenalty", '<img src="https://stellaris.paradoxwikis.com/images/4/4f/Research_speed_%28Society%29.png" title="Society Income with Penalty">', new google.visualization.NumberFormat({ fractionDigits: 2 })),
+			new Column("engineeringResearchIncomeWithPenalty", '<img src="https://stellaris.paradoxwikis.com/images/e/ec/Research_speed_%28Engineering%29.png" title="Engineering Income with Penalty">', new google.visualization.NumberFormat({ fractionDigits: 2 })),
+			new Column("population", '<img src="https://stellaris.paradoxwikis.com/images/7/71/Pop.png" title="Population">'),
+			new Column("totalResearchIncomeWithPenalty", "<span title='Total Research Income with Penalty'><img src='https://stellaris.paradoxwikis.com/images/b/b3/Research_speed_%28Physics%29.png'> + <img src='https://stellaris.paradoxwikis.com/images/4/4f/Research_speed_%28Society%29.png'> + <img src='https://stellaris.paradoxwikis.com/images/e/ec/Research_speed_%28Engineering%29.png'></span>", new google.visualization.NumberFormat({ fractionDigits: 2 }))];
+
+
+
             fetch("/api/RecentSaves?limit=25").then(response => response.json()).then(recentSaves =>
             {
                 if (recentSaves.length === 0)
