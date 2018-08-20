@@ -7,6 +7,7 @@
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.0/lodash.min.js"></script>
     <script type="text/javascript" src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+	<script src="content/palette.js"></script>
 	<script src="content/Column.js"></script>
 
     <style type="text/css">
@@ -384,8 +385,8 @@
 			lineChartData.addColumn({ type: "date", label: "date" });
 			for (let tag of tags)
 			{
-				for (let p of properties)
-					lineChartData.addColumn({ type: "number", label: tag.name + "-" + p });
+				for (let i = 0; i < properties.length; i++)
+					lineChartData.addColumn({ type: "number", label: tag.name + (i === 0 ? "" : "-" + properties[i]) });
 			}
 
 			const rows = historyData.map(item =>
@@ -426,12 +427,34 @@
 				}
 			}
 
+			let colors = palette('tol', tags.length);
+			let pointShapePalette = ["circle", "triangle", "square", "diamond"];
+			let series = [];
+			for (let i = 0; i < tags.length; i++)
+			{
+				let color = colors[i];
+				for (let j = 0; j < properties.length; j++)
+				{
+					series.push({
+						color: color,
+						pointShape: pointShapePalette[j],
+						visibleInLegend: j === 0,
+					});
+				}
+			}
+
+			for (let j = 0; j < properties.length; j++)
+			{
+				title +=", "+ _.startCase(properties[j]).replace(/\bWith\b/, "with") + "的标记为" + pointShapePalette[j];
+			}
+
 			var options = {
 				title: title,
+				series: series,
 				legend: { position: 'right' },
 				width: document.getElementsByTagName("body")[0].clientWidth - 50,
 				height: Math.max(400, 100 * Math.ceil(tags.length / 2.0)),
-				pointSize: 5
+				pointSize: 10
 			};
 
 			let chartDiv = $(`#${id}Chart`);
