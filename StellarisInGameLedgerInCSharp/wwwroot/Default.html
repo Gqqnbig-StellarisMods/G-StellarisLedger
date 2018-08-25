@@ -293,17 +293,18 @@
 			let dataPropertyNames = propertyNames.filter(p => ["tag", "name"].indexOf(p) === -1);
 
 
-			let partition = _.partition(dataPropertyNames, p => _.includes(["physicsResearchIncomeWithPenalty", "societyResearchIncomeWithPenalty", "engineeringResearchIncomeWithPenalty", "totalResearchIncomeWithPenalty"], p));
+			let partition = _.partition(dataPropertyNames, p => _.includes(["physicsResearchIncomeWithPenalty", "societyResearchIncomeWithPenalty", "engineeringResearchIncomeWithPenalty"], p));
 			let researchIncomeWithPenaltyProperties = partition[0];
 			let regularProperties = partition[1];
 
-			partition = _.partition(regularProperties, p => _.includes(["physicsResearchIncome", "societyResearchIncome", "engineeringResearchIncome", "totalResearchIncome"], p));
+			partition = _.partition(regularProperties, p => _.includes(["physicsResearchIncome", "societyResearchIncome", "engineeringResearchIncome"], p));
 			let researchIncomeProperties = partition[0];
 			regularProperties = partition[1];
 
 			updateSinglePropertyCharts(regularProperties);
 
 			updateCombinedPropertyChart("ResearchIncome", "Research Income", researchIncomeProperties);
+			updateCombinedPropertyChart("ResearchIncomeWithPenalty", "Research Income with Penalty", researchIncomeWithPenaltyProperties);
 		}
 
 		/**
@@ -427,7 +428,7 @@
 				}
 			}
 
-			let colors = palette('tol', tags.length);
+			let colors = palette('mpn65', tags.length);
 			let pointShapePalette = ["circle", "triangle", "square", "diamond"];
 			let series = [];
 			for (let i = 0; i < tags.length; i++)
@@ -438,7 +439,7 @@
 					series.push({
 						color: color,
 						pointShape: pointShapePalette[j],
-						visibleInLegend: j === 0,
+						visibleInLegend: j === 0
 					});
 				}
 			}
