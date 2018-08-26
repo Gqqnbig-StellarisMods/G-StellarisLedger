@@ -17,31 +17,37 @@ namespace StellarisInGameLedgerInCSharp
 
 		public Analyst(string content)
 		{
-			//这里的大括号匹配并不健壮，而且与Antlr语法重复。但是Antlr语法分析比较慢，这里做一个优化，预先提取出有效部分。
+			string lineEndingSymbol = content.DetectLineEnding();
+			var p = content.IndexOf(lineEndingSymbol + "pop={" + lineEndingSymbol);
+			p += lineEndingSymbol.Length;
+			content = content.Substring(p);
+			ParadoxParser.ParadoxContext popData = (ParadoxParser.ParadoxContext)GetScopeBody(content);
+			this.popData = popData;
+			//+3是因为GetScopeBody返回children，不含右大括号。
+			content = content.Substring(popData.Stop.StopIndex + 3);
 
-			//string lineEndingSymbol = content.DetectLineEnding();
-			//var p= content.IndexOf(lineEndingSymbol + "country={" + lineEndingSymbol);
-			//p += lineEndingSymbol.Length;
+			p = content.IndexOf(lineEndingSymbol + "planet={" + lineEndingSymbol);
+			p += lineEndingSymbol.Length;
+			content = content.Substring(p);
+			ParadoxParser.ParadoxContext planetsData = (ParadoxParser.ParadoxContext)GetScopeBody(content);
+			this.planetsData = planetsData;
+			//+3是因为GetScopeBody返回children，不含右大括号。
+			content = content.Substring(planetsData.Stop.StopIndex + 3);
 
-			//content = content.Substring(p);
+			p = content.IndexOf(lineEndingSymbol + "country={" + lineEndingSymbol);
+			p += lineEndingSymbol.Length;
+			content = content.Substring(p);
+			ParadoxParser.ParadoxContext countriesData = (ParadoxParser.ParadoxContext)GetScopeBody(content);
+			this.countriesData = countriesData;
+			content = content.Substring(countriesData.Stop.StopIndex + 3);
 
-			//ParadoxParser.ParadoxContext countriesData = (ParadoxParser.ParadoxContext) GetScopeBody(content);
-			//this.countriesData = countriesData;
 
-			////+3是因为
-			//content = content.Substring(countriesData.Stop.StopIndex + 3);
-
-
-			var t1 = GetScopeBodyAsync(GetMatchedScope(content, "country"));
-			var t2 = GetScopeBodyAsync(GetMatchedScope(content, "planet"));
-			var t3 = GetScopeBodyAsync(GetMatchedScope(content, "pop"));
-			var t4 = GetScopeBodyAsync(GetMatchedScope(content, "pop_factions"));
-
-			Task.WaitAll(t1, t2, t3, t4);
-			countriesData = t1.Result;
-			planetsData = t2.Result;
-			popData = t3.Result;
-			pop_factionsData = t4.Result;
+			p = content.IndexOf(lineEndingSymbol + "pop_factions={" + lineEndingSymbol);
+			p += lineEndingSymbol.Length;
+			content = content.Substring(p);
+			ParadoxParser.ParadoxContext pop_factionsData = (ParadoxParser.ParadoxContext)GetScopeBody(content);
+			this.pop_factionsData = pop_factionsData;
+			content = content.Substring(pop_factionsData.Stop.StopIndex + 3);
 		}
 
 		public IList<Country> GetCountries()
@@ -221,10 +227,12 @@ namespace StellarisInGameLedgerInCSharp
 				return null;
 
 			var factionId = GetValue(body, "pop_faction")?.GetText();
-
-			var faction = GetValue(pop_factionsData, factionId);
-
-			var factionName = GetValue(faction, "name").GetText();
+			string factionName = null;
+			if (factionId != null)
+			{
+				var faction = GetValue(pop_factionsData, factionId).GetChild(1);
+				factionName = GetValue(faction, "name").GetText().Trim('"');
+			}
 
 			return new Pop { Id = popId, Faction = factionName };
 		}
