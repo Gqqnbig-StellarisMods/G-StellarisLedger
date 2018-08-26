@@ -57,8 +57,8 @@ namespace StellarisInGameLedgerInCSharp.Controllers
 
             var content = GetGameSaveContent(fileName);
 
-	        var aalysis = new Analysis(content);
-            return aalysis.GetCountries();
+	        var analyst = new Analyst(content);
+            return analyst.GetCountries();
         }
 
         /// <summary>
