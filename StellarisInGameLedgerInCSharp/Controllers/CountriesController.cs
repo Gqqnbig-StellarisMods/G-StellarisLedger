@@ -20,15 +20,15 @@ namespace StellarisInGameLedgerInCSharp.Controllers
 		}
 
 
-        // GET api/values
-        [HttpGet("Countries")]
-        public IList<Country> Get()
-        {
-            var mostRecentSave = GetMostRecentSaves().First();
-            var content = GetGameSaveContent(Path.Combine(saveGamesPath, mostRecentSave));
+        //// GET api/values
+        //[HttpGet("Countries")]
+        //public IList<Country> Get()
+        //{
+        //    var mostRecentSave = GetMostRecentSaves().First();
+        //    var content = GetGameSaveContent(Path.Combine(saveGamesPath, mostRecentSave));
 
-            return Analysis.GetCountries(content);
-        }
+        //    return Analysis.GetCountries(content);
+        //}
 
         private static string GetGameSaveContent(string saveGamePath)
         {
@@ -46,7 +46,7 @@ namespace StellarisInGameLedgerInCSharp.Controllers
 
         [ResponseCache(Duration = 3600 * 24 * 30)]
         [HttpGet(@"{gameId:regex(^[[\d_-]]+$)}/{saveName:regex(^[[\d.]]+\.sav$)}/Countries")]
-        public IList<Country> Get(string gameId, string saveName)
+        public IList<Country> GetCountries(string gameId, string saveName)
         {
             var fileName = Path.Combine(saveGamesPath, gameId, saveName);
             if (System.IO.File.Exists(fileName) == false)
@@ -56,7 +56,9 @@ namespace StellarisInGameLedgerInCSharp.Controllers
             }
 
             var content = GetGameSaveContent(fileName);
-            return Analysis.GetCountries(content);
+
+	        var aalysis = new Analysis(content);
+            return aalysis.GetCountries();
         }
 
         /// <summary>

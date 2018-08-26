@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -8,17 +8,28 @@ using Antlr4.Runtime.Tree;
 
 namespace StellarisInGameLedgerInCSharp
 {
-    static class Analysis
-    {
-        public static IList<Country> GetCountries(string content)
-        {
-            //ÕâÀïµÄ´óÀ¨ºÅÆ¥Åä²¢²»Ç¿×³£¬¶øÇÒÓëAntlrÓï·¨ÖØ¸´¡£µ«ÊÇAntlrÓï·¨·ÖÎö±È½ÏÂı£¬ÕâÀï×öÒ»¸öÓÅ»¯£¬Ô¤ÏÈÌáÈ¡³öÓĞĞ§²¿·Ö¡£
-            var t1 = GetScopeBodyAsync(GetMatchedScope(content, "country"));
-            var t2 = GetScopeBodyAsync(GetMatchedScope(content, "planet"));
+	class Analysis
+	{
+		private readonly IParseTree countriesData;
+		private readonly IParseTree planetsData;
+		private readonly IParseTree popData;
 
-            Task.WaitAll(t1, t2);
-            IParseTree countriesData = t1.Result;
-            IParseTree planetsData = t2.Result;
+		public Analysis(string content)
+		{
+			//è¿™é‡Œçš„å¤§æ‹¬å·åŒ¹é…å¹¶ä¸å¼ºå£®ï¼Œè€Œä¸”ä¸Antlrè¯­æ³•é‡å¤ã€‚ä½†æ˜¯Antlrè¯­æ³•åˆ†ææ¯”è¾ƒæ…¢ï¼Œè¿™é‡Œåšä¸€ä¸ªä¼˜åŒ–ï¼Œé¢„å…ˆæå–å‡ºæœ‰æ•ˆéƒ¨åˆ†ã€‚
+			var t1 = GetScopeBodyAsync(GetMatchedScope(content, "country"));
+			var t2 = GetScopeBodyAsync(GetMatchedScope(content, "planet"));
+			var t3 = GetScopeBodyAsync(GetMatchedScope(content, "pop"));
+
+			Task.WaitAll(t1, t2, t3);
+			countriesData = t1.Result;
+			planetsData = t2.Result;
+			popData = t3.Result;
+		}
+
+		public IList<Country> GetCountries()
+		{
+
 
 
             //Stopwatch sw = new Stopwatch();
@@ -49,9 +60,10 @@ namespace StellarisInGameLedgerInCSharp
                 country.CivilianStations = GetValue(rightValue.GetChild(1), "controlled_planets").ChildCount - 2;
 
                 var owned_planets = GetValue(rightValue.GetChild(1), "owned_planets");
-                country.ColonyCount = owned_planets.ChildCount - 2;
+				country.Colonies = GetColonies(country, owned_planets, planetsData, popData);
 
-                country.Population = GetPopulation(owned_planets, planetsData);
+				var planetList = owned_planets.GetChild(1);
+				//country.ColonyCount = owned_planets.ChildCount - 2;
 
                 var modules = GetValue(rightValue.GetChild(1), "modules").GetChild(1);
                 var standard_economy_module = GetValue(modules, "standard_economy_module").GetChild(1);
@@ -130,10 +142,31 @@ namespace StellarisInGameLedgerInCSharp
             }
 
             //sw.Stop();
-            //Console.WriteLine($"Éú³ÉÊı¾İÓÃÊ±{sw.ElapsedMilliseconds}ms");
+            //Console.WriteLine($"ç”Ÿæˆæ•°æ®ç”¨æ—¶{sw.ElapsedMilliseconds}ms");
 
-            return countries;
-        }
+			return countries;
+		}
+
+		private static List<Planet> GetColonies(Country country, IParseTree owned_planets, IParseTree planetsData,
+			IParseTree popData)
+		{
+			var colonies = new List<Planet>();
+
+			for (int j = 1; j < owned_planets.ChildCount - 2; j++)
+			{
+				var planetId = owned_planets.GetChild(j).GetText();
+				colonies.Add(GetPlanet(planetId, planetsData, popData));
+			}
+
+			return colonies;
+		}
+
+		private static Planet GetPlanet(string planetId, IParseTree planetsData, IParseTree popData)
+		{
+			var planetData = GetValue(planetsData, planetId).GetChild(1);
+			var tileData = GetValue(planetData, "tiles").GetChild(1);
+			return new Planet() { Id = planetId, Pops = GetPlanetPops(tileData, popData) };
+		}
 
         private static int GetTechnologyCount(IParseTree rightValue)
         {
@@ -148,20 +181,35 @@ namespace StellarisInGameLedgerInCSharp
             return levels;
         }
 
-        private static int GetPopulation(IParseTree owned_planets, IParseTree planetsData)
-        {
-            var population = 0;
-            for (int j = 1; j < owned_planets.ChildCount - 1; j++)
-            {
-                var planetId = owned_planets.GetChild(j).GetText();
-                var planetData = GetValue(planetsData, planetId).GetChild(1);
-                var popData = GetValue(planetData, "pop");
-                if (popData != null)
-                    population += popData.ChildCount - 2;
-            }
+		private static List<Pop> GetPlanetPops(IParseTree tileData, IParseTree popData)
+		{
+			var pops = new List<Pop>();
+			for (int i = 0; i < tileData.ChildCount; i++)
+			{
+				var popId = GetValue(tileData.GetChild(i).GetChild(2).GetChild(1), "pop")?.GetText();
 
-            return population;
-        }
+				if (popId != null)
+				{
+					var pop = GetPop(popId, popData);
+					if (pop != null)
+						pops.Add(pop);
+				}
+			}
+
+			return pops;
+		}
+
+		private static Pop GetPop(string popId, IParseTree popData)
+		{
+			//å½“è¡Œæ˜Ÿè¢«è½°ç‚¸æ—¶ï¼Œå¯èƒ½äººå£æ­»äº¡ï¼Œè¡Œæ˜Ÿæ•°æ®é‡Œè¿˜æœ‰pop idï¼Œä½†popæ•°æ®åº“é‡Œå·²ç»æ²¡æœ‰äº†ã€‚
+			var body = GetValue(popData, popId)?.GetChild(1);
+			if (body == null)
+				return null;
+
+			var pop_faction = GetValue(body, "pop_faction")?.GetText();
+
+			return new Pop { Id = popId, Faction = pop_faction };
+		}
 
         private static string GetMatchedScope(string content, string scopeName)
         {
@@ -216,7 +264,7 @@ namespace StellarisInGameLedgerInCSharp
         }
 
         /// <summary>
-        /// Èç¹ûÕÒ²»µ½Ôò·µ»Ønull¡£
+        /// å¦‚æœæ‰¾ä¸åˆ°åˆ™è¿”å›nullã€‚
         /// </summary>
         /// <param name="tree"></param>
         /// <param name="key"></param>
