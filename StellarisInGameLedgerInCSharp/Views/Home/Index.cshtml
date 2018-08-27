@@ -1,40 +1,35 @@
-﻿<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8" />
-    <title>Stellaris Ledger</title>
-    <!--Load the AJAX API-->
-    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.0/lodash.min.js"></script>
-    <script type="text/javascript" src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
-	<script src="content/palette.js"></script>
+﻿<meta charset="utf-8" />
+<title>Stellaris Ledger</title>
+<!--Load the AJAX API-->
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.0/lodash.min.js"></script>
+<script type="text/javascript" src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+<script src="content/palette.js"></script>
 
-    <style type="text/css">
-        thead th img {
-            max-height: 32px;
-            vertical-align: middle;
-        }
+<style type="text/css">
+	thead th img {
+		max-height: 32px;
+		vertical-align: middle;
+	}
 
-        #visibleColumnsForTable label {
-            float: left; /* 不用display:block因为这样会使label占据大量空间，光标点击空白区会意外勾选多选框。 */
-            clear: left;
-        }
+	#visibleColumnsForTable label {
+		float: left; /* 不用display:block因为这样会使label占据大量空间，光标点击空白区会意外勾选多选框。 */
+		clear: left;
+	}
 
-        label {
-            padding-right: 3em;
-        }
-    </style>
-</head>
+	label {
+		padding-right: 3em;
+	}
+</style>
 
-<body>
-    <div id="table_div"></div>
+<div id="table_div"></div>
 
 
-    <fieldset>
-        <legend>Show following columns</legend>
-        <div id="visibleColumnsForTable"></div>
-    </fieldset>
-    <script type="text/javascript">
+<fieldset>
+	<legend>Show following columns</legend>
+	<div id="visibleColumnsForTable"></div>
+</fieldset>
+<script type="text/javascript">
         "use strict";
 
         let googleTable;
@@ -67,8 +62,8 @@
 
         /**
          *
-         * @param {Array} countries
-         * @param {HTMLElement} placeHolder
+         * @@param {Array} countries
+         * @@param {HTMLElement} placeHolder
          */
         function drawTableFromJson(countries)
         {
@@ -167,12 +162,12 @@
 
             googleTable.draw(view, { allowHtml: true, width:"100%" });
         }
-    </script>
+</script>
 
-    <div id="historyPanel">
-        <div id="countryFilterPanel"></div>
-    </div>
-    <script>
+<div id="historyPanel">
+	<div id="countryFilterPanel"></div>
+</div>
+<script>
         let historyData;
         let tags = [];
 
@@ -313,7 +308,7 @@
 
 		/**
 		 * 本方法为每一个属性绘制一张折线图
-		 * @param properties {string[]}
+		 * @@param properties {string[]}
 		 */
 		function updateSinglePropertyCharts(properties)
 		{
@@ -392,7 +387,7 @@
 
 		/**
 		 * 本方法把所有属性绘制在同一张折线图里
-		 * @param properties {string[]}
+		 * @@param properties {string[]}
 		 */
 		function updateCombinedPropertyChart(id, title, properties)
 		{
@@ -501,6 +496,4 @@
 		}
 
 
-	</script>
-</body>
-</html>
+</script>
