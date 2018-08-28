@@ -18,10 +18,10 @@
 	<span class="navbar-brand">Stellaris Ledger</span>
 	<div class="collapse navbar-collapse" id="navbarSupportedContent">
 		<ul class="navbar-nav">
-			<li class="nav-item active">
+			<li class="nav-item @(ViewContext.RouteData.Values["controller"].ToString()=="Home" && ViewContext.RouteData.Values["action"].ToString() == "Index"?"active":null)">
 				<a class="nav-link" asp-controller="Home" asp-action="Index">Statistics</a>
 			</li>
-			<li class="nav-item">
+			<li class="nav-item @(ViewContext.RouteData.Values["controller"].ToString()=="Factions" && ViewContext.RouteData.Values["action"].ToString() == "Index"?"active":null)">
 				<a class="nav-link" asp-controller="Factions" asp-action="Index">Factions</a>
 			</li>
 		</ul>
