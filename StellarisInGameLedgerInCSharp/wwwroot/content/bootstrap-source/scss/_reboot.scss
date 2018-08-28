@@ -394,33 +394,6 @@ textarea {
   resize: vertical;
 }
 
-fieldset {
-  // Browsers set a default `min-width: min-content;` on fieldsets,
-  // unlike e.g. `<div>`s, which have `min-width: 0;` by default.
-  // So we reset that to ensure fieldsets behave more like a standard block element.
-  // See https://github.com/twbs/bootstrap/issues/12359
-  // and https://html.spec.whatwg.org/multipage/#the-fieldset-and-legend-elements
-  min-width: 0;
-  // Reset the default outline behavior of fieldsets so they don't affect page layout.
-  padding: 0;
-  margin: 0;
-  border: 0;
-}
-
-// 1. Correct the text wrapping in Edge and IE.
-// 2. Correct the color inheritance from `fieldset` elements in IE.
-legend {
-  display: block;
-  width: 100%;
-  max-width: 100%; // 1
-  padding: 0;
-  margin-bottom: .5rem;
-  font-size: 1.5rem;
-  line-height: inherit;
-  color: inherit; // 2
-  white-space: normal; // 1
-}
-
 progress {
   vertical-align: baseline; // Add the correct vertical alignment in Chrome, Firefox, and Opera.
 }
