@@ -1,80 +1,77 @@
 ﻿@{ ViewData["Title"] = "Statistics"; }
 
-<meta charset="utf-8" />
-<title>Stellaris Ledger</title>
-<!--Load the AJAX API-->
-<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.0/lodash.min.js"></script>
-<script type="text/javascript" src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
-<script src="content/palette.js"></script>
+@section head
+{
+	<style type="text/css">
+		thead th img {
+			max-height: 32px;
+			vertical-align: middle;
+		}
 
-<style type="text/css">
-	thead th img {
-		max-height: 32px;
-		vertical-align: middle;
-	}
+		#visibleColumnsForTable label {
+			float: left; /* 不用display:block因为这样会使label占据大量空间，光标点击空白区会意外勾选多选框。 */
+			clear: left;
+		}
 
-	#visibleColumnsForTable label {
-		float: left; /* 不用display:block因为这样会使label占据大量空间，光标点击空白区会意外勾选多选框。 */
-		clear: left;
-	}
+		label {
+			padding-right: 3em;
+		}
+	</style>
+}
 
-	label {
-		padding-right: 3em;
-	}
-</style>
+@section Scripts
+{
+	<!--Load the AJAX API-->
+	<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.0/lodash.min.js"></script>
+	<script type="text/javascript" src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+	<script src="content/palette.js"></script>
 
-<div id="table_div"></div>
 
+	<script>
+		"use strict";
 
-<fieldset>
-	<legend>Show following columns</legend>
-	<div id="visibleColumnsForTable"></div>
-</fieldset>
-<script type="text/javascript">
-        "use strict";
-
-        let googleTable;
-        let tableData;
+		let googleTable;
+		let tableData;
 		let columns;
 
 
-        // Load the Visualization API and the corechart package.
-        google.charts.load('current', { 'packages': ['corechart', 'table'] });
+		// Load the Visualization API and the corechart package.
+		google.charts.load('current', { 'packages': ['corechart', 'table'] });
 
 
-        function addCalculatedProperties(country)
-        {
-            Object.defineProperty(country, 'totalResearchIncomeWithPenalty',
-                {
-                    get: function ()
-                    {
-                        return this.physicsResearchIncomeWithPenalty + this.societyResearchIncomeWithPenalty + this.engineeringResearchIncomeWithPenalty;
-                    }
-                });
-        }
+		function addCalculatedProperties(country)
+		{
+			Object.defineProperty(country, 'totalResearchIncomeWithPenalty',
+				{
+					get: function ()
+					{
+						return this.physicsResearchIncomeWithPenalty + this.societyResearchIncomeWithPenalty + this.engineeringResearchIncomeWithPenalty;
+					}
+				});
+		}
 
-        function getDefaultColumnVisibility(columnName)
-        {
-            if (["physicsResearchIncome", "societyResearchIncome", "engineeringResearchIncome"].indexOf(columnName) == -1)
-                return true;
-            else
-                return false;
-        }
+		function getDefaultColumnVisibility(columnName)
+		{
+			if (["physicsResearchIncome", "societyResearchIncome", "engineeringResearchIncome"].indexOf(columnName) == -1)
+				return true;
+			else
+				return false;
+		}
 
-        /**
-         *
-         * @@param {Array} countries
-         * @@param {HTMLElement} placeHolder
-         */
-        function drawTableFromJson(countries)
-        {
+		/**
+		 *
+		 * @@param {Array} countries
+		 * @@param {HTMLElement} placeHolder
+		 */
+		function drawTableFromJson(countries)
+		{
 
-            tableData = new google.visualization.DataTable();
+			tableData = new google.visualization.DataTable();
 			let propertyNames = Object.getOwnPropertyNames(countries[0]);
 
 
-            //propertyNames = propertyNames.filter(p => ["physicsResearchIncome", "societyResearchIncome", "engineeringResearchIncome"].indexOf(p) === -1);
+			//propertyNames = propertyNames.filter(p => ["physicsResearchIncome", "societyResearchIncome", "engineeringResearchIncome"].indexOf(p) === -1);
 
 			propertyNames.forEach(p =>
 			{
@@ -92,36 +89,36 @@
 				return tableData.addColumn({ type: type, label: label });
 			});
 
-            //创建多选框控制列的显隐
-            propertyNames.forEach((p, i) =>
-            {
-                const checkBox = $("<input type='checkbox'>");
-                checkBox.attr("name", i);
-                checkBox.change(function ()
-                {
-                    localStorage.setItem("table-" + $(this).attr("name"), $(this).prop("checked"));
-                    updateTableView();
-                });
+			//创建多选框控制列的显隐
+			propertyNames.forEach((p, i) =>
+			{
+				const checkBox = $("<input type='checkbox'>");
+				checkBox.attr("name", i);
+				checkBox.change(function ()
+				{
+					localStorage.setItem("table-" + $(this).attr("name"), $(this).prop("checked"));
+					updateTableView();
+				});
 
-                let isChecked = localStorage.getItem("table-" + i);
-                if (isChecked == undefined)
-                    isChecked = getDefaultColumnVisibility(p);
-                else
-                    isChecked = isChecked == "true";
-                checkBox.prop("checked", isChecked);
-                const label = $(`<label>${_.startCase(p).replace(/\bWith\b/, "with")}</label>`);
-                label.prepend(checkBox);
-                $("#visibleColumnsForTable").append(label);
-            });
+				let isChecked = localStorage.getItem("table-" + i);
+				if (isChecked == undefined)
+					isChecked = getDefaultColumnVisibility(p);
+				else
+					isChecked = isChecked == "true";
+				checkBox.prop("checked", isChecked);
+				const label = $(`<label>${_.startCase(p).replace(/\bWith\b/, "with")}</label>`);
+				label.prepend(checkBox);
+				$("#visibleColumnsForTable").append(label);
+			});
 
-            let maxLabelWidth = 0;
-            $("#visibleColumnsForTable label").each(function ()
-            {
-                let w = $(this).outerWidth();
-                if (w > maxLabelWidth)
-                    maxLabelWidth = w;
-            });
-            $("#visibleColumnsForTable").css("column-width", `${maxLabelWidth}px`);
+			let maxLabelWidth = 0;
+			$("#visibleColumnsForTable label").each(function ()
+			{
+				let w = $(this).outerWidth();
+				if (w > maxLabelWidth)
+					maxLabelWidth = w;
+			});
+			$("#visibleColumnsForTable").css("column-width", `${maxLabelWidth}px`);
 
 
 			//把json对象转换为数组
@@ -149,32 +146,29 @@
 
 
 
-            updateTableView();
-        }
+			updateTableView();
+		}
 
-        function updateTableView()
-        {
-            const view = new google.visualization.DataView(tableData);
-            var columns = view.getViewColumns();
-            columns = columns.filter(c => $(`#visibleColumnsForTable input[name="${c}"]`).prop("checked"));
-            view.setColumns(columns);
+		function updateTableView()
+		{
+			const view = new google.visualization.DataView(tableData);
+			var columns = view.getViewColumns();
+			columns = columns.filter(c => $(`#visibleColumnsForTable input[name="${c}"]`).prop("checked"));
+			view.setColumns(columns);
 
-            // Instantiate and draw our chart, passing in some options.
-            googleTable = new google.visualization.Table(document.getElementById('table_div'));
+			// Instantiate and draw our chart, passing in some options.
+			googleTable = new google.visualization.Table(document.getElementById('table_div'));
 
-            googleTable.draw(view, { allowHtml: true, width:"100%" });
-        }
-</script>
+			googleTable.draw(view, { allowHtml: true, width: "100%" });
+		}
+	</script>
 
-<div id="historyPanel">
-	<div id="countryFilterPanel"></div>
-</div>
-<script>
-        let historyData;
-        let tags = [];
+	<script>
+		let historyData;
+		let tags = [];
 
-        google.charts.setOnLoadCallback(() =>
-        {
+		google.charts.setOnLoadCallback(() =>
+		{
 			columns = [{ name: "militaryPower", formatter: new google.visualization.NumberFormat({ fractionDigits: 0, groupingSymbol: "" }) },
 			{ name: "technologyCount", header: "Technologies" },
 			{ name: "colonies", header: '<img src="https://stellaris.paradoxwikis.com/images/6/6e/Planet_gaia.png" title="Colonies">', type: "number", getValue: d => d.length },
@@ -197,99 +191,99 @@
 
 
 
-            fetch("/api/RecentSaves?limit=25").then(response => response.json()).then(recentSaves =>
-            {
-                if (recentSaves.length === 0)
-                {
-                    $("body").html("No savegames");
-                    return;
-                }
+			fetch("/api/RecentSaves?limit=25").then(response => response.json()).then(recentSaves =>
+			{
+				if (recentSaves.length === 0)
+				{
+					$("body").html("No savegames");
+					return;
+				}
 
-                //recentSaves.splice(0, 1);
-                const promises = recentSaves.map(path => fetch(`/api/${path.replace("\\", "/")}/Countries`).then(r =>
-                {
-                    const i = path.indexOf("\\") + 1;
-                    //定义一个新的承诺，当r.json()承诺实现时，新的承诺也实现。
-                    return new Promise(function (resolve, reject)
-                    {
-                        r.json().then(json =>
-                        {
-                            json.forEach(addCalculatedProperties);
+				//recentSaves.splice(0, 1);
+				const promises = recentSaves.map(path => fetch(`/api/${path.replace("\\", "/")}/Countries`).then(r =>
+				{
+					const i = path.indexOf("\\") + 1;
+					//定义一个新的承诺，当r.json()承诺实现时，新的承诺也实现。
+					return new Promise(function (resolve, reject)
+					{
+						r.json().then(json =>
+						{
+							json.forEach(addCalculatedProperties);
 
-                            resolve({
-                                date: path.substr(i, path.length - i - ".sav".length),
-                                content: json
-                            });
-                        }).catch(function (ex)
-                        {
-                            $("body").text("Error");
-                            throw ex;
-                        });
-                    });
-                }));
+							resolve({
+								date: path.substr(i, path.length - i - ".sav".length),
+								content: json
+							});
+						}).catch(function (ex)
+						{
+							$("body").text("Error");
+							throw ex;
+						});
+					});
+				}));
 
-                promises[0].then(data =>
-                {
-                    drawTableFromJson(data.content);
-                });
+				promises[0].then(data =>
+				{
+					drawTableFromJson(data.content);
+				});
 
-                Promise.all(promises).then(history =>
-                {
-                    history = history.sort((x, y) => Date.parse(x.date) - Date.parse(y.date));
-                    historyData = history;
-
-
-                    for (let snapshot of history)
-                    {
-                        for (let country of snapshot.content)
-                            tags.push(country.tag);
-                    }
-                    tags = jQuery.uniqueSort(tags);
-                    tags = tags.map(tag =>
-                    {
-                        for (let i = history.length - 1; i >= 0; i--)
-                        {
-                            for (let country of history[i].content)
-                            {
-                                if (country.tag === tag)
-                                    return { tag: tag, name: country.name };
-                            }
-                        }
-                        throw new Error();
-                    });
-
-                    const filterPanel = $("#countryFilterPanel");
-                    for (let tag of tags)
-                    {
-                        const label= $(`<label>${tag.name}</label>`);
-                        const checkBox = $(`<input type='checkbox' name='${tag.name}'>`);
-
-                        let v = localStorage.getItem("history-" + tag.name);
-                        if (v == undefined)
-                            v = true;
-                        else
-                            v = v == "true";
-                        checkBox.prop("checked", v);
-
-                        checkBox.change(function ()
-                        {
-                            localStorage.setItem("history-" + $(this).attr("name"), $(this).prop("checked"));
-                            updateHistoryCharts();
-                        });
-
-                        label.prepend(checkBox);
-                        filterPanel.append(label);
-                    }
-
-                    updateHistoryCharts();
-                });
-            });
-        });
+				Promise.all(promises).then(history =>
+				{
+					history = history.sort((x, y) => Date.parse(x.date) - Date.parse(y.date));
+					historyData = history;
 
 
-        function updateHistoryCharts()
-        {
-            let propertyNames = Object.getOwnPropertyNames(historyData[0].content[0]);
+					for (let snapshot of history)
+					{
+						for (let country of snapshot.content)
+							tags.push(country.tag);
+					}
+					tags = jQuery.uniqueSort(tags);
+					tags = tags.map(tag =>
+					{
+						for (let i = history.length - 1; i >= 0; i--)
+						{
+							for (let country of history[i].content)
+							{
+								if (country.tag === tag)
+									return { tag: tag, name: country.name };
+							}
+						}
+						throw new Error();
+					});
+
+					const filterPanel = $("#countryFilterPanel");
+					for (let tag of tags)
+					{
+						const label = $(`<label>${tag.name}</label>`);
+						const checkBox = $(`<input type='checkbox' name='${tag.name}'>`);
+
+						let v = localStorage.getItem("history-" + tag.name);
+						if (v == undefined)
+							v = true;
+						else
+							v = v == "true";
+						checkBox.prop("checked", v);
+
+						checkBox.change(function ()
+						{
+							localStorage.setItem("history-" + $(this).attr("name"), $(this).prop("checked"));
+							updateHistoryCharts();
+						});
+
+						label.prepend(checkBox);
+						filterPanel.append(label);
+					}
+
+					updateHistoryCharts();
+				});
+			});
+		});
+
+
+		function updateHistoryCharts()
+		{
+			let propertyNames = Object.getOwnPropertyNames(historyData[0].content[0]);
 
 			let dataPropertyNames = propertyNames.filter(p => ["tag", "name"].indexOf(p) === -1);
 
@@ -317,9 +311,9 @@
 
 			for (let property of properties)
 			{
-                const lineChartData = new google.visualization.DataTable();
-                lineChartData.addColumn({ type: "date", label: "date" });
-                for (let tag of tags)
+				const lineChartData = new google.visualization.DataTable();
+				lineChartData.addColumn({ type: "date", label: "date" });
+				for (let tag of tags)
 				{
 					let c = columns.find(v => v.name === property);
 					let type = "number";
@@ -328,52 +322,52 @@
 					lineChartData.addColumn({ type: type, label: tag.name });
 				}
 
-                const rows = historyData.map(item =>
-                {
-                    const row = [new Date(Date.parse(item.date))];
-                    for (let tag of tags)
-                    {
-                        const country = item.content.find(c => c.tag === tag.tag);
-                        if (country)
-                        {
+				const rows = historyData.map(item =>
+				{
+					const row = [new Date(Date.parse(item.date))];
+					for (let tag of tags)
+					{
+						const country = item.content.find(c => c.tag === tag.tag);
+						if (country)
+						{
 							let c = columns.find(v => v.name === property);
 							if (c && c.getValue)
 								row.push(c.getValue(country[property]));
 							else
 								row.push(country[property]);
-                        } else
-                            row.push(undefined);
-                    }
-                    return row;
-                });
+						} else
+							row.push(undefined);
+					}
+					return row;
+				});
 
-                lineChartData.addRows(rows);
+				lineChartData.addRows(rows);
 
 
-                var dateFormatter = new google.visualization.DateFormat({ pattern: "yyyy.MM.dd" });
-                dateFormatter.format(lineChartData, 0);
+				var dateFormatter = new google.visualization.DateFormat({ pattern: "yyyy.MM.dd" });
+				dateFormatter.format(lineChartData, 0);
 
 				var c = columns.find(c => c.name === property);
 				if (c && c.formatter)
 				{
 					for (var i = 0; i < tags.length; i++)
-						c.formatter.format(lineChartData, 1+i);
+						c.formatter.format(lineChartData, 1 + i);
 				}
 
-                var options = {
-                    title: _.startCase(property).replace(/\bWith\b/, "with"),
-                    legend: { position: 'right' },
-                    width: document.getElementsByTagName("body")[0].clientWidth - 50,
-                    height: Math.max(400, 100 * Math.ceil(tags.length / 2.0)),
+				var options = {
+					title: _.startCase(property).replace(/\bWith\b/, "with"),
+					legend: { position: 'right' },
+					width: document.getElementsByTagName("body")[0].clientWidth - 50,
+					height: Math.max(400, 100 * Math.ceil(tags.length / 2.0)),
 					pointSize: 5
-                };
+				};
 
-                let chartDiv = $(`#${property}Chart`);
-                if (chartDiv.length === 0)
-                {
-                    chartDiv = $(`<div id="${property}Chart"></div>`);
-                    $("#historyPanel").append(chartDiv);
-                }
+				let chartDiv = $(`#${property}Chart`);
+				if (chartDiv.length === 0)
+				{
+					chartDiv = $(`<div id="${property}Chart"></div>`);
+					$("#historyPanel").append(chartDiv);
+				}
 
 				const view = new google.visualization.DataView(lineChartData);
 				var viewColumns = view.getViewColumns();
@@ -381,11 +375,11 @@
 				view.setColumns(viewColumns);
 
 
-                const googleLineChart = new google.visualization.LineChart(chartDiv[0]);
+				const googleLineChart = new google.visualization.LineChart(chartDiv[0]);
 
-                googleLineChart.draw(view, options);
-            }
-        }
+				googleLineChart.draw(view, options);
+			}
+		}
 
 		/**
 		 * 本方法把所有属性绘制在同一张折线图里
@@ -457,7 +451,7 @@
 
 			for (let j = 0; j < properties.length; j++)
 			{
-				title +=", "+ _.startCase(properties[j]).replace(/\bWith\b/, "with") + "的标记为" + pointShapePalette[j];
+				title += ", " + _.startCase(properties[j]).replace(/\bWith\b/, "with") + "的标记为" + pointShapePalette[j];
 			}
 
 			var options = {
@@ -484,7 +478,7 @@
 					return true;
 
 				let label = view.getColumnLabel(columnIndex);
-				return $("#countryFilterPanel input[name]").is(function()
+				return $("#countryFilterPanel input[name]").is(function ()
 				{
 					return $(this).prop("checked") && _.startsWith(label, $(this).attr("name"));
 				});
@@ -498,4 +492,17 @@
 		}
 
 
-</script>
+	</script>
+}
+
+<div id="table_div"></div>
+
+
+<fieldset>
+	<legend>Show following columns</legend>
+	<div id="visibleColumnsForTable"></div>
+</fieldset>
+
+<div id="historyPanel">
+	<div id="countryFilterPanel"></div>
+</div>

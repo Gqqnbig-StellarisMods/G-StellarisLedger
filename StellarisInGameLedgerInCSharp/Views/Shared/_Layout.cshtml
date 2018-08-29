@@ -5,6 +5,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 	<title>@ViewData["Title"] - Stellaris Ledger</title>
 	<link href="~/content/bootstrap/css/bootstrap.css" rel="stylesheet" />
+	@RenderSection("head", false)
 </head>
 <body>
 <nav class="navbar navbar-expand navbar-dark bg-dark">
@@ -20,9 +21,6 @@
 		</ul>
 	</div>
 </nav>
-
-	<partial name="_CookieConsentPartial" />
-
 	<div class="container-fluid body-content">
 		@RenderBody()
 		<hr />
