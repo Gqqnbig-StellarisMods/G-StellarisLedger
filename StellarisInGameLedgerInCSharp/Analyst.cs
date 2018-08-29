@@ -13,11 +13,22 @@ namespace StellarisInGameLedgerInCSharp
 		private readonly IParseTree planetsData;
 		private readonly IParseTree popData;
 		private readonly IParseTree pop_factionsData;
+		public string PlayerTag { get; }
 
 		public Analyst(string content)
 		{
 			string lineEndingSymbol = content.DetectLineEnding();
-			var p = content.IndexOf(lineEndingSymbol + "pop={" + lineEndingSymbol);
+			var p = content.IndexOf(lineEndingSymbol + "player={" + lineEndingSymbol);
+			p += lineEndingSymbol.Length;
+			content = content.Substring(p);
+			ParadoxParser.ParadoxContext playerData = (ParadoxParser.ParadoxContext)GetScopeBody(content);
+			var playerCountryTag = playerData.GetChild(0).GetChild(0).GetChild(1);
+			PlayerTag = GetValue(playerCountryTag, "country").GetText();
+			//+3是因为GetScopeBody返回children，不含右大括号。
+			content = content.Substring(playerData.Stop.StopIndex + 3);
+
+
+			p = content.IndexOf(lineEndingSymbol + "pop={" + lineEndingSymbol);
 			p += lineEndingSymbol.Length;
 			content = content.Substring(p);
 			ParadoxParser.ParadoxContext popData = (ParadoxParser.ParadoxContext)GetScopeBody(content);
@@ -69,23 +80,50 @@ namespace StellarisInGameLedgerInCSharp
 				if (new[] { "fallen_empire", "default" }.Contains(GetValue(rightValue.GetChild(1), "type").GetChild(0).GetText()
 					.Trim('"')) == false)
 					continue;
+				PopulateCountry(country, (ParadoxParser.ParadoxContext)rightValue.GetChild(1));
 
-				country.Name = GetValue(rightValue.GetChild(1), "name").GetChild(0).GetText().Trim('"');
+				// ReSharper restore InconsistentNaming
+				countries.Add(country);
+			}
 
-				country.TechnologyCount = GetTechnologyCount(rightValue);
+			//sw.Stop();
+			//Console.WriteLine($"生成数据用时{sw.ElapsedMilliseconds}ms");
 
-				country.MilitaryPower = Convert.ToDouble(GetValue(rightValue.GetChild(1), "military_power").GetChild(0).GetText());
+			return countries;
+		}
+
+		public Country GetCountry(string tag)
+		{
+			var country = new Country();
+			country.Tag = tag;
+
+			var countryData = GetValue(countriesData, tag);
+			var scope = countryData as ParadoxParser.ScopeContext;
+			if (scope == null)
+				throw new ArgumentException($"{tag} is not a playable country.");
+
+			PopulateCountry(country, scope.paradox());
+			return country;
+		}
+
+		private void PopulateCountry(Country country, ParadoxParser.ParadoxContext kvPairs)
+		{
+			country.Name = GetValue(kvPairs, "name").GetChild(0).GetText().Trim('"');
+
+			country.TechnologyCount = GetTechnologyCount(kvPairs);
+
+			country.MilitaryPower = Convert.ToDouble(GetValue(kvPairs, "military_power").GetChild(0).GetText());
 
 
-				country.CivilianStations = GetValue(rightValue.GetChild(1), "controlled_planets").ChildCount - 2;
+			country.CivilianStations = GetValue(kvPairs, "controlled_planets").ChildCount - 2;
 
-				var owned_planets = GetValue(rightValue.GetChild(1), "owned_planets");
-				country.Colonies = GetColonies(owned_planets);
+			var owned_planets = GetValue(kvPairs, "owned_planets");
+			country.Colonies = GetColonies(owned_planets);
 
 				var planetList = owned_planets.GetChild(1);
 				//country.ColonyCount = owned_planets.ChildCount - 2;
 
-				var modules = GetValue(rightValue.GetChild(1), "modules").GetChild(1);
+			var modules = GetValue(kvPairs, "modules").GetChild(1);
 				var standard_economy_module = GetValue(modules, "standard_economy_module").GetChild(1);
 				var resources = GetValue(standard_economy_module, "resources").GetChild(1);
 				var energy = GetValue(resources, "energy");
@@ -143,9 +181,9 @@ namespace StellarisInGameLedgerInCSharp
 					var unityIncome = GetValue(last_month, "unity");
 					country.UnityIncome = Convert.ToDouble(unityIncome.GetChild(1).GetText());
 
-					var traditions = GetValue(rightValue.GetChild(1), "traditions");
-					for (int j = 1; j < traditions?.ChildCount - 1; j++)
-						country.Traditions.Add(traditions.GetChild(j).GetText().Trim('"'));
+				var traditions = GetValue(kvPairs, "traditions");
+				for (int j = 1; j < traditions?.ChildCount - 1; j++)
+					country.Traditions.Add(traditions.GetChild(j).GetText().Trim('"'));
 
 					var physics_research = GetValue(last_month, "physics_research");
 					country.PhysicsResearchIncome = Convert.ToDouble(physics_research.GetChild(1).GetText());
@@ -156,15 +194,6 @@ namespace StellarisInGameLedgerInCSharp
 					var engineering_research = GetValue(last_month, "engineering_research");
 					country.EngineeringResearchIncome = Convert.ToDouble(engineering_research.GetChild(1).GetText());
 				}
-
-				// ReSharper restore InconsistentNaming
-				countries.Add(country);
-			}
-
-			//sw.Stop();
-			//Console.WriteLine($"生成数据用时{sw.ElapsedMilliseconds}ms");
-
-			return countries;
 		}
 
 		private List<Planet> GetColonies(IParseTree owned_planets)
@@ -187,9 +216,9 @@ namespace StellarisInGameLedgerInCSharp
 			return new Planet() { Id = planetId, Pops = GetPlanetPops(tileData, popData) };
 		}
 
-		private static int GetTechnologyCount(IParseTree rightValue)
+		private static int GetTechnologyCount(ParadoxParser.ParadoxContext kvPairs)
 		{
-			var tech_status = GetValue(rightValue.GetChild(1), "tech_status").GetChild(1);
+			var tech_status = GetValue(kvPairs, "tech_status").GetChild(1);
 			int levels = 0;
 			for (int j = 0; j < tech_status.ChildCount; j++)
 			{

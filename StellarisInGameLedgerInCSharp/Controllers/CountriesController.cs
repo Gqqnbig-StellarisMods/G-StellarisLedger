@@ -61,6 +61,23 @@ namespace StellarisInGameLedgerInCSharp.Controllers
             return analyst.GetCountries();
         }
 
+	    [ResponseCache(Duration = 3600 * 24 * 30)]
+	    [HttpGet(@"{gameId:regex(^[[\d_-]]+$)}/{saveName:regex(^[[\d.]]+\.sav$)}/Countries/Player")]
+	    public Country GetPlayerCountry(string gameId, string saveName)
+	    {
+		    var fileName = Path.Combine(saveGamesPath, gameId, saveName);
+		    if (System.IO.File.Exists(fileName) == false)
+		    {
+			    Response.StatusCode = 404;
+			    return null;
+		    }
+
+		    var content = GetGameSaveContent(fileName);
+
+		    var analyst = new Analyst(content);
+		    return analyst.GetCountry(analyst.PlayerTag);
+	    }
+
         /// <summary>
         /// 获取最近的limit个游戏存档
         /// </summary>
