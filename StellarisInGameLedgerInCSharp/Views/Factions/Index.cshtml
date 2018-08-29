@@ -1,6 +1,53 @@
 ﻿
 @{
-    ViewData["Title"] = "Factions";
+	ViewData["Title"] = "Factions";
+}
+
+@section Scripts
+	{
+	<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.0/lodash.min.js"></script>
+	<script type="text/javascript" src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+
+	<script>
+		fetch("/api/RecentSaves?limit=1").then(response => response.json()).then(recentSaves =>
+		{
+			if (recentSaves.length === 0)
+			{
+				$("body").html("No savegames");
+				return;
+			}
+
+			path = recentSaves[0];
+			fetch(`/api/${path.replace("\\", "/")}/Countries/Player`).then(r =>
+			{
+				const i = path.indexOf("\\") + 1;
+				//定义一个新的承诺，当r.json()承诺实现时，新的承诺也实现。
+				return new Promise(function (resolve, reject)
+				{
+					r.json().then(json =>
+					{
+						resolve({
+							date: path.substr(i, path.length - i - ".sav".length),
+							content: json
+						});
+					}).catch(function (ex)
+					{
+						$("body").text("Error");
+						throw ex;
+					});
+				});
+			}).then(data =>
+			{
+				drawFactionsTable(data.content.colonies);
+			});
+		});
+
+		function drawFactionsTable(colonies)
+		{
+
+		}
+	</script>
 }
 
 <h2>Factions</h2>
