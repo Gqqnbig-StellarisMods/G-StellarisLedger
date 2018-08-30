@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Antlr4.Runtime;
 using Antlr4.Runtime.Tree;
+using JetBrains.Annotations; 
 
 namespace StellarisInGameLedgerInCSharp
 {
@@ -108,7 +109,7 @@ namespace StellarisInGameLedgerInCSharp
 
 		private void PopulateCountry(Country country, ParadoxParser.ParadoxContext kvPairs)
 		{
-			country.Name = GetValue(kvPairs, "name").GetChild(0).GetText().Trim('"');
+			country.Name = GetStringValue(kvPairs, "name");
 
 			country.TechnologyCount = GetTechnologyCount(kvPairs);
 
@@ -119,9 +120,6 @@ namespace StellarisInGameLedgerInCSharp
 
 			var owned_planets = GetValue(kvPairs, "owned_planets");
 			country.Colonies = GetColonies(owned_planets);
-
-				var planetList = owned_planets.GetChild(1);
-				//country.ColonyCount = owned_planets.ChildCount - 2;
 
 			var modules = GetValue(kvPairs, "modules").GetChild(1);
 				var standard_economy_module = GetValue(modules, "standard_economy_module").GetChild(1);
@@ -259,7 +257,7 @@ namespace StellarisInGameLedgerInCSharp
 			if (factionId != null)
 			{
 				var faction = GetValue(pop_factionsData, factionId).GetChild(1);
-				factionName = GetValue(faction, "name").GetText().Trim('"');
+				factionName = GetStringValue(faction, "name");
 			}
 
 			return new Pop { Id = popId, Faction = factionName };
@@ -325,6 +323,7 @@ namespace StellarisInGameLedgerInCSharp
 		/// <param name="tree"></param>
 		/// <param name="key"></param>
 		/// <returns></returns>
+		[CanBeNull]
 		public static IParseTree GetValue(IParseTree tree, string key)
 		{
 			for (int i = 0; i < tree.ChildCount; i++)
@@ -333,6 +332,17 @@ namespace StellarisInGameLedgerInCSharp
 					return tree.GetChild(i).GetChild(2);
 			}
 			return null;
+		}
+
+		/// <summary>
+		/// 如果找不到则返回null。
+		/// </summary>
+		/// <param name="tree"></param>
+		/// <param name="key"></param>
+		/// <returns></returns>
+		public static string GetStringValue(IParseTree tree, string key)
+		{
+			return GetValue(tree, key)?.GetText().Trim('"');
 		}
 	}
 }
