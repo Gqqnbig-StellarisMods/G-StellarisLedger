@@ -1,15 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using Microsoft.AspNetCore.Mvc;
-using System.IO.Compression;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using Microsoft.AspNetCore.Mvc.Formatters;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.IO.Compression;
+using System.Linq;
+using System.Net.Http;
 
 namespace StellarisInGameLedgerInCSharp.Controllers
 {
@@ -145,15 +143,15 @@ namespace StellarisInGameLedgerInCSharp.Controllers
         }
 
 
-	    class SerializePopContractResolver : DefaultContractResolver
-	    {
+	    class SerializePopContractResolver : CamelCasePropertyNamesContractResolver
+		{
 		    public static readonly SerializePopContractResolver Instance = new SerializePopContractResolver();
 
 		    protected override JsonProperty CreateProperty(System.Reflection.MemberInfo member, Newtonsoft.Json.MemberSerialization memberSerialization)
 		    {
 			    JsonProperty property = base.CreateProperty(member, memberSerialization);
 
-			    if (property.DeclaringType == typeof(Planet) && property.PropertyName == nameof(Planet.Pops))
+			    if (property.DeclaringType == typeof(Planet) && property.PropertyName.Equals(nameof(Planet.Pops),StringComparison.OrdinalIgnoreCase))
 			    {
 				    property.PropertyType = typeof(string[]);
 				    property.ItemConverter = new PopConverter();
@@ -165,12 +163,6 @@ namespace StellarisInGameLedgerInCSharp.Controllers
 
 		    class PopConverter : Newtonsoft.Json.JsonConverter<Pop>
 		    {
-			    //public PopConverter()
-			    //{
-				    
-			    //}
-
-
 			    public override void WriteJson(JsonWriter writer, Pop value, JsonSerializer serializer)
 			    {
 				    writer.WriteValue(value.Faction);
