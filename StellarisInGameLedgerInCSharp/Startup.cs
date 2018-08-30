@@ -14,8 +14,9 @@ namespace StellarisInGameLedgerInCSharp
 
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
-        public void ConfigureServices(IServiceCollection services)
+		//被Program.BuildWebHost隐式调用。Use this method to add services to the container.
+	    // ReSharper disable once UnusedMember.Global
+	    public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc()
 					.AddWebApiConventions()
@@ -23,8 +24,9 @@ namespace StellarisInGameLedgerInCSharp
 			services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+	    //被Program.BuildWebHost隐式调用。Use this method to configure the HTTP request pipeline.
+	    // ReSharper disable once UnusedMember.Global
+		public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
             if (env.IsDevelopment())
             {
