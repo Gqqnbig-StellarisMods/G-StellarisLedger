@@ -17,7 +17,9 @@ namespace StellarisInGameLedgerInCSharp
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc().AddJsonOptions(options=> options.SerializerSettings.Formatting=Newtonsoft.Json.Formatting.Indented);
+            services.AddMvc()
+					.AddWebApiConventions()
+					.AddJsonOptions(options=> options.SerializerSettings.Formatting=Newtonsoft.Json.Formatting.Indented);
 			services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
         }
 

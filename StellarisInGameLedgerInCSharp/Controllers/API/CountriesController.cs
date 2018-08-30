@@ -5,6 +5,11 @@ using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using System.IO.Compression;
 using Microsoft.Extensions.Options;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using Microsoft.AspNetCore.Mvc.Formatters;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
 namespace StellarisInGameLedgerInCSharp.Controllers
 {
@@ -46,7 +51,7 @@ namespace StellarisInGameLedgerInCSharp.Controllers
 
         [ResponseCache(Duration = 3600 * 24 * 30)]
         [HttpGet(@"{gameId:regex(^[[\d_-]]+$)}/{saveName:regex(^[[\d.]]+\.sav$)}/Countries")]
-        public IList<Country> GetCountries(string gameId, string saveName)
+        public HttpResponseMessage GetCountries(string gameId, string saveName)
         {
             var fileName = Path.Combine(saveGamesPath, gameId, saveName);
             if (System.IO.File.Exists(fileName) == false)
@@ -58,14 +63,19 @@ namespace StellarisInGameLedgerInCSharp.Controllers
             var content = GetGameSaveContent(fileName);
 
 	        var analyst = new Analyst(content);
-            return analyst.GetCountries();
-        }
+            var countries= analyst.GetCountries();
+	        string json = JsonConvert.SerializeObject(countries, Formatting.Indented, new JsonSerializerSettings { ContractResolver = new SerializePopContractResolver() });
+
+	        var response = new HttpResponseMessage(System.Net.HttpStatusCode.OK);
+	        response.Content = new StringContent(json);
+	        return response;
+		}
 
 	    [ResponseCache(Duration = 3600 * 24 * 30)]
 	    [HttpGet(@"{gameId:regex(^[[\d_-]]+$)}/{saveName:regex(^[[\d.]]+\.sav$)}/Countries/Player")]
-	    public Country GetPlayerCountry(string gameId, string saveName)
+	    public HttpResponseMessage GetPlayerCountry(string gameId, string saveName)
 	    {
-		    var fileName = Path.Combine(saveGamesPath, gameId, saveName);
+			var fileName = Path.Combine(saveGamesPath, gameId, saveName);
 		    if (System.IO.File.Exists(fileName) == false)
 		    {
 			    Response.StatusCode = 404;
@@ -73,10 +83,16 @@ namespace StellarisInGameLedgerInCSharp.Controllers
 		    }
 
 		    var content = GetGameSaveContent(fileName);
+		    
+			var analyst = new Analyst(content);
+		    var country= analyst.GetCountry(analyst.PlayerTag);
 
-		    var analyst = new Analyst(content);
-		    return analyst.GetCountry(analyst.PlayerTag);
-	    }
+		    string json = JsonConvert.SerializeObject(country, Formatting.Indented, new JsonSerializerSettings{ContractResolver=new SerializePopContractResolver()});
+
+		    var response = new HttpResponseMessage(System.Net.HttpStatusCode.OK);
+		    response.Content = new StringContent(json);
+		    return response;
+		}
 
         /// <summary>
         /// 获取最近的limit个游戏存档
@@ -127,5 +143,46 @@ namespace StellarisInGameLedgerInCSharp.Controllers
             else
                 return result.Take(limit.Value);
         }
-    }
+
+
+	    class SerializePopContractResolver : DefaultContractResolver
+	    {
+		    public static readonly SerializePopContractResolver Instance = new SerializePopContractResolver();
+
+		    protected override JsonProperty CreateProperty(System.Reflection.MemberInfo member, Newtonsoft.Json.MemberSerialization memberSerialization)
+		    {
+			    JsonProperty property = base.CreateProperty(member, memberSerialization);
+
+			    if (property.DeclaringType == typeof(Planet) && property.PropertyName == nameof(Planet.Pops))
+			    {
+				    property.PropertyType = typeof(string[]);
+				    property.ItemConverter = new PopConverter();
+			    }
+
+			    return property;
+		    }
+
+
+		    class PopConverter : Newtonsoft.Json.JsonConverter<Pop>
+		    {
+			    //public PopConverter()
+			    //{
+				    
+			    //}
+
+
+			    public override void WriteJson(JsonWriter writer, Pop value, JsonSerializer serializer)
+			    {
+				    writer.WriteValue(value.Faction);
+			    }
+
+			    public override Pop ReadJson(JsonReader reader, Type objectType, Pop existingValue, bool hasExistingValue, JsonSerializer serializer)
+			    {
+				    throw new NotImplementedException();
+			    }
+		    }
+
+		}
+	}
+
 }
