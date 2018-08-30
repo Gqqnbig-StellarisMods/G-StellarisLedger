@@ -22,17 +22,6 @@ namespace StellarisInGameLedgerInCSharp.Controllers.Api
 			saveGamesPath =Path.GetFullPath(appSettings.Value.SaveGamesPath);
 		}
 
-
-        //// GET api/values
-        //[HttpGet("Countries")]
-        //public IList<Country> Get()
-        //{
-        //    var mostRecentSave = GetMostRecentSaves().First();
-        //    var content = GetGameSaveContent(Path.Combine(saveGamesPath, mostRecentSave));
-
-        //    return Analysis.GetCountries(content);
-        //}
-
         private static string GetGameSaveContent(string saveGamePath)
         {
             var zipArchive = ZipFile.Open(saveGamePath, ZipArchiveMode.Read);
