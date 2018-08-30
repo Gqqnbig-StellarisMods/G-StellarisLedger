@@ -55,6 +55,8 @@ namespace StellarisInGameLedgerInCSharp
 	public class Planet
 	{
 		public string Id { get; set; }
+
+		public string Name { get; set; }
 		public List<Pop> Pops { get; set; }
 	}
 

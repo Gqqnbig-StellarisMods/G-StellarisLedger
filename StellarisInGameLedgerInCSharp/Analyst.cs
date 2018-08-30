@@ -211,7 +211,8 @@ namespace StellarisInGameLedgerInCSharp
 		{
 			var planetData = GetValue(planetsData, planetId).GetChild(1);
 			var tileData = GetValue(planetData, "tiles").GetChild(1);
-			return new Planet() { Id = planetId, Pops = GetPlanetPops(tileData, popData) };
+			var name = GetStringValue(planetData, "name");
+			return new Planet() { Id = planetId, Name = name, Pops = GetPlanetPops(tileData, popData) };
 		}
 
 		private static int GetTechnologyCount(ParadoxParser.ParadoxContext kvPairs)
