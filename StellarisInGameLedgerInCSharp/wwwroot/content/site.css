@@ -1,0 +1,16 @@
+﻿.loading-prompt:empty::before {
+    content: "";
+    display: block;
+    width: 6em;
+    height: 6em;
+    background-image: url('/images/spinner-1s-200px.gif');
+    background-size: contain;
+    background-repeat: no-repeat;
+    margin: 0 auto;
+}
+
+.loading-prompt:empty::after {
+    content: "Loading... It may take 30 seconds.";
+    display: block;
+    text-align: center;
+}
