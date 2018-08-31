@@ -10,7 +10,7 @@
 }
 
 .loading-prompt:empty::after {
-    content: "Loading... It may take 30 seconds.";
+    content: "Loading... It may take " attr(data-time) " seconds.";
     display: block;
     text-align: center;
 }
