@@ -1,0 +1,21 @@
+﻿
+
+<nav id="storageConsent" class="navbar navbar-default navbar-fixed-top bg-info" role="alert" style="display:none">
+	<div class="navbar-text text-white">
+		<p>This application stores permanent data into browser's local storage for tracking which checkboxes are selected, and restores the selection when you visit this application the next time.</p>
+		<p>By clicking the OK button, you are aware that you can manully delete the stored data to free up your disk.</p>
+		<button type="button" class="btn" onclick="javascript:acknowledgeStorage()" >OK</button>
+	</div>
+</nav>
+<script>
+	if (localStorage.getItem("useStorage") !== null)
+		document.getElementById("storageConsent").remove();
+	else
+		document.getElementById("storageConsent").style.display = null;
+
+	function acknowledgeStorage()
+	{
+		localStorage.setItem("useStorage", true);
+		document.getElementById("storageConsent").remove();
+	}
+</script>

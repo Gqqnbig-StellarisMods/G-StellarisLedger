@@ -8,6 +8,8 @@
 	@RenderSection("head", false)
 </head>
 <body>
+	@await Html.PartialAsync("_UseStorageNotification")
+
 <nav class="navbar navbar-expand navbar-dark bg-dark">
 	<span class="navbar-brand">Stellaris Ledger</span>
 	<div class="collapse navbar-collapse" id="navbarSupportedContent">
