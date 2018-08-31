@@ -11,6 +11,8 @@
 
 	<script>
 		google.charts.load('current', { 'packages': ['corechart', 'table'] });
+		let factions = [];
+		let dataTable;
 
 		google.charts.setOnLoadCallback(() =>
 		{
@@ -43,53 +45,115 @@
 					});
 				}).then(data =>
 				{
-					drawFactionsTable(data.content.colonies);
-				});
-			});
-
-			function drawFactionsTable(colonies)
-			{
-				let data = new google.visualization.DataTable();
-				data.addColumn('string', 'Planet');
-				let factions = [];
-				for (let colony of colonies)
-				{
-					let pops = colony.pops;
-					pops.forEach(faction =>
+					let colonies = data.content.colonies;
+					for (let colony of colonies)
 					{
-						if (factions.indexOf(faction) === -1)
+						let pops = colony.pops;
+						pops.forEach(faction =>
 						{
-							factions.push(faction);
-							data.addColumn('number', faction);
-						}
-					});
-				}
-
-				for (let colony of colonies)
-				{
-					let groups = _.groupBy(colony.pops);
-					let row = [];
-					for (let faction in groups)
-					{
-						let p = factions.indexOf(faction);
-						row[p] = groups[faction].length;
+							if (factions.indexOf(faction) === -1)
+							{
+								factions.push(faction);
+							}
+						});
 					}
 
-					if (row.length < factions.length)
-						row[factions.length - 1] = null;
+					dataTable = new google.visualization.DataTable();
+					dataTable.addColumn('string', 'Planet');
+					for (let i = 0; i < factions.length; i++)
+					{
+						dataTable.addColumn('number', factions[i]);
+					}
 
-					row.unshift(colony.name);
-					data.addRow(row);
-				}
+					for (let colony of colonies)
+					{
+						let groups = _.groupBy(colony.pops);
+						let row = [];
+						for (let faction in groups)
+						{
+							let p = factions.indexOf(faction);
+							row[p] = groups[faction].length;
+						}
 
-				var table = new google.visualization.Table(document.getElementById('table_div'));
+						if (row.length < factions.length)
+							row[factions.length - 1] = null;
 
-				table.draw(data);
-			}
+						row.unshift(colony.name);
+						dataTable.addRow(row);
+					}
+
+					showFactionFilters(factions);
+
+					refreshFactionsView();
+				});
+			});
 		});
+
+		function showFactionFilters(factions)
+		{
+			$("#visibleFactions").empty();
+
+			for (let faction of factions)
+			{
+				//考虑使用 https://github.com/treycordova/nativejsx
+				let checkBox = $(`<input type='checkbox' name='${faction}'>`);
+				checkBox.change(function ()
+				{
+					sessionStorage.setItem("faction-" + faction, $(this).prop("checked"));
+					refreshFactionsView();
+				});
+				let v = sessionStorage.getItem("faction-" + faction);
+				if (v === null)
+					v = true;
+				else
+					v = v === "true";
+				checkBox.prop("checked", v);
+
+				let label = $(`<label>${faction}</label>`);
+				label.prepend(checkBox);
+				$("#visibleFactions").append(label);
+			}
+		}
+
+		function refreshFactionsView()
+		{
+			let view = new google.visualization.DataView(dataTable);
+			let visibleColumns = [0];
+
+			for (let i = 0; i < factions.length; i++)
+			{
+				if ($(`#visibleFactions input[name="${factions[i]}"]`).prop("checked"))
+					visibleColumns.push(i+1);
+			}
+
+			visibleColumns.push({
+				calc: (dataTable, rowNum) =>
+				{
+					let sum = 0;
+					for (let i = 0; i < factions.length; i++)
+					{
+						if ($(`#visibleFactions input[name="${factions[i]}"]`).prop("checked"))
+							sum += dataTable.getValue(rowNum, i + 1);
+					}
+					return sum;
+				},
+				type: 'number',
+				label: 'Total'
+			});
+
+			view.setColumns(visibleColumns);
+
+			var table = new google.visualization.Table(document.getElementById('table_div'));
+
+			table.draw(view);
+		}
 	</script>
 }
 
 <h2>Factions</h2>
+<fieldset>
+	<legend>Show following factions</legend>
+	<div id="visibleFactions"></div>
+</fieldset>
 
 <div id="table_div"></div>
