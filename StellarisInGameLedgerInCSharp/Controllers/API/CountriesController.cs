@@ -15,11 +15,14 @@ namespace StellarisInGameLedgerInCSharp.Controllers.Api
     [Route("api/")]
     public class CountriesController : Controller
     {
-		private string saveGamesPath;
+		private readonly string saveGamesPath;
+		private readonly JsonSerializerSettings serializerSettings;
 
-		public CountriesController(IOptions<AppSettings> appSettings)
+
+		public CountriesController(IOptions<AppSettings> appSettings, IOptions<MvcJsonOptions> jsonOptions)
 		{
-			saveGamesPath =Path.GetFullPath(appSettings.Value.SaveGamesPath);
+			saveGamesPath = Path.GetFullPath(appSettings.Value.SaveGamesPath);
+			serializerSettings = jsonOptions.Value.SerializerSettings;
 		}
 
         private static string GetGameSaveContent(string saveGamePath)
@@ -51,7 +54,8 @@ namespace StellarisInGameLedgerInCSharp.Controllers.Api
 
 	        var analyst = new Analyst(content);
             var countries= analyst.GetCountries();
-	        string json = JsonConvert.SerializeObject(countries, Formatting.Indented, new JsonSerializerSettings { ContractResolver = new SerializePopContractResolver() });
+			string json = JsonConvert.SerializeObject(countries, new JsonSerializerSettings { ContractResolver = new SerializePopContractResolver(),
+																							  Formatting = serializerSettings.Formatting });
 
 	        var response = new HttpResponseMessage(System.Net.HttpStatusCode.OK);
 	        response.Content = new StringContent(json);

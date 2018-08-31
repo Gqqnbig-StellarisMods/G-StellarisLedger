@@ -20,7 +20,14 @@ namespace StellarisInGameLedgerInCSharp
         {
             services.AddMvc()
 					.AddWebApiConventions()
-					.AddJsonOptions(options=> options.SerializerSettings.Formatting=Newtonsoft.Json.Formatting.Indented);
+					.AddJsonOptions(options =>
+		            {
+#if DEBUG
+						options.SerializerSettings.Formatting = Newtonsoft.Json.Formatting.Indented;
+#else
+			            options.SerializerSettings.Formatting = Newtonsoft.Json.Formatting.None;
+#endif
+					});
 			services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
         }
 
