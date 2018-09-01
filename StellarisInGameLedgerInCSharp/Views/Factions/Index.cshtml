@@ -1,4 +1,8 @@
-﻿@{
+﻿@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
+
+
+@{
 	ViewData["Title"] = "Factions";
 }
 
@@ -158,7 +162,7 @@
 	</script>
 }
 <fieldset>
-	<legend>Show following factions</legend>
+	<legend>@Localizer["Show following factions"]</legend>
 	<div id="visibleFactions" class="loading-prompt" data-time="10"></div>
 </fieldset>
 
