@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StellarisLedger", "Stellari
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ParadoxParser", "ParadoxParser\ParadoxParser.csproj", "{6D1B602B-4DB7-40BE-8566-609780CE1C54}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleApp2", "ConsoleApp2\ConsoleApp2.csproj", "{61CBD02C-347F-4F29-9211-F174D040A3D7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Stellaris", "Stellaris\Stellaris.csproj", "{649D6E40-AEF5-4C16-B6A5-7CBD83039492}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,10 +23,10 @@ Global
 		{6D1B602B-4DB7-40BE-8566-609780CE1C54}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6D1B602B-4DB7-40BE-8566-609780CE1C54}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6D1B602B-4DB7-40BE-8566-609780CE1C54}.Release|Any CPU.Build.0 = Release|Any CPU
-		{61CBD02C-347F-4F29-9211-F174D040A3D7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{61CBD02C-347F-4F29-9211-F174D040A3D7}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{61CBD02C-347F-4F29-9211-F174D040A3D7}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{61CBD02C-347F-4F29-9211-F174D040A3D7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{649D6E40-AEF5-4C16-B6A5-7CBD83039492}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{649D6E40-AEF5-4C16-B6A5-7CBD83039492}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{649D6E40-AEF5-4C16-B6A5-7CBD83039492}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{649D6E40-AEF5-4C16-B6A5-7CBD83039492}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

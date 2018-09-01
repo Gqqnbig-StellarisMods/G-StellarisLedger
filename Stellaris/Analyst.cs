@@ -4,11 +4,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using Antlr4.Runtime;
 using Antlr4.Runtime.Tree;
-using JetBrains.Annotations; 
+using JetBrains.Annotations;
 
 namespace StellarisLedger
 {
-	class Analyst
+	public class Analyst
 	{
 		private readonly IParseTree countriesData;
 		private readonly IParseTree planetsData;
@@ -22,6 +22,7 @@ namespace StellarisLedger
 			var p = content.IndexOf(lineEndingSymbol + "player={" + lineEndingSymbol);
 			p += lineEndingSymbol.Length;
 			content = content.Substring(p);
+			
 			ParadoxParser.ParadoxContext playerData = (ParadoxParser.ParadoxContext)GetScopeBody(content);
 			var playerCountryTag = playerData.GetChild(0).GetChild(0).GetChild(1);
 			PlayerTag = GetValue(playerCountryTag, "country").GetText();

@@ -29,7 +29,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ParadoxParser\ParadoxParser.csproj" />
+    <ProjectReference Include="..\Stellaris\Stellaris.csproj" />
   </ItemGroup>
 
   <ItemGroup>
