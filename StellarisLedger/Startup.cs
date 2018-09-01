@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Localization;
@@ -22,9 +23,8 @@ namespace StellarisLedger
 	    // ReSharper disable once UnusedMember.Global
 	    public void ConfigureServices(IServiceCollection services)
 	    {
-		    services.AddLocalization(opts => { opts.ResourcesPath = "Resources"; });
 
-			
+		    services.AddSingleton<YamlStringLocalizer>();
 
 
 			services.AddMvc()
@@ -45,20 +45,25 @@ namespace StellarisLedger
 		    services.Configure<RequestLocalizationOptions>(
 			    opts =>
 			    {
-				    var supportedCultures = new List<CultureInfo>
+				    var supportedCultures = new HashSet<CultureInfo>
 				    {
-					    new CultureInfo("zh-CN"),
-					    new CultureInfo("en-US"),
-					    new CultureInfo("zh"),
-					    new CultureInfo("en")
-				    };
+						CultureInfo.CurrentCulture,
+						CultureInfo.CurrentUICulture,
+						new CultureInfo("zh"),
+					    new CultureInfo("en"),
+						new CultureInfo("pt-BR"),
+						new CultureInfo("de"),
+						new CultureInfo("fr"),
+						new CultureInfo("es"),
+						new CultureInfo("pl"),
+						new CultureInfo("ru")
+					};
 
-				    opts.DefaultRequestCulture = new RequestCulture("zh-CN");
-				    // Formatting numbers, dates, etc.
-				    opts.SupportedCultures = supportedCultures;
-				    // UI strings that we have localized.
-				    opts.SupportedUICultures = supportedCultures;
-			    });
+					// Formatting numbers, dates, etc.
+					opts.SupportedCultures = supportedCultures.ToList();
+					//// UI strings that we have localized.
+					opts.SupportedUICultures = supportedCultures.ToList();
+				});
 		}
 
 	    //被Program.BuildWebHost隐式调用。Use this method to configure the HTTP request pipeline.
