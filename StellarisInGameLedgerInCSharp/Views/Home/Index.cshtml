@@ -1,4 +1,7 @@
-﻿@{ ViewData["Title"] = "Statistics"; }
+﻿@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
+
+@{ ViewData["Title"] = "Statistics"; }
 
 @section head
 {
@@ -499,13 +502,13 @@
 
 
 <fieldset>
-	<legend>Show following columns</legend>
+	<legend>@Localizer["Show following columns"]</legend>
 	<div id="visibleColumnsForTable" class="loading-prompt" data-time="10"></div>
 </fieldset>
 
 <div id="historyPanel">
 	<fieldset>
-		<legend>Show following countries</legend>
+		<legend>@Localizer["Show following countries"]</legend>
 		<div id="countryFilterPanel" class="loading-prompt" data-time="30"></div>
 	</fieldset>
 </div>
