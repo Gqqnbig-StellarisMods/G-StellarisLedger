@@ -4,7 +4,7 @@ using System.Linq;
 using Newtonsoft.Json;
 
 
-namespace StellarisInGameLedgerInCSharp
+namespace StellarisLedger
 {
     public class Country
     {

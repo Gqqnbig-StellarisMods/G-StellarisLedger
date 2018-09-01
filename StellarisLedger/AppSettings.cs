@@ -1,4 +1,4 @@
-﻿namespace StellarisInGameLedgerInCSharp
+﻿namespace StellarisLedger
 {
     public class AppSettings
     {

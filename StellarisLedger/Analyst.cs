@@ -6,7 +6,7 @@ using Antlr4.Runtime;
 using Antlr4.Runtime.Tree;
 using JetBrains.Annotations; 
 
-namespace StellarisInGameLedgerInCSharp
+namespace StellarisLedger
 {
 	class Analyst
 	{

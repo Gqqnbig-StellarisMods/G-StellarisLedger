@@ -9,7 +9,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Net.Http;
 
-namespace StellarisInGameLedgerInCSharp.Controllers.Api
+namespace StellarisLedger.Controllers.Api
 {
     //[controller]是路由占位符，被替换为控制器名称 https://docs.microsoft.com/en-us/aspnet/core/mvc/controllers/routing#token-replacement-in-route-templates-controller-action-area
     [Route("api/")]

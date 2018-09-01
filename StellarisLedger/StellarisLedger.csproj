@@ -5,6 +5,8 @@
   </PropertyGroup>
   <PropertyGroup>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <UserSecretsId>8dceb673-8a1e-4400-ad78-b4b0d22ea09a</UserSecretsId>
+    <RootNamespace>StellarisLedger</RootNamespace>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <NoWarn>1701;1702;1705;CS1591</NoWarn>
@@ -28,6 +30,18 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ParadoxParser\ParadoxParser.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Antlr4.Runtime.Standard">
+      <HintPath>..\packages\Antlr4.Runtime.Standard.4.7.1.1\lib\net35\Antlr4.Runtime.Standard.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Resources\Views\Shared\_UseStorageNotification.resx">
+      <Generator></Generator>
+    </EmbeddedResource>
   </ItemGroup>
 
 </Project>

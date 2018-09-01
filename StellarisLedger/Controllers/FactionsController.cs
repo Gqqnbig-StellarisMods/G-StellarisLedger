@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-namespace StellarisInGameLedgerInCSharp.Controllers
+namespace StellarisLedger.Controllers
 {
 	[Route("Factions/")]
 	public class FactionsController : Controller

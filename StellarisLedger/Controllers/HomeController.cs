@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-namespace StellarisInGameLedgerInCSharp.Controllers
+namespace StellarisLedger.Controllers
 {
 	[Route("/")]
 	[Route("Default/")]
