@@ -1,4 +1,7 @@
-﻿<!DOCTYPE html>
+﻿@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
+
+<!DOCTYPE html>
 <html>
 <head>
 	<meta charset="utf-8" />
@@ -11,19 +14,19 @@
 <body>
 	@await Html.PartialAsync("_UseStorageNotification")
 
-<nav class="navbar navbar-expand navbar-dark bg-dark">
-	<span class="navbar-brand">Stellaris Ledger</span>
-	<div class="collapse navbar-collapse" id="navbarSupportedContent">
-		<ul class="navbar-nav">
-			<li class="nav-item @(ViewContext.RouteData.Values["controller"].ToString()=="Home" && ViewContext.RouteData.Values["action"].ToString() == "Index"?"active":null)">
-				<a class="nav-link" asp-controller="Home" asp-action="Index">Statistics</a>
-			</li>
-			<li class="nav-item @(ViewContext.RouteData.Values["controller"].ToString()=="Factions" && ViewContext.RouteData.Values["action"].ToString() == "Index"?"active":null)">
-				<a class="nav-link" asp-controller="Factions" asp-action="Index">Factions</a>
-			</li>
-		</ul>
-	</div>
-</nav>
+	<nav class="navbar navbar-expand navbar-dark bg-dark">
+		<span class="navbar-brand">Stellaris Ledger</span>
+		<div class="collapse navbar-collapse" id="navbarSupportedContent">
+			<ul class="navbar-nav">
+				<li class="nav-item @(ViewContext.RouteData.Values["controller"].ToString()=="Home" && ViewContext.RouteData.Values["action"].ToString() == "Index"?"active":null)">
+					<a class="nav-link" asp-controller="Home" asp-action="Index">@Localizer["Statistics"]</a>
+				</li>
+				<li class="nav-item @(ViewContext.RouteData.Values["controller"].ToString()=="Factions" && ViewContext.RouteData.Values["action"].ToString() == "Index"?"active":null)">
+					<a class="nav-link" asp-controller="Factions" asp-action="Index">Factions</a>
+				</li>
+			</ul>
+		</div>
+	</nav>
 	<div class="container-fluid body-content">
 		@RenderBody()
 		<hr />

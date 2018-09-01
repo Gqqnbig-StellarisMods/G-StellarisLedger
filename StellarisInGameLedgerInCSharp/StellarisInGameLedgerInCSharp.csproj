@@ -30,8 +30,4 @@
     <ProjectReference Include="..\ParadoxParser\ParadoxParser.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Resources\Views\Shared\" />
-  </ItemGroup>
-
 </Project>
