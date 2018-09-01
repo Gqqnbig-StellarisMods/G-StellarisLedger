@@ -27,17 +27,19 @@ namespace StellarisInGameLedgerInCSharp.Controllers.Api
 
         private static string GetGameSaveContent(string saveGamePath)
         {
-            var zipArchive = ZipFile.Open(saveGamePath, ZipArchiveMode.Read);
-            var gamestate = zipArchive.GetEntry("gamestate");
-            string content;
+			using (var zipArchive = ZipFile.Open(saveGamePath, ZipArchiveMode.Read))
+			{
+				var gamestate = zipArchive.GetEntry("gamestate");
+				string content;
 
-            using (var sr = new StreamReader(gamestate.Open(), System.Text.Encoding.UTF8))
-            {
-                content = sr.ReadToEnd();
-            }
+				using (var sr = new StreamReader(gamestate.Open(), System.Text.Encoding.UTF8))
+				{
+					content = sr.ReadToEnd();
+				}
 
-            return content;
-        }
+				return content;
+			}
+		}
 
         [ResponseCache(Duration = 3600 * 24 * 30)]
         [HttpGet(@"{gameId:regex(^[[\d_-]]+$)}/{saveName:regex(^[[\d.]]+\.sav$)}/Countries")]
@@ -57,9 +59,11 @@ namespace StellarisInGameLedgerInCSharp.Controllers.Api
 			string json = JsonConvert.SerializeObject(countries, new JsonSerializerSettings { ContractResolver = new SerializePopContractResolver(),
 																							  Formatting = serializerSettings.Formatting });
 
-	        var response = new HttpResponseMessage(System.Net.HttpStatusCode.OK);
-	        response.Content = new StringContent(json);
-	        return response;
+			var response = new HttpResponseMessage(System.Net.HttpStatusCode.OK);
+#pragma warning disable DF0022 // Marks undisposed objects assinged to a property, originated in an object creation.
+			response.Content = new StringContent(json);
+#pragma warning restore DF0022 // Marks undisposed objects assinged to a property, originated in an object creation.
+			return response;
 		}
 
 	    [ResponseCache(Duration = 3600 * 24 * 30)]
@@ -80,9 +84,11 @@ namespace StellarisInGameLedgerInCSharp.Controllers.Api
 
 		    string json = JsonConvert.SerializeObject(country, Formatting.Indented, new JsonSerializerSettings{ContractResolver=new SerializePopContractResolver()});
 
-		    var response = new HttpResponseMessage(System.Net.HttpStatusCode.OK);
-		    response.Content = new StringContent(json);
-		    return response;
+			var response = new HttpResponseMessage(System.Net.HttpStatusCode.OK);
+#pragma warning disable DF0022 // Marks undisposed objects assinged to a property, originated in an object creation.
+			response.Content = new StringContent(json);
+#pragma warning restore DF0022 // Marks undisposed objects assinged to a property, originated in an object creation.
+			return response;
 		}
 
         /// <summary>
