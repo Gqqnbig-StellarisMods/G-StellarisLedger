@@ -25,21 +25,7 @@ namespace StellarisLedger.Controllers.Api
 			serializerSettings = jsonOptions.Value.SerializerSettings;
 		}
 
-        private static string GetGameSaveContent(string saveGamePath)
-        {
-			using (var zipArchive = ZipFile.Open(saveGamePath, ZipArchiveMode.Read))
-			{
-				var gamestate = zipArchive.GetEntry("gamestate");
-				string content;
 
-				using (var sr = new StreamReader(gamestate.Open(), System.Text.Encoding.UTF8))
-				{
-					content = sr.ReadToEnd();
-				}
-
-				return content;
-			}
-		}
 
         [ResponseCache(Duration = 3600 * 24 * 30)]
         [HttpGet(@"{gameId:regex(^[[\d_-]]+$)}/{saveName:regex(^[[\d.]]+\.sav$)}/Countries")]
@@ -52,7 +38,7 @@ namespace StellarisLedger.Controllers.Api
                 return null;
             }
 
-            var content = GetGameSaveContent(fileName);
+			var content = Stellaris.GetGameSaveContent(fileName);
 
 	        var analyst = new Analyst(content);
             var countries= analyst.GetCountries();
@@ -77,8 +63,8 @@ namespace StellarisLedger.Controllers.Api
 			    return null;
 		    }
 
-		    var content = GetGameSaveContent(fileName);
-		    
+			var content = Stellaris.GetGameSaveContent(fileName);
+
 			var analyst = new Analyst(content);
 		    var country= analyst.GetCountry(analyst.PlayerTag);
 
