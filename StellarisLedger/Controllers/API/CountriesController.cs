@@ -40,8 +40,10 @@ namespace StellarisLedger.Controllers.Api
 
 			var content = Stellaris.GetGameSaveContent(fileName);
 
-	        var analyst = new Analyst(content);
-            var countries= analyst.GetCountries();
+			var analyst = new Analyst(content);
+			var countries = analyst.GetCountries();
+			GC.Collect();
+
 			string json = JsonConvert.SerializeObject(countries, new JsonSerializerSettings { ContractResolver = new SerializePopContractResolver(),
 																							  Formatting = serializerSettings.Formatting });
 
@@ -68,7 +70,8 @@ namespace StellarisLedger.Controllers.Api
 			var analyst = new Analyst(content);
 		    var country= analyst.GetCountry(analyst.PlayerTag);
 
-		    string json = JsonConvert.SerializeObject(country, Formatting.Indented, new JsonSerializerSettings{ContractResolver=new SerializePopContractResolver()});
+			GC.Collect();
+			string json = JsonConvert.SerializeObject(country, Formatting.Indented, new JsonSerializerSettings { ContractResolver = new SerializePopContractResolver() });
 
 			var response = new HttpResponseMessage(System.Net.HttpStatusCode.OK);
 #pragma warning disable DF0022 // Marks undisposed objects assinged to a property, originated in an object creation.
