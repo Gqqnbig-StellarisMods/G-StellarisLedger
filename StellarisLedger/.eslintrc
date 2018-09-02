@@ -18,6 +18,7 @@
     "worker": true
   },
   "rules": {
+		"no-mixed-spaces-and-tabs": "off",
     "no-unreachable": 1,
     "no-self-compare": 2,
     "eqeqeq": 1,
