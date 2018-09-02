@@ -141,9 +141,9 @@
 			propertyNames.forEach((p, i) =>
 			{
 				var c = columns.find(v => v.name === p);
-				if (c && c.formatter)
+				if (c && c.format)
 				{
-					c.formatter.format(tableData, i);
+					c.format.format(tableData, i);
 				}
 			});
 
@@ -172,25 +172,27 @@
 
 		google.charts.setOnLoadCallback(() =>
 		{
-			columns = [{ name: "militaryPower", formatter: new google.visualization.NumberFormat({ fractionDigits: 0, groupingSymbol: "" }) },
+			let incomeFormat = new google.visualization.NumberFormat({fractionDigits: 2, groupingSymbol: "", negativeColor: "red"});
+			let totalFormat = new google.visualization.NumberFormat({ fractionDigits: 0, groupingSymbol: "" });
+			columns = [ { name: "militaryPower", format: totalFormat },
 			{ name: "technologyCount", header: "Technologies" },
 			{ name: "colonies", header: '<img src="https://stellaris.paradoxwikis.com/images/6/6e/Planet_gaia.png" title="Colonies">', type: "number", getValue: d => d.length },
 			{ name: "traditionCount", header: "Traditions" },
-			{ name: "energy", header: '<img src="https://stellaris.paradoxwikis.com/images/5/58/Energy_Credits.png" title="Energy">', formatter: new google.visualization.NumberFormat({ fractionDigits: 0, groupingSymbol: "" }) },
-			{ name: "minerals", header: '<img src="https://stellaris.paradoxwikis.com/images/1/10/Minerals.png" title="Minerals">', formatter: new google.visualization.NumberFormat({ fractionDigits: 0, groupingSymbol: "" }) },
-			{ name: "food", header: '<img src="https://stellaris.paradoxwikis.com/images/c/c6/Food.png" title="Food">', formatter: new google.visualization.NumberFormat({ fractionDigits: 0, groupingSymbol: "" }) },
-			{ name: "influence", header: '<img src="https://stellaris.paradoxwikis.com/images/9/91/Influence.png" title="Influence">', formatter: new google.visualization.NumberFormat({ fractionDigits: 2, groupingSymbol: "" }) },
-			{ name: "energyIncome", formatter: new google.visualization.NumberFormat({ fractionDigits: 2, groupingSymbol: "", negativeColor: "red" }) },
-			{ name: "mineralsIncome", formatter: new google.visualization.NumberFormat({ fractionDigits: 2, groupingSymbol: "", negativeColor: "red" }) },
-			{ name: "foodIncome", formatter: new google.visualization.NumberFormat({ fractionDigits: 2, groupingSymbol: "", negativeColor: "red" }) },
-			{ name: "influenceIncome", formatter: new google.visualization.NumberFormat({ fractionDigits: 2, groupingSymbol: "" }) },
+				{ name: "energy", header: '<img src="https://stellaris.paradoxwikis.com/images/5/58/Energy_Credits.png" title="Energy">', format: totalFormat },
+				{ name: "minerals", header: '<img src="https://stellaris.paradoxwikis.com/images/1/10/Minerals.png" title="Minerals">', format: totalFormat },
+				{ name: "food", header: '<img src="https://stellaris.paradoxwikis.com/images/c/c6/Food.png" title="Food">', format: totalFormat },
+				{ name: "influence", header: '<img src="https://stellaris.paradoxwikis.com/images/9/91/Influence.png" title="Influence">', format: new google.visualization.NumberFormat({ fractionDigits: 2, groupingSymbol: "" }) },
+				{ name: "energyIncome", format: incomeFormat },
+				{ name: "mineralsIncome",  format: incomeFormat },
+				{ name: "foodIncome", format: incomeFormat },
+				{ name: "influenceIncome", format: incomeFormat },
 			{ name: "unity", header: '<img src="https://stellaris.paradoxwikis.com/images/3/3d/Unity.png" title="Unity">' },
-			{ name: "unityIncomeWithPenalty", header: "Unity Income with Penalty", formatter: new google.visualization.NumberFormat({ fractionDigits: 2 }) },
-			{ name: "physicsResearchIncomeWithPenalty", header: '<img src="https://stellaris.paradoxwikis.com/images/b/b3/Research_speed_%28Physics%29.png" title="Physics Income with Penalty">', formatter: new google.visualization.NumberFormat({ fractionDigits: 2 }) },
-			{ name: "societyResearchIncomeWithPenalty", header: '<img src="https://stellaris.paradoxwikis.com/images/4/4f/Research_speed_%28Society%29.png" title="Society Income with Penalty">', formatter: new google.visualization.NumberFormat({ fractionDigits: 2 }) },
-			{ name: "engineeringResearchIncomeWithPenalty", header: '<img src="https://stellaris.paradoxwikis.com/images/e/ec/Research_speed_%28Engineering%29.png" title="Engineering Income with Penalty">', formatter: new google.visualization.NumberFormat({ fractionDigits: 2 }) },
+				{ name: "unityIncomeWithPenalty", header: "Unity Income with Penalty", format: incomeFormat },
+				{ name: "physicsResearchIncomeWithPenalty", header: '<img src="https://stellaris.paradoxwikis.com/images/b/b3/Research_speed_%28Physics%29.png" title="Physics Income with Penalty">', format: incomeFormat },
+				{ name: "societyResearchIncomeWithPenalty", header: '<img src="https://stellaris.paradoxwikis.com/images/4/4f/Research_speed_%28Society%29.png" title="Society Income with Penalty">', format: incomeFormat },
+				{ name: "engineeringResearchIncomeWithPenalty", header:'<img src="https://stellaris.paradoxwikis.com/images/e/ec/Research_speed_%28Engineering%29.png" title="Engineering Income with Penalty">', format: incomeFormat },
 			{ name: "population", header: '<img src="https://stellaris.paradoxwikis.com/images/7/71/Pop.png" title="Population">' },
-			{ name: "totalResearchIncomeWithPenalty", header: "<span title='Total Research Income with Penalty'><img src='https://stellaris.paradoxwikis.com/images/b/b3/Research_speed_%28Physics%29.png'> + <img src='https://stellaris.paradoxwikis.com/images/4/4f/Research_speed_%28Society%29.png'> + <img src='https://stellaris.paradoxwikis.com/images/e/ec/Research_speed_%28Engineering%29.png'></span>", formatter: new google.visualization.NumberFormat({ fractionDigits: 2 }) }];
+				{ name: "totalResearchIncomeWithPenalty", header: "<span title='Total Research Income with Penalty'><img src='https://stellaris.paradoxwikis.com/images/b/b3/Research_speed_%28Physics%29.png'> + <img src='https://stellaris.paradoxwikis.com/images/4/4f/Research_speed_%28Society%29.png'> + <img src='https://stellaris.paradoxwikis.com/images/e/ec/Research_speed_%28Engineering%29.png'></span>", format: incomeFormat }];
 
 
 
@@ -351,10 +353,10 @@
 				dateFormatter.format(lineChartData, 0);
 
 				var c = columns.find(c => c.name === property);
-				if (c && c.formatter)
+				if (c && c.format)
 				{
 					for (var i = 0; i < tags.length; i++)
-						c.formatter.format(lineChartData, 1 + i);
+						c.format.format(lineChartData, 1 + i);
 				}
 
 				var options = {
@@ -428,9 +430,9 @@
 				for (let p of properties)
 				{
 					var c = columns.find(c => c.name === p);
-					if (c && c.formatter)
+					if (c && c.format)
 					{
-						c.formatter.format(lineChartData, 1 + index);
+						c.format.format(lineChartData, 1 + index);
 					}
 					index++;
 				}
@@ -502,13 +504,13 @@
 
 
 <fieldset>
-	<legend>@Localizer["Show following columns"]</legend>
+	<legend>@Lo["Show following columns"]</legend>
 	<div id="visibleColumnsForTable" class="loading-prompt" data-time="10"></div>
 </fieldset>
 
 <div id="historyPanel">
 	<fieldset>
-		<legend>@Localizer["Show following countries"]</legend>
+		<legend>@Lo["Show following countries"]</legend>
 		<div id="countryFilterPanel" class="loading-prompt" data-time="30"></div>
 	</fieldset>
 </div>
