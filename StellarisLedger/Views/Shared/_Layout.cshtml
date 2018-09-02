@@ -1,5 +1,6 @@
 ﻿@using Microsoft.AspNetCore.Mvc.Localization
 @inject IViewLocalizer Localizer
+@inject YamlStringLocalizer YamlLocalizer
 
 <!DOCTYPE html>
 <html>
@@ -24,7 +25,7 @@
 					<a class="nav-link" asp-controller="Home" asp-action="Index">@Localizer["Statistics"]</a>
 				</li>
 				<li class="nav-item @(ViewContext.RouteData.Values["controller"].ToString()=="Factions" && ViewContext.RouteData.Values["action"].ToString() == "Index"?"active":null)">
-					<a class="nav-link" asp-controller="Factions" asp-action="Index">Factions</a>
+					<a class="nav-link" asp-controller="Factions" asp-action="Index">@YamlLocalizer["FACTIONS"]</a>
 				</li>
 			</ul>
 		</div>
