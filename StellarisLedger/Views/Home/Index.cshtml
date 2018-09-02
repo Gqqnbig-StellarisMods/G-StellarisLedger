@@ -78,7 +78,7 @@
 
 			propertyNames.forEach(p =>
 			{
-				let c = columns.find(v => v.name === p);
+				let c = columns[p];
 				let label = _.startCase(p);
 				let type = typeof (countries[0][p]);
 				if (c)
@@ -127,7 +127,7 @@
 			//把json对象转换为数组
 			const rows = countries.map(country => propertyNames.map(p =>
 			{
-				let c = columns.find(v => v.name === p);
+				let c = columns[p];
 				if (c && c.getValue)
 					return c.getValue(country[p]);
 				else
@@ -140,7 +140,7 @@
 
 			propertyNames.forEach((p, i) =>
 			{
-				var c = columns.find(v => v.name === p);
+				var c = columns[p];
 				if (c && c.format)
 				{
 					c.format.format(tableData, i);
@@ -174,25 +174,25 @@
 		{
 			let incomeFormat = new google.visualization.NumberFormat({fractionDigits: 2, groupingSymbol: "", negativeColor: "red"});
 			let totalFormat = new google.visualization.NumberFormat({ fractionDigits: 0, groupingSymbol: "" });
-			columns = [ { name: "militaryPower", format: totalFormat },
-			{ name: "technologyCount", header: "Technologies" },
-			{ name: "colonies", header: '<img src="https://stellaris.paradoxwikis.com/images/6/6e/Planet_gaia.png" title="Colonies">', type: "number", getValue: d => d.length },
-			{ name: "traditionCount", header: "Traditions" },
-				{ name: "energy", header: '<img src="https://stellaris.paradoxwikis.com/images/5/58/Energy_Credits.png" title="Energy">', format: totalFormat },
-				{ name: "minerals", header: '<img src="https://stellaris.paradoxwikis.com/images/1/10/Minerals.png" title="Minerals">', format: totalFormat },
-				{ name: "food", header: '<img src="https://stellaris.paradoxwikis.com/images/c/c6/Food.png" title="Food">', format: totalFormat },
-				{ name: "influence", header: '<img src="https://stellaris.paradoxwikis.com/images/9/91/Influence.png" title="Influence">', format: new google.visualization.NumberFormat({ fractionDigits: 2, groupingSymbol: "" }) },
-				{ name: "energyIncome", format: incomeFormat },
-				{ name: "mineralsIncome",  format: incomeFormat },
-				{ name: "foodIncome", format: incomeFormat },
-				{ name: "influenceIncome", format: incomeFormat },
-			{ name: "unity", header: '<img src="https://stellaris.paradoxwikis.com/images/3/3d/Unity.png" title="Unity">' },
-				{ name: "unityIncomeWithPenalty", header: "Unity Income with Penalty", format: incomeFormat },
-				{ name: "physicsResearchIncomeWithPenalty", header: '<img src="https://stellaris.paradoxwikis.com/images/b/b3/Research_speed_%28Physics%29.png" title="Physics Income with Penalty">', format: incomeFormat },
-				{ name: "societyResearchIncomeWithPenalty", header: '<img src="https://stellaris.paradoxwikis.com/images/4/4f/Research_speed_%28Society%29.png" title="Society Income with Penalty">', format: incomeFormat },
-				{ name: "engineeringResearchIncomeWithPenalty", header:'<img src="https://stellaris.paradoxwikis.com/images/e/ec/Research_speed_%28Engineering%29.png" title="Engineering Income with Penalty">', format: incomeFormat },
-			{ name: "population", header: '<img src="https://stellaris.paradoxwikis.com/images/7/71/Pop.png" title="Population">' },
-				{ name: "totalResearchIncomeWithPenalty", header: "<span title='Total Research Income with Penalty'><img src='https://stellaris.paradoxwikis.com/images/b/b3/Research_speed_%28Physics%29.png'> + <img src='https://stellaris.paradoxwikis.com/images/4/4f/Research_speed_%28Society%29.png'> + <img src='https://stellaris.paradoxwikis.com/images/e/ec/Research_speed_%28Engineering%29.png'></span>", format: incomeFormat }];
+			columns = { militaryPower:{ format: totalFormat },
+				technologyCount:{ header: "Technologies" },
+				colonies:{ header: '<img src="https://stellaris.paradoxwikis.com/images/6/6e/Planet_gaia.png" title="Colonies">', type: "number", getValue: d => d.length },
+				traditionCount:{ header: "Traditions" },
+				energy:{header: '<img src="https://stellaris.paradoxwikis.com/images/5/58/Energy_Credits.png" title="Energy">', format: totalFormat },
+				minerals:{ header: '<img src="https://stellaris.paradoxwikis.com/images/1/10/Minerals.png" title="Minerals">', format: totalFormat },
+				food:{ header: '<img src="https://stellaris.paradoxwikis.com/images/c/c6/Food.png" title="Food">', format: totalFormat },
+				influence:{  header: '<img src="https://stellaris.paradoxwikis.com/images/9/91/Influence.png" title="Influence">', format: new google.visualization.NumberFormat({ fractionDigits: 2, groupingSymbol: "" }) },
+				energyIncome:{  format: incomeFormat },
+				mineralsIncome:{ format: incomeFormat },
+				foodIncome:{ format: incomeFormat },
+				influenceIncome:{  format: incomeFormat },
+				unity:{  header:'<img src="https://stellaris.paradoxwikis.com/images/3/3d/Unity.png" title="Unity">' },
+				unityIncomeWithPenalty:{  header: "Unity Income with Penalty", format: incomeFormat },
+				physicsResearchIncomeWithPenalty:{  header: '<img src="https://stellaris.paradoxwikis.com/images/b/b3/Research_speed_%28Physics%29.png" title="Physics Income with Penalty">', format: incomeFormat },
+				societyResearchIncomeWithPenalty:{  header: '<img src="https://stellaris.paradoxwikis.com/images/4/4f/Research_speed_%28Society%29.png" title="Society Income with Penalty">', format: incomeFormat },
+				engineeringResearchIncomeWithPenalty:{  header:'<img src="https://stellaris.paradoxwikis.com/images/e/ec/Research_speed_%28Engineering%29.png" title="Engineering Income with Penalty">', format: incomeFormat },
+				population:{  header: '<img src="https://stellaris.paradoxwikis.com/images/7/71/Pop.png" title="Population">' },
+				totalResearchIncomeWithPenalty:{  header: "<span title='Total Research Income with Penalty'><img src='https://stellaris.paradoxwikis.com/images/b/b3/Research_speed_%28Physics%29.png'> + <img src='https://stellaris.paradoxwikis.com/images/4/4f/Research_speed_%28Society%29.png'> + <img src='https://stellaris.paradoxwikis.com/images/e/ec/Research_speed_%28Engineering%29.png'></span>", format: incomeFormat }};
 
 
 
@@ -320,7 +320,7 @@
 				lineChartData.addColumn({ type: "date", label: "date" });
 				for (let tag of tags)
 				{
-					let c = columns.find(v => v.name === property);
+					let c = columns[property];
 					let type = "number";
 					if (c && c.type)
 						type = c.type;
@@ -335,7 +335,7 @@
 						const country = item.content.find(c => c.tag === tag.tag);
 						if (country)
 						{
-							let c = columns.find(v => v.name === property);
+							let c = columns[property];
 							if (c && c.getValue)
 								row.push(c.getValue(country[property]));
 							else
@@ -352,7 +352,7 @@
 				var dateFormatter = new google.visualization.DateFormat({ pattern: "yyyy.MM.dd" });
 				dateFormatter.format(lineChartData, 0);
 
-				var c = columns.find(c => c.name === property);
+				var c = columns[property];
 				if (c && c.format)
 				{
 					for (var i = 0; i < tags.length; i++)
@@ -429,7 +429,7 @@
 			{
 				for (let p of properties)
 				{
-					var c = columns.find(c => c.name === p);
+					var c = columns[p];
 					if (c && c.format)
 					{
 						c.format.format(lineChartData, 1 + index);
