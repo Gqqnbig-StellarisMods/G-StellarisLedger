@@ -1,10 +1,11 @@
-﻿@using Microsoft.AspNetCore.Mvc.Localization
-@inject YamlStringLocalizer Localizer
+﻿@using StellarisLedger
+@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer Lo
+@inject YamlStringLocalizer YLo
 
 @{ ViewData["Title"] = "Statistics"; }
 
 @section head
-{
+	{
 	<style type="text/css">
 		thead th img {
 			max-height: 32px;
@@ -23,7 +24,7 @@
 }
 
 @section Scripts
-{
+	{
 	<!--Load the AJAX API-->
 	<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.0/lodash.min.js"></script>
@@ -83,7 +84,9 @@
 				let type = typeof (countries[0][p]);
 				if (c)
 				{
-					if (c.header)
+					if (c.compactHeader)
+						label = c.compactHeader;
+					else if (c.header)
 						label = c.header;
 
 					if (c.type)
@@ -109,7 +112,10 @@
 				else
 					isChecked = isChecked == "true";
 				checkBox.prop("checked", isChecked);
-				const label = $(`<label>${_.startCase(p).replace(/\bWith\b/, "with")}</label>`);
+
+				let c = columns[p] || {};
+
+				const label = $(`<label>${c.header || _.startCase(p).replace(/\bWith\b/, "with")}</label>`);
 				label.prepend(checkBox);
 				$("#visibleColumnsForTable").append(label);
 			});
@@ -172,28 +178,30 @@
 
 		google.charts.setOnLoadCallback(() =>
 		{
-			let incomeFormat = new google.visualization.NumberFormat({fractionDigits: 2, groupingSymbol: "", negativeColor: "red"});
+			let incomeFormat = new google.visualization.NumberFormat({ fractionDigits: 2, groupingSymbol: "", negativeColor: "red" });
 			let totalFormat = new google.visualization.NumberFormat({ fractionDigits: 0, groupingSymbol: "" });
-			columns = { militaryPower:{ format: totalFormat },
-				technologyCount:{ header: "Technologies" },
-				colonies:{ header: '<img src="https://stellaris.paradoxwikis.com/images/6/6e/Planet_gaia.png" title="Colonies">', type: "number", getValue: d => d.length },
-				traditionCount:{ header: "Traditions" },
-				energy:{header: '<img src="https://stellaris.paradoxwikis.com/images/5/58/Energy_Credits.png" title="Energy">', format: totalFormat },
-				minerals:{ header: '<img src="https://stellaris.paradoxwikis.com/images/1/10/Minerals.png" title="Minerals">', format: totalFormat },
-				food:{ header: '<img src="https://stellaris.paradoxwikis.com/images/c/c6/Food.png" title="Food">', format: totalFormat },
-				influence:{  header: '<img src="https://stellaris.paradoxwikis.com/images/9/91/Influence.png" title="Influence">', format: new google.visualization.NumberFormat({ fractionDigits: 2, groupingSymbol: "" }) },
-				energyIncome:{  format: incomeFormat },
-				mineralsIncome:{ format: incomeFormat },
-				foodIncome:{ format: incomeFormat },
-				influenceIncome:{  format: incomeFormat },
-				unity:{  header:'<img src="https://stellaris.paradoxwikis.com/images/3/3d/Unity.png" title="Unity">' },
-				unityIncomeWithPenalty:{  header: "Unity Income with Penalty", format: incomeFormat },
-				physicsResearchIncomeWithPenalty:{  header: '<img src="https://stellaris.paradoxwikis.com/images/b/b3/Research_speed_%28Physics%29.png" title="Physics Income with Penalty">', format: incomeFormat },
-				societyResearchIncomeWithPenalty:{  header: '<img src="https://stellaris.paradoxwikis.com/images/4/4f/Research_speed_%28Society%29.png" title="Society Income with Penalty">', format: incomeFormat },
-				engineeringResearchIncomeWithPenalty:{  header:'<img src="https://stellaris.paradoxwikis.com/images/e/ec/Research_speed_%28Engineering%29.png" title="Engineering Income with Penalty">', format: incomeFormat },
-				population:{  header: '<img src="https://stellaris.paradoxwikis.com/images/7/71/Pop.png" title="Population">' },
-				totalResearchIncomeWithPenalty:{  header: "<span title='Total Research Income with Penalty'><img src='https://stellaris.paradoxwikis.com/images/b/b3/Research_speed_%28Physics%29.png'> + <img src='https://stellaris.paradoxwikis.com/images/4/4f/Research_speed_%28Society%29.png'> + <img src='https://stellaris.paradoxwikis.com/images/e/ec/Research_speed_%28Engineering%29.png'></span>", format: incomeFormat }};
-
+			columns = {
+				name: { header: "@Html.RawResource(YLo["NAME"])" },
+				militaryPower: { header: "@Html.RawResource(YLo["MILITARY_POWER_HEADER"])", format: totalFormat },
+				technologyCount: { header: "Technologies" },
+				colonies: { compactHeader: '<img src="https://stellaris.paradoxwikis.com/images/6/6e/Planet_gaia.png" title="Colonies">', type: "number", getValue: d => d.length },
+				traditionCount: { header: "@Html.RawResource(YLo["topbar_button_traditions_name"])" },
+				energy: { header: "@Html.RawResource(YLo["energy"])", compactHeader: '<img src="https://stellaris.paradoxwikis.com/images/5/58/Energy_Credits.png" title="@YLo["energy"]">', format: totalFormat },
+				minerals: { header: "@Html.RawResource(YLo["minerals"])", compactHeader: '<img src="https://stellaris.paradoxwikis.com/images/1/10/Minerals.png" title="@YLo["minerals"]">', format: totalFormat },
+				food: { header: "@Html.RawResource(YLo["food"])", compactHeader: '<img src="https://stellaris.paradoxwikis.com/images/c/c6/Food.png" title="@YLo["food"]">', format: totalFormat },
+				influence: { header: "@Html.RawResource(YLo["influence"])", compactHeader: '<img src="https://stellaris.paradoxwikis.com/images/9/91/Influence.png" title="@YLo["influence"]">', format: new google.visualization.NumberFormat({ fractionDigits: 2, groupingSymbol: "" }) },
+				energyIncome: { header: "@Html.Raw(Lo["{0} Income"], YLo["energy"])", format: incomeFormat },
+				mineralsIncome: { header: "@Html.Raw(Lo["{0} Income"], YLo["minerals"])", format: incomeFormat },
+				foodIncome: { header: "@Html.Raw(Lo["{0} Income"], YLo["food"])", format: incomeFormat },
+				influenceIncome: { header: "@Html.Raw(Lo["{0} Income"], YLo["influence"])", format: incomeFormat },
+				unity: { header: "@Html.Raw(Lo["{0} Income"], YLo["unity"])", compactHeader: '<img src="https://stellaris.paradoxwikis.com/images/3/3d/Unity.png" title="@YLo["unity"]">' },
+				unityIncomeWithPenalty: { header: "@Html.Raw(Lo["{0} Income with Penalty"], YLo["unity"])", format: incomeFormat },
+				physicsResearchIncomeWithPenalty: { header: "@Html.Raw(Lo["{0} Income with Penalty"], YLo["PHYSICS_RESEARCH"])", compactHeader: '<img src="https://stellaris.paradoxwikis.com/images/b/b3/Research_speed_%28Physics%29.png" title="@Lo["{0} Income with Penalty", YLo["PHYSICS_RESEARCH"]]">', format: incomeFormat },
+				societyResearchIncomeWithPenalty: { header: "@Html.Raw(Lo["{0} Income with Penalty"], YLo["SOCIETY_RESEARCH"])", compactHeader: '<img src="https://stellaris.paradoxwikis.com/images/4/4f/Research_speed_%28Society%29.png" title="@Lo["{0} Income with Penalty", YLo["SOCIETY_RESEARCH"]]">', format: incomeFormat },
+				engineeringResearchIncomeWithPenalty: { header: "@Html.Raw(Lo["{0} Income with Penalty"], YLo["ENGINEERING_RESEARCH"])", compactHeader: '<img src="https://stellaris.paradoxwikis.com/images/e/ec/Research_speed_%28Engineering%29.png" title="@Lo["{0} Income with Penalty", YLo["ENGINEERING_RESEARCH"]]">', format: incomeFormat },
+				population: { header: "@Html.RawResource(YLo["POPULATION"])", compactHeader: '<img src="https://stellaris.paradoxwikis.com/images/7/71/Pop.png" title="@YLo["POPULATION"]">' },
+				totalResearchIncomeWithPenalty: { compactHeader: "<span title='Total Research Income with Penalty'><img src='https://stellaris.paradoxwikis.com/images/b/b3/Research_speed_%28Physics%29.png'> + <img src='https://stellaris.paradoxwikis.com/images/4/4f/Research_speed_%28Society%29.png'> + <img src='https://stellaris.paradoxwikis.com/images/e/ec/Research_speed_%28Engineering%29.png'></span>", format: incomeFormat }
+			};
 
 
 			fetch("/api/RecentSaves?limit=25").then(response => response.json()).then(recentSaves =>
@@ -360,7 +368,7 @@
 				}
 
 				var options = {
-					title: _.startCase(property).replace(/\bWith\b/, "with"),
+					title: (c || {}).header || _.startCase(property).replace(/\bWith\b/, "with"),
 					legend: { position: 'right' },
 					width: document.getElementsByTagName("body")[0].clientWidth - 50,
 					height: Math.max(400, 100 * Math.ceil(tags.length / 2.0)),

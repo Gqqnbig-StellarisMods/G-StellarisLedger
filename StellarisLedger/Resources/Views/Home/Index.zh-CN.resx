@@ -123,4 +123,10 @@
   <data name="Show following countries" xml:space="preserve">
     <value>显示以下国家</value>
   </data>
+  <data name="{0} Income" xml:space="preserve">
+    <value>{0}收入</value>
+  </data>
+  <data name="{0} Income with Penalty" xml:space="preserve">
+    <value>惩罚后的{0}收入</value>
+  </data>
 </root>
