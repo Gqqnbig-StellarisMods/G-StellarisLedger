@@ -70,7 +70,6 @@
 		 */
 		function drawTableFromJson(countries)
 		{
-
 			tableData = new google.visualization.DataTable();
 			let propertyNames = Object.getOwnPropertyNames(countries[0]);
 
@@ -141,7 +140,6 @@
 			}));
 
 
-
 			tableData.addRows(rows);
 
 			propertyNames.forEach((p, i) =>
@@ -152,7 +150,6 @@
 					c.format.format(tableData, i);
 				}
 			});
-
 
 
 			updateTableView();
@@ -183,7 +180,7 @@
 			columns = {
 				name: { header: "@Html.RawResource(YLo["NAME"])" },
 				militaryPower: { header: "@Html.RawResource(YLo["MILITARY_POWER_HEADER"])", format: totalFormat },
-				technologyCount: { header: "Technologies" },
+				technologyCount: { header: "@Html.RawResource(Lo["Technologies"])" },
 				colonies: { compactHeader: '<img src="https://stellaris.paradoxwikis.com/images/6/6e/Planet_gaia.png" title="Colonies">', type: "number", getValue: d => d.length },
 				traditionCount: { header: "@Html.RawResource(YLo["topbar_button_traditions_name"])" },
 				energy: { header: "@Html.RawResource(YLo["energy"])", compactHeader: '<img src="https://stellaris.paradoxwikis.com/images/5/58/Energy_Credits.png" title="@YLo["energy"]">', format: totalFormat },
@@ -217,7 +214,7 @@
 				{
 					const i = path.indexOf("\\") + 1;
 					//定义一个新的承诺，当r.json()承诺实现时，新的承诺也实现。
-					return new Promise(function (resolve, reject)
+					return new Promise(function(resolve, reject)
 					{
 						r.json().then(json =>
 						{
@@ -227,7 +224,7 @@
 								date: path.substr(i, path.length - i - ".sav".length),
 								content: json
 							});
-						}).catch(function (ex)
+						}).catch(function(ex)
 						{
 							$("body").text("Error");
 							throw ex;
@@ -278,7 +275,7 @@
 							v = v == "true";
 						checkBox.prop("checked", v);
 
-						checkBox.change(function ()
+						checkBox.change(function()
 						{
 							localStorage.setItem("history-" + $(this).attr("name"), $(this).prop("checked"));
 							updateHistoryCharts();
@@ -311,8 +308,8 @@
 
 			updateSinglePropertyCharts(regularProperties);
 
-			updateCombinedPropertyChart("ResearchIncome", "Research Income", researchIncomeProperties);
-			updateCombinedPropertyChart("ResearchIncomeWithPenalty", "Research Income with Penalty", researchIncomeWithPenaltyProperties);
+			updateCombinedPropertyChart("ResearchIncome", "@Html.RawResource(Lo["Research Income"])", researchIncomeProperties);
+			updateCombinedPropertyChart("ResearchIncomeWithPenalty", "@Html.RawResource(Lo["Research Income with Penalty"])", researchIncomeWithPenaltyProperties);
 		}
 
 		/**
@@ -321,7 +318,6 @@
 		 */
 		function updateSinglePropertyCharts(properties)
 		{
-
 			for (let property of properties)
 			{
 				const lineChartData = new google.visualization.DataTable();
@@ -441,6 +437,8 @@
 
 			let colors = palette('mpn65', tags.length);
 			let pointShapePalette = ["circle", "triangle", "square", "diamond"];
+			let pointShapePaletteLocalized = ["●", "▲", "■", "♦"];
+
 			let series = [];
 			for (let i = 0; i < tags.length; i++)
 			{
@@ -455,13 +453,17 @@
 				}
 			}
 
+			let subtitle="";
 			for (let j = 0; j < properties.length; j++)
 			{
-				title += ", " + _.startCase(properties[j]).replace(/\bWith\b/, "with") + "的标记为" + pointShapePalette[j];
+				let header = (columns[properties[j]] || {}).header;
+				let a = header || _.startCase(properties[j]).replace(/\bWith\b/, "with");
+				let b = pointShapePaletteLocalized[j];
+				subtitle += @Html.RawResource(Lo["\"mark of \"+ a+\" is \"+b"])+ (j<properties.length-1?"@Html.RawResource(Lo["subTitleSeparator"])":"");
 			}
 
 			var options = {
-				title: title,
+				title: title+ (subtitle?"@Html.RawResource(Lo["subTitleIntroducer"])"+subtitle:""),
 				series: series,
 				legend: { position: 'right' },
 				width: document.getElementsByTagName("body")[0].clientWidth - 50,
@@ -485,7 +487,7 @@
 					return true;
 
 				let label = view.getColumnLabel(columnIndex);
-				return $("#countryFilterPanel input[name]").is(function ()
+				return $("#countryFilterPanel input[name]").is(function()
 				{
 					return $(this).prop("checked") && _.startsWith(label, $(this).attr("name"));
 				});
