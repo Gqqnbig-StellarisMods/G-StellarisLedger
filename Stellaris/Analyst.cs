@@ -79,8 +79,7 @@ namespace StellarisLedger
 				if (!(rightValue is ParadoxParser.ScopeContext))
 					continue;
 
-				if (new[] { "fallen_empire", "default" }.Contains(GetValue(rightValue.GetChild(1), "type").GetChild(0).GetText()
-					.Trim('"')) == false)
+				if (new[] { "awakened_fallen_empire", "fallen_empire", "default" }.Contains(GetStringValue(rightValue.GetChild(1), "type")) == false)
 					continue;
 				PopulateCountry(country, (ParadoxParser.ParadoxContext)rightValue.GetChild(1));
 
