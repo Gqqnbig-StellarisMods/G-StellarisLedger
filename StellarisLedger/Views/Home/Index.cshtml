@@ -189,7 +189,7 @@
 				influence: { header: "@Html.RawResource(YLo["influence"])", compactHeader: '<img src="https://stellaris.paradoxwikis.com/images/9/91/Influence.png" title="@YLo["influence"]">', format: new google.visualization.NumberFormat({ fractionDigits: 2, groupingSymbol: "" }) },
 				energyIncome: { header: "@Html.Raw(Lo["{0} Income"], YLo["energy"])", format: incomeFormat },
 				mineralsIncome: { header: "@Html.Raw(Lo["{0} Income"], YLo["minerals"])", format: incomeFormat },
-				foodIncome: { header: "@Html.Raw(Lo["{0} Income"], YLo["food"])", format: incomeFormat },
+				foodIncome: { header: "@Html.Raw(Lo["{0} Income"], YLo["food"])", type: "number", format: incomeFormat }, //机械帝国没有食物，食物总量是0，增长是null。
 				influenceIncome: { header: "@Html.Raw(Lo["{0} Income"], YLo["influence"])", format: incomeFormat },
 				unity: { header: "@Html.Raw(Lo["{0} Income"], YLo["unity"])", compactHeader: '<img src="https://stellaris.paradoxwikis.com/images/3/3d/Unity.png" title="@YLo["unity"]">' },
 				unityIncomeWithPenalty: { header: "@Html.Raw(Lo["{0} Income with Penalty"], YLo["unity"])", format: incomeFormat },
