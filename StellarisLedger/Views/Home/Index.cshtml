@@ -248,7 +248,7 @@
 						for (let country of snapshot.content)
 							tags.push(country.tag);
 					}
-					tags = jQuery.uniqueSort(tags);
+					tags = [...new Set(tags)];
 					tags = tags.map(tag =>
 					{
 						for (let i = history.length - 1; i >= 0; i--)
