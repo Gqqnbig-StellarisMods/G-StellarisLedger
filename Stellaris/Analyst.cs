@@ -55,11 +55,15 @@ namespace StellarisLedger
 
 
 			p = content.IndexOf(lineEndingSymbol + "pop_factions={" + lineEndingSymbol);
-			p += lineEndingSymbol.Length;
-			content = content.Substring(p);
-			ParadoxParser.ParadoxContext pop_factionsData = (ParadoxParser.ParadoxContext)GetScopeBody(content);
-			this.pop_factionsData = pop_factionsData;
-			content = content.Substring(pop_factionsData.Stop.StopIndex + 3);
+			if (p != -1)
+			{
+				//机械帝国没有派系
+				p += lineEndingSymbol.Length;
+				content = content.Substring(p);
+				ParadoxParser.ParadoxContext pop_factionsData = (ParadoxParser.ParadoxContext) GetScopeBody(content);
+				this.pop_factionsData = pop_factionsData;
+				content = content.Substring(pop_factionsData.Stop.StopIndex + 3);
+			}
 		}
 
 		public IList<Country> GetCountries()
@@ -171,6 +175,8 @@ namespace StellarisLedger
 					var foodIncome = GetValue(last_month, "food");
 					if (foodIncome != null)
 						country.FoodIncome = Convert.ToDouble(foodIncome.GetChild(1).GetText());
+					else
+						country.FoodIncome = 0;
 
 
 					var influenceIncome = GetValue(last_month, "influence");
