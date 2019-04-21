@@ -287,7 +287,7 @@
 
 					updateHistoryCharts();
 				});
-			});
+			}).catch(function(error) {$("body").text("Error in loading recent save games. Check console output for details.")});
 		});
 
 
