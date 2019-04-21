@@ -95,7 +95,7 @@ namespace StellarisLedger.Controllers.Api
                 throw new ArgumentException($"存档目录\"{saveGamesPath}\"不包含子文件夹");
 
             var mostRecentWriteTime = directories.Max(d => d.LastWriteTime);
-            var mostRecentPlayDirectory = directories.First(d => d.LastAccessTime == mostRecentWriteTime);
+            var mostRecentPlayDirectory = directories.First(d => d.LastWriteTime == mostRecentWriteTime);
 
             var files = mostRecentPlayDirectory.GetFiles("*.sav");
             if (files.Any() == false)
