@@ -349,9 +349,6 @@
 				lineChartData.addRows(rows);
 
 
-				var dateFormatter = new google.visualization.DateFormat({ pattern: "yyyy.MM.dd" });
-				dateFormatter.format(lineChartData, 0);
-
 				var c = columns[property];
 				if (c && c.format)
 				{
@@ -364,7 +361,8 @@
 					legend: { position: 'right' },
 					width: document.getElementsByTagName("body")[0].clientWidth - 50,
 					height: Math.max(400, 100 * Math.ceil(tags.length / 2.0)),
-					pointSize: 5
+					pointSize: 5,
+					hAxis: { format: "yyyy.MM.dd" }
 				};
 
 				let chartDiv = $(`#${property}Chart`);
@@ -419,11 +417,6 @@
 
 			lineChartData.addRows(rows);
 
-
-			var dateFormatter = new google.visualization.DateFormat({ pattern: "yyyy.MM.dd" });
-			dateFormatter.format(lineChartData, 0);
-
-
 			let index = 0;
 			for (let tag of tags)
 			{
@@ -465,7 +458,8 @@
 				legend: { position: 'right' },
 				width: document.getElementsByTagName("body")[0].clientWidth - 50,
 				height: Math.max(400, 100 * Math.ceil(tags.length / 2.0)),
-				pointSize: 10
+				pointSize: 10,
+				hAxis: { format: "yyyy.MM.dd" }
 			};
 
 			let chartDiv = $(`#${id}Chart`);
