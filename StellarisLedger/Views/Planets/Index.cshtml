@@ -1,0 +1,18 @@
+﻿@*
+	For more information on enabling MVC for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@using Microsoft.AspNetCore.Mvc.Localization
+@using Newtonsoft.Json
+@inject IViewLocalizer Localizer
+@model PlanetTiles[]
+
+@{
+	ViewData["Title"] = "Planets";
+}
+
+@section Scripts
+{
+	<script type="text/javascript">
+		var planetsData=@Html.Raw(Json.Serialize(Model));
+	</script>
+}
