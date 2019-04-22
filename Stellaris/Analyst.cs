@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Antlr4.Runtime;
@@ -22,7 +23,7 @@ namespace StellarisLedger
 			var p = content.IndexOf(lineEndingSymbol + "player={" + lineEndingSymbol);
 			p += lineEndingSymbol.Length;
 			content = content.Substring(p);
-			
+
 			ParadoxParser.ParadoxContext playerData = (ParadoxParser.ParadoxContext)GetScopeBody(content);
 			var playerCountryTag = playerData.GetChild(0).GetChild(0).GetChild(1);
 			PlayerTag = GetValue(playerCountryTag, "country").GetText();
@@ -60,7 +61,7 @@ namespace StellarisLedger
 				//机械帝国没有派系
 				p += lineEndingSymbol.Length;
 				content = content.Substring(p);
-				ParadoxParser.ParadoxContext pop_factionsData = (ParadoxParser.ParadoxContext) GetScopeBody(content);
+				ParadoxParser.ParadoxContext pop_factionsData = (ParadoxParser.ParadoxContext)GetScopeBody(content);
 				this.pop_factionsData = pop_factionsData;
 				content = content.Substring(pop_factionsData.Stop.StopIndex + 3);
 			}
@@ -123,94 +124,95 @@ namespace StellarisLedger
 			country.CivilianStations = GetValue(kvPairs, "controlled_planets").ChildCount - 2;
 
 			var owned_planets = GetValue(kvPairs, "owned_planets");
-			country.Colonies = GetColonies(owned_planets);
+			country.Colonies = (from id in GetColonies(owned_planets)
+								select GetPlanet(id)).ToList();
 
 			var modules = GetValue(kvPairs, "modules").GetChild(1);
-				var standard_economy_module = GetValue(modules, "standard_economy_module").GetChild(1);
-				var resources = GetValue(standard_economy_module, "resources").GetChild(1);
-				var energy = GetValue(resources, "energy");
-				if (energy is ParadoxParser.ScopeContext)
-					country.Energy = Convert.ToDouble(energy.GetChild(1).GetText());
+			var standard_economy_module = GetValue(modules, "standard_economy_module").GetChild(1);
+			var resources = GetValue(standard_economy_module, "resources").GetChild(1);
+			var energy = GetValue(resources, "energy");
+			if (energy is ParadoxParser.ScopeContext)
+				country.Energy = Convert.ToDouble(energy.GetChild(1).GetText());
+			else
+				country.Energy = Convert.ToDouble(energy.GetText());
+
+			var minerals = GetValue(resources, "minerals");
+			if (minerals is ParadoxParser.ScopeContext)
+				country.Minerals = Convert.ToDouble(minerals.GetChild(1).GetText());
+			else
+				country.Minerals = Convert.ToDouble(minerals.GetText());
+
+			var food = GetValue(resources, "food");
+			if (food is null)
+				country.Food = 0;
+			else if (food is ParadoxParser.ScopeContext)
+				country.Food = Convert.ToDouble(food.GetChild(1).GetText());
+			else
+				country.Food = Convert.ToDouble(food.GetText());
+
+
+			var influence = GetValue(resources, "influence");
+			if (influence is ParadoxParser.ScopeContext)
+				country.Influence = Convert.ToDouble(influence.GetChild(1).GetText());
+			else
+				country.Influence = Convert.ToDouble(influence.GetText());
+
+
+			//var unity = GetValue(resources, "unity");
+			//if (unity is ParadoxParser.ScopeContext)
+			//    country.Unity = Convert.ToDouble(unity.GetChild(1).GetText());
+			//else
+			//    country.Unity = Convert.ToDouble(unity.GetText());
+
+			// ReSharper disable InconsistentNaming
+			var last_month = GetValue(standard_economy_module, "last_month")?.GetChild(1);
+			if (last_month != null)
+			{
+				var energyIncome = GetValue(last_month, "energy");
+				country.EnergyIncome = Convert.ToDouble(energyIncome.GetChild(1).GetText());
+
+				var mineralsIncome = GetValue(last_month, "minerals");
+				country.MineralsIncome = Convert.ToDouble(mineralsIncome.GetChild(1).GetText());
+
+				var foodIncome = GetValue(last_month, "food");
+				if (foodIncome != null)
+					country.FoodIncome = Convert.ToDouble(foodIncome.GetChild(1).GetText());
 				else
-					country.Energy = Convert.ToDouble(energy.GetText());
-
-				var minerals = GetValue(resources, "minerals");
-				if (minerals is ParadoxParser.ScopeContext)
-					country.Minerals = Convert.ToDouble(minerals.GetChild(1).GetText());
-				else
-					country.Minerals = Convert.ToDouble(minerals.GetText());
-
-				var food = GetValue(resources, "food");
-				if (food is null)
-					country.Food = 0;
-				else if (food is ParadoxParser.ScopeContext)
-					country.Food = Convert.ToDouble(food.GetChild(1).GetText());
-				else
-					country.Food = Convert.ToDouble(food.GetText());
+					country.FoodIncome = 0;
 
 
-				var influence = GetValue(resources, "influence");
-				if (influence is ParadoxParser.ScopeContext)
-					country.Influence = Convert.ToDouble(influence.GetChild(1).GetText());
-				else
-					country.Influence = Convert.ToDouble(influence.GetText());
+				var influenceIncome = GetValue(last_month, "influence");
+				country.InfluenceIncome = Convert.ToDouble(influenceIncome.GetChild(1).GetText());
 
-
-				//var unity = GetValue(resources, "unity");
-				//if (unity is ParadoxParser.ScopeContext)
-				//    country.Unity = Convert.ToDouble(unity.GetChild(1).GetText());
-				//else
-				//    country.Unity = Convert.ToDouble(unity.GetText());
-
-				// ReSharper disable InconsistentNaming
-				var last_month = GetValue(standard_economy_module, "last_month")?.GetChild(1);
-				if (last_month != null)
-				{
-					var energyIncome = GetValue(last_month, "energy");
-					country.EnergyIncome = Convert.ToDouble(energyIncome.GetChild(1).GetText());
-
-					var mineralsIncome = GetValue(last_month, "minerals");
-					country.MineralsIncome = Convert.ToDouble(mineralsIncome.GetChild(1).GetText());
-
-					var foodIncome = GetValue(last_month, "food");
-					if (foodIncome != null)
-						country.FoodIncome = Convert.ToDouble(foodIncome.GetChild(1).GetText());
-					else
-						country.FoodIncome = 0;
-
-
-					var influenceIncome = GetValue(last_month, "influence");
-					country.InfluenceIncome = Convert.ToDouble(influenceIncome.GetChild(1).GetText());
-
-					var unityIncome = GetValue(last_month, "unity");
-					country.UnityIncome = Convert.ToDouble(unityIncome.GetChild(1).GetText());
+				var unityIncome = GetValue(last_month, "unity");
+				country.UnityIncome = Convert.ToDouble(unityIncome.GetChild(1).GetText());
 
 				var traditions = GetValue(kvPairs, "traditions");
 				for (int j = 1; j < traditions?.ChildCount - 1; j++)
 					country.Traditions.Add(traditions.GetChild(j).GetText().Trim('"'));
 
-					var physics_research = GetValue(last_month, "physics_research");
-					country.PhysicsResearchIncome = Convert.ToDouble(physics_research.GetChild(1).GetText());
+				var physics_research = GetValue(last_month, "physics_research");
+				country.PhysicsResearchIncome = Convert.ToDouble(physics_research.GetChild(1).GetText());
 
-					var society_research = GetValue(last_month, "society_research");
-					country.SocietyResearchIncome = Convert.ToDouble(society_research.GetChild(1).GetText());
+				var society_research = GetValue(last_month, "society_research");
+				country.SocietyResearchIncome = Convert.ToDouble(society_research.GetChild(1).GetText());
 
-					var engineering_research = GetValue(last_month, "engineering_research");
-					country.EngineeringResearchIncome = Convert.ToDouble(engineering_research.GetChild(1).GetText());
-				}
+				var engineering_research = GetValue(last_month, "engineering_research");
+				country.EngineeringResearchIncome = Convert.ToDouble(engineering_research.GetChild(1).GetText());
+			}
 		}
 
-		private List<Planet> GetColonies(IParseTree owned_planets)
+		/// <summary>
+		/// 返回Planet ID
+		/// </summary>
+		/// <param name="owned_planets"></param>
+		/// <returns></returns>
+		private IEnumerable<string> GetColonies(IParseTree owned_planets)
 		{
-			var colonies = new List<Planet>();
-
 			for (int j = 1; j < owned_planets.ChildCount - 2; j++)
 			{
-				var planetId = owned_planets.GetChild(j).GetText();
-				colonies.Add(GetPlanet(planetId));
+				yield return owned_planets.GetChild(j).GetText();
 			}
-
-			return colonies;
 		}
 
 		private Planet GetPlanet(string planetId)
@@ -269,6 +271,54 @@ namespace StellarisLedger
 
 			return new Pop { Id = popId, Faction = factionName };
 		}
+
+		public List<PlanetTiles> GetCountryPlanetTiles(string tag)
+		{
+			var countryData = GetValue(countriesData, tag);
+			var scope = countryData as ParadoxParser.ScopeContext;
+			if (scope == null)
+				throw new ArgumentException($"{tag} is not a playable country.");
+
+			var owned_planets = GetValue(scope.paradox(), "owned_planets");
+			return (from planetId in GetColonies(owned_planets)
+					select GetPlanetTitles(planetId)).ToList();
+		}
+
+		private PlanetTiles GetPlanetTitles(string planetId)
+		{
+			var planetData = GetValue(planetsData, planetId).GetChild(1);
+			var planetSize = Convert.ToInt32(GetValue(planetData, "planet_size")?.GetText());
+
+			var tiles = GetValue(planetData, "tiles").GetChild(1);
+			var planetTiles = new PlanetTiles();
+			planetTiles.Id = planetId;
+			planetTiles.Name = GetStringValue(planetData, "name");
+			planetTiles.Tiles = new List<Tile>(planetSize);
+			for (int titleIndex = 0; titleIndex < planetSize; titleIndex++)
+			{
+				var tileData = tiles.GetChild(titleIndex);
+
+				var tile = new Tile();
+				planetTiles.Tiles.Add(tile);
+				tile.Id = tileData.GetChild(0).GetText();
+
+				var resources = GetValue(tileData.GetChild(2).GetChild(1), "resources")?.GetChild(1);
+				if (resources != null)
+				{
+					for (int i = 0; i < resources.ChildCount; i++)
+					{
+						var resource = resources.GetChild(i);
+						string resourceName = resource.GetChild(0).GetText();
+						var value = resource.GetChild(2).GetChild(1).GetText();
+						Debug.Assert(resource.GetChild(2).GetChild(2).GetText() == value, $"planetId={planetId}, tileId={tileData.GetChild(0).GetText()}，一项资源的两个数值不同：\n{resource.GetText()}");
+						tile.Resources[resourceName] = Convert.ToDouble(value);
+					}
+				}
+			}
+
+			return planetTiles;
+		}
+
 
 		private static string GetMatchedScope(string content, string scopeName)
 		{
