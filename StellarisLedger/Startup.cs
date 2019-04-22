@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace StellarisLedger
@@ -82,6 +83,9 @@ namespace StellarisLedger
 	        app.UseRequestLocalization(options.Value);
 
 			app.UseMvc();
-        }
+
+
+			ApplicationLogging.LoggerFactory.AddConsole(Configuration.GetSection("Logging"));
+		}
     }
 }

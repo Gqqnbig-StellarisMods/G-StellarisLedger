@@ -10,13 +10,13 @@ namespace StellarisLedger
 		public string Name { get; set; }
 		public string Id { get; set; }
 
-		public List<Tile> Tiles { get; set; }
+		public Dictionary<int, Tile> Tiles { get; set; }
 	}
 
 
 	public class Tile
 	{
-		public string Id { get; set; }
+		//public string Id { get; set; }
 
 		public Dictionary<string, double> Resources { get; set; } = new Dictionary<string, double>();
 		//public int Minerals { get; set; }

@@ -3,16 +3,113 @@
 *@
 @using Microsoft.AspNetCore.Mvc.Localization
 @using Newtonsoft.Json
-@inject IViewLocalizer Localizer
+@*支持页面基础部分的本地化，字符串由Resources\View文件夹里的文件提供*@
+@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer Lo
+@*支持群星游戏字符串的本地化，字符串由游戏的YAML文件提供*@
+@inject YamlStringLocalizer YLo
+
 @model PlanetTiles[]
 
 @{
 	ViewData["Title"] = "Planets";
 }
 
+@section head
+	{
+	<style type="text/css">
+		.nonexistent {
+			background-color: lightgray;
+			cursor: not-allowed;
+		}
+
+		.tiles {
+			margin-bottom: 2em;
+		}
+
+		table.tiles caption {
+			caption-side: top;
+		}
+
+		.tiles td {
+			text-align: center;
+		}
+
+		.tiles .resource {
+			margin: 0.1em 0.2em;
+		}
+	</style>
+}
+
+<div id="planets">
+
+</div>
+
+
 @section Scripts
-{
+	{
+	<script type="text/javascript" src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
 	<script type="text/javascript">
-		var planetsData=@Html.Raw(Json.Serialize(Model));
+		var planetsData = @Html.Raw(Json.Serialize(Model));
+
+
+		planetsData.forEach(planet =>
+		{
+			let $planetTable = $(`<table class="table-bordered tiles"><caption>${planet.name}</caption></table>`);
+
+			let id = 0;
+			let tiles = planet.tiles;
+			let planetSize = Object.keys(tiles).length;
+			outside:
+
+				for (let row = 0; row < 5; row++)
+				{
+					let $tr = $("<tr>");
+					for (let column = 0; column < 5; column++)
+					{
+						let $td = $("<td>");
+						if (tiles[id])
+						{
+							let technologies = 0;
+							let special = 0;
+							for (let [resourceName,amount] of Object.entries(tiles[id].resources))
+							{
+								switch (resourceName)
+								{
+									case "minerals":
+										$td.append(`<span class="resource"><img src="https://stellaris.paradoxwikis.com/images/1/10/Minerals.png" title="@YLo["minerals"]">${amount}</span>`);
+										break;
+									case "energy":
+										$td.append(`<span class="resource"><img src="https://stellaris.paradoxwikis.com/images/5/58/Energy_Credits.png" title="@YLo["minerals"]">${amount}</span>`);
+										break;
+									case "food":
+										$td.append(`<span class="resource"><img src="https://stellaris.paradoxwikis.com/images/c/c6/Food.png" title="@YLo["minerals"]">${amount}</span>`);
+										break;
+									case "physics_research":
+									case "society_research":
+									case "engineering_research":
+										technologies += amount;
+										break;
+									default:
+										special += amount;
+								}
+							}
+							if (technologies > 0)
+								$td.append(`<span class="resource"><img src="https://stellaris.paradoxwikis.com/images/2/20/Research.png" width=22 title="@YLo["minerals"]">${technologies}</span>`);
+							if (special > 0)
+								$td.append(`<span class="resource"><img src="https://stellaris.paradoxwikis.com/images/8/83/Strategic.png" title="@YLo["minerals"]">${special}</span>`);
+						} else
+							$td.addClass("nonexistent");
+						$tr.append($td);
+						id++;
+					}
+					$planetTable.append($tr);
+					if (id > planetSize)
+						break outside;
+				}
+
+
+			$("#planets").append($planetTable);
+		});
+
 	</script>
 }

@@ -293,14 +293,13 @@ namespace StellarisLedger
 			var planetTiles = new PlanetTiles();
 			planetTiles.Id = planetId;
 			planetTiles.Name = GetStringValue(planetData, "name");
-			planetTiles.Tiles = new List<Tile>(planetSize);
+			planetTiles.Tiles = new Dictionary<int, Tile>(planetSize);
 			for (int titleIndex = 0; titleIndex < planetSize; titleIndex++)
 			{
 				var tileData = tiles.GetChild(titleIndex);
 
 				var tile = new Tile();
-				planetTiles.Tiles.Add(tile);
-				tile.Id = tileData.GetChild(0).GetText();
+				planetTiles.Tiles[Convert.ToInt32(tileData.GetChild(0).GetText())] = tile;
 
 				var resources = GetValue(tileData.GetChild(2).GetChild(1), "resources")?.GetChild(1);
 				if (resources != null)
