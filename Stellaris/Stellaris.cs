@@ -5,6 +5,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace StellarisLedger
 {
@@ -12,18 +13,35 @@ namespace StellarisLedger
 	{
 		public static string GetGameSaveContent(string saveGamePath)
 		{
+			var myTempFolder = Path.Combine(Path.GetTempPath(), "StellarisLedger");
+			var cacheFileName = Path.Combine(myTempFolder, Path.GetFileNameWithoutExtension(saveGamePath));
+			try
+			{
+				Directory.CreateDirectory(myTempFolder);
+				if (File.Exists(cacheFileName) && File.GetLastWriteTime(saveGamePath) < File.GetLastWriteTime(cacheFileName))
+					return File.ReadAllText(cacheFileName);
+			}
+			catch (Exception e)
+			{
+				var logger = ApplicationLogging.CreateLogger<Stellaris>();
+				logger.LogWarning("Unable to create save game cache files.\n" + e.Message);
+			}
+
+			string content;
 			using (var zipArchive = ZipFile.Open(saveGamePath, ZipArchiveMode.Read))
 			{
 				var gamestate = zipArchive.GetEntry("gamestate");
-				string content;
 
-				using (var sr = new StreamReader(gamestate.Open(), System.Text.Encoding.UTF8))
+				using (var sr = new StreamReader(gamestate.Open(), Encoding.UTF8))
 				{
 					content = sr.ReadToEnd();
 				}
-
-				return content;
 			}
+
+			Task t = new Task(c => File.WriteAllText(cacheFileName, (string)c), content);
+			t.Start();
+
+			return content;
 		}
 
 		public static IEnumerable<string> GetMostRecentSaves(string saveGamesPath, int? limit)
