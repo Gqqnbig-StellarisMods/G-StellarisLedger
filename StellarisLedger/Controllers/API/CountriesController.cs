@@ -87,48 +87,9 @@ namespace StellarisLedger.Controllers.Api
         /// <returns>第0个是最近的</returns>
         [HttpGet("RecentSaves")]
         public IEnumerable<string> GetMostRecentSaves([FromQuery]int? limit = null)
-        {
-
-            var saveGamesDirectory = new DirectoryInfo(saveGamesPath);
-            var directories = saveGamesDirectory.GetDirectories();
-            if (directories.Any() == false)
-                throw new ArgumentException($"存档目录\"{saveGamesPath}\"不包含子文件夹");
-
-            var mostRecentWriteTime = directories.Max(d => d.LastWriteTime);
-            var mostRecentPlayDirectory = directories.First(d => d.LastWriteTime == mostRecentWriteTime);
-
-            var files = mostRecentPlayDirectory.GetFiles("*.sav");
-            if (files.Any() == false)
-                throw new ArgumentException($"存档目录\"{mostRecentPlayDirectory.FullName}\"不包含游戏存档文件(*.sav)");
-
-            var orderedFiles = files.OrderByDescending(f => f.LastWriteTime).ToList();
-            //排除文件名日期顺序不符的
-
-            int lastDate = int.MaxValue;
-            for (int i = 0; i < orderedFiles.Count; i++)
-            {
-                var dateString = Path.GetFileNameWithoutExtension(orderedFiles[i].Name);
-                try
-                {
-                    dateString = dateString.Replace(".", "");
-                    int d = Convert.ToInt32(dateString);
-                    if (d < lastDate)
-                        lastDate = d;
-                    else
-                        orderedFiles.RemoveAt(i--);
-                }
-                catch
-                {
-                    orderedFiles.RemoveAt(i--);
-                }
-            }
-            
-            var result = orderedFiles.Select(f => f.FullName.Substring(saveGamesPath.Length).Trim(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar));
-            if (limit == null)
-                return result;
-            else
-                return result.Take(limit.Value);
-        }
+		{
+			return Stellaris.GetMostRecentSaves(saveGamesPath,limit);
+		}
 
 
 	    class SerializePopContractResolver : CamelCasePropertyNamesContractResolver
