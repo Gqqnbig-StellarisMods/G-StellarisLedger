@@ -209,7 +209,7 @@ namespace StellarisLedger
 		/// <returns></returns>
 		private IEnumerable<string> GetColonies(IParseTree owned_planets)
 		{
-			for (int j = 1; j < owned_planets.ChildCount - 2; j++)
+			for (int j = 1; j < owned_planets.ChildCount - 1; j++)
 			{
 				yield return owned_planets.GetChild(j).GetText();
 			}
