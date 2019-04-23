@@ -44,6 +44,10 @@
 		.bg-highlight {
 			border: 3px dotted orange !important;
 		}
+
+		.bg-active {
+			border: 3px dotted lightblue !important;
+		}
 	</style>
 }
 
@@ -124,15 +128,29 @@
 			//并列第一的都列出来
 			for (let i = 0; i < result.length && (i < 3 || result[i].bonus === maxBonus); i++)
 			{
-				$resultDisplay.append(`<p>都城建在<span class="${result[i].bonus === maxBonus ? "bg-highlight" : ""}" >${result[i].capitalTileId}</span>，加成为${result[i].bonus}${result[i].conditions}</p>`);
+				$resultDisplay.append(`<p>都城建在<span class="tileId ${result[i].bonus === maxBonus ? "bg-highlight" : ""}" >${result[i].capitalTileId}</span>，加成为${result[i].bonus}${result[i].conditions}</p>`);
 				if (result[i].bonus === maxBonus)
-				{
-					let r = parseInt(result[i].capitalTileId / 5);
-					let c = result[i].capitalTileId % 5;
-					$section.find(`table.tiles tr:nth-child(${r + 1}) td:nth-child(${c + 1})`).addClass("bg-highlight");
-				}
+					findTileTd.call($section, result[i].capitalTileId).addClass("bg-highlight");
 			}
+
+			$form.find(".tileId").hover(function()
+			{
+				let $this = $(this);
+				findTileTd.call($this, parseInt($this.text())).addClass("bg-active");
+			}, function()
+			{
+				let $this = $(this);
+				findTileTd.call($this, parseInt($this.text())).removeClass("bg-active");
+			});
 		};
+
+		function findTileTd(id)
+		{
+			let r = parseInt(id / 5);
+			let c = id % 5;
+			return this.closest(".planet").find(`table.tiles  tr:nth-child(${r + 1}) td:nth-child(${c + 1})`);
+		}
+
 
 		function buildTilesTable($planetTable, tiles)
 		{
@@ -234,14 +252,20 @@
 							if (res.energy > 0 || res.minerals > 0 || res.food > 0)
 							{
 								bonus += options.adjacencyBonus;
-								if (res.research)
-									conditions += `; 假设地块${id}造基本建筑，${res.resource}点科研被压`;
+								if (res.research || res.special)
+								{
+									conditions += `; 假设地块<span class="tileId">${id}</span>造基本建筑`;
+									if (res.research)
+										conditions += `，${res.resource}点科研被压`;
+									if (res.special)
+										conditions += "，特殊资源被压";
+								}
 							} else if (res.research)
 							{
 								//不覆盖科研点
 							} else
 							{
-								conditions += `; 假设空地块${id}造基本建筑`;
+								conditions += `; 假设空地块<span class="tileId">${id}</span>造基本建筑`;
 								bonus += options.adjacencyBonus;
 							}
 						}
