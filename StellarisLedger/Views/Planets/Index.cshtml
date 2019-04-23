@@ -89,49 +89,52 @@
 
 		document.planetsData = {}; //不用关键字var可成为全局变量，但这在严格模式不允许。
 
-		fetch("/api/latest/latest/Countries/me/Planets").then(response => response.json()).then(planetsData =>
+		let saveGamePath = "@ViewData["saveGamePath"]";
+		if (saveGamePath)
 		{
-			document.planetsData = planetsData;
-
-
-			let $template = $("#planetSectionTemplate");
-			$template.detach();
-
-			planetsData.forEach((planet, index) =>
+			fetch(`/api/${saveGamePath}/Countries/me/Planets`).then(response => response.json()).then(planetsData =>
 			{
-				let $section = $template.clone();
-				$section.removeAttr("id");
-				$section.attr("index", index);
-
-				$section.find("legend").text(planet.Name);
-
-				buildTilesTable($section.find(".tiles"), planet.Tiles);
-
-				let $form = $section.find(".best-colony");
-				let $button = $form.find("button");
-				$button.click(bestColonyButton_Click);
+				document.planetsData = planetsData;
 
 
-				let s = localStorage.getItem("planet-capital-options");
-				if (s)
+				let $template = $("#planetSectionTemplate");
+				$template.detach();
+
+				planetsData.forEach((planet, index) =>
 				{
-					try
+					let $section = $template.clone();
+					$section.removeAttr("id");
+					$section.attr("index", index);
+
+					$section.find("legend").text(planet.Name);
+
+					buildTilesTable($section.find(".tiles"), planet.Tiles);
+
+					let $form = $section.find(".best-colony");
+					let $button = $form.find("button");
+					$button.click(bestColonyButton_Click);
+
+
+					let s = localStorage.getItem("planet-capital-options");
+					if (s)
 					{
-						let options = JSON.parse(s);
-						$form.find(".adjacency-bonus-input").val(options.adjacencyBonus);
-						$form.find(".ignore-food-input")[0].checked = options.ignoreFood;
-						$form.find(".not-on-special-input")[0].checked = options.notOnSpecial;
-					}
-					catch(e)
-					{
-						localStorage.removeItem("planet-capital-options");
+						try
+						{
+							let options = JSON.parse(s);
+							$form.find(".adjacency-bonus-input").val(options.adjacencyBonus);
+							$form.find(".ignore-food-input")[0].checked = options.ignoreFood;
+							$form.find(".not-on-special-input")[0].checked = options.notOnSpecial;
+						} catch (e)
+						{
+							localStorage.removeItem("planet-capital-options");
+						}
 					}
 
-				}
-
-				$("#planets").append($section);
+					$("#planets").append($section);
+				});
 			});
-		});
+		} else
+			$("body").text("No save games!");
 
 		function bestColonyButton_Click()
 		{

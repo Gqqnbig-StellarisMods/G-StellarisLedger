@@ -28,21 +28,10 @@ namespace StellarisLedger.Controllers.API
 		[HttpGet(@"{gameId}/{saveName}/Countries/{tag}/Planets")]
 		public HttpResponseMessage GetPlanetTilesData(string gameId, string saveName, string tag)
 		{
-			if (gameId.Equals("latest", StringComparison.OrdinalIgnoreCase) == false ||
-				saveName.Equals("latest", StringComparison.OrdinalIgnoreCase) == false)
-			{
-				var logger = ApplicationLogging.CreateLogger<PlanetsController>();
-				logger.LogWarning("gameId, saveName must both be \"latest\".");
-			}
-
 			if (tag.Equals("me",StringComparison.OrdinalIgnoreCase))
 				tag = "0";
 
-			var fileName = Stellaris.GetMostRecentSaves(saveGamesPath, 1).FirstOrDefault();
-			if (fileName == null)
-				return null;
-
-			var content = Stellaris.GetGameSaveContent(System.IO.Path.Combine(saveGamesPath, fileName));
+			var content = Stellaris.GetGameSaveContent(Path.Combine(saveGamesPath,gameId,saveName));
 			var analyst = new Analyst(content);
 			var planetTilesData = analyst.GetCountryPlanetTiles(tag);
 
