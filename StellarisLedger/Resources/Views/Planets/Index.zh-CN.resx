@@ -117,6 +117,18 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="Adjacency Bonus" xml:space="preserve">
+    <value>邻接加成</value>
+  </data>
+  <data name="Do not build on special resources" xml:space="preserve">
+    <value>不要把都城建在特殊资源上</value>
+  </data>
+  <data name="Find best tile for colony capital" xml:space="preserve">
+    <value>列出行星都城的最佳位置</value>
+  </data>
+  <data name="Ignore food, useful for machine empire who doesn't consume food." xml:space="preserve">
+    <value>忽略食物，如果是机械帝国就不需要食物</value>
+  </data>
   <data name="Special Resources, eg. alien pets, betharian" xml:space="preserve">
     <value>特殊资源，如外星宠物、倍燃石</value>
   </data>

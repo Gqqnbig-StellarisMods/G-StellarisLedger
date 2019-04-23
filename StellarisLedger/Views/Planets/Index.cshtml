@@ -67,8 +67,8 @@
 						<option value="2">2 - @YLo["building_capital_2"]</option>
 						<option value="3">3 - @YLo["building_capital_3"]</option>
 					</select>
-					<label class="form-check" style="padding-left: 0"><input class="ignore-food" type="checkbox" />@Lo["Ignore food, useful for machine empire who doesn't consume food."]</label>
-					<label class="form-check" style="padding-left: 0"><input class="not-on-special" type="checkbox" />@Lo["Do not build on special resources"]</label>
+					<label class="form-check" style="padding-left: 0"><input class="ignore-food-input" type="checkbox" />@Lo["Ignore food, useful for machine empire who doesn't consume food."]</label>
+					<label class="form-check" style="padding-left: 0"><input class="not-on-special-input" type="checkbox" />@Lo["Do not build on special resources"]</label>
 
 
 					<button>@Lo["Find best tile for colony capital"]</button>
@@ -87,26 +87,50 @@
 	<script type="text/javascript">
 		'use strict';
 
-		var planetsData = @Html.Raw(Json.Serialize(Model));
+		document.planetsData = {}; //不用关键字var可成为全局变量，但这在严格模式不允许。
 
-
-		let $template = $("#planetSectionTemplate");
-		$template.detach();
-
-		planetsData.forEach((planet, index) =>
+		fetch("/api/latest/latest/Countries/me/Planets").then(response => response.json()).then(planetsData =>
 		{
-			let $section = $template.clone();
-			$section.removeAttr("id");
-			$section.attr("index", index);
+			document.planetsData = planetsData;
 
-			$section.find("legend").text(planet.name);
 
-			buildTilesTable($section.find(".tiles"), planet.tiles);
+			let $template = $("#planetSectionTemplate");
+			$template.detach();
 
-			let $button = $section.find(".best-colony button");
-			$button.click(bestColonyButton_Click);
+			planetsData.forEach((planet, index) =>
+			{
+				let $section = $template.clone();
+				$section.removeAttr("id");
+				$section.attr("index", index);
 
-			$("#planets").append($section);
+				$section.find("legend").text(planet.Name);
+
+				buildTilesTable($section.find(".tiles"), planet.Tiles);
+
+				let $form = $section.find(".best-colony");
+				let $button = $form.find("button");
+				$button.click(bestColonyButton_Click);
+
+
+				let s = localStorage.getItem("planet-capital-options");
+				if (s)
+				{
+					try
+					{
+						let options = JSON.parse(s);
+						$form.find(".adjacency-bonus-input").val(options.adjacencyBonus);
+						$form.find(".ignore-food-input")[0].checked = options.ignoreFood;
+						$form.find(".not-on-special-input")[0].checked = options.notOnSpecial;
+					}
+					catch(e)
+					{
+						localStorage.removeItem("planet-capital-options");
+					}
+
+				}
+
+				$("#planets").append($section);
+			});
 		});
 
 		function bestColonyButton_Click()
@@ -118,11 +142,15 @@
 			$section.find("table.tiles td").removeClass("bg-highlight");
 
 
-			let planet = planetsData[parseInt($section.attr("index"))];
+			let planet = document.planetsData[parseInt($section.attr("index"))];
 			let options = {
 				adjacencyBonus: parseInt($form.find(".adjacency-bonus-input").val()),
-				notOnSpecial: $form.find(".not-on-special")[0].checked
+				notOnSpecial: $form.find(".not-on-special-input")[0].checked
 			};
+
+			localStorage.setItem("planet-capital-options", JSON.stringify(options));
+
+
 			let result = findBestTileForColonyCapital(planet.tiles, options);
 			let maxBonus = result[0].bonus;
 			//并列第一的都列出来
@@ -213,6 +241,9 @@
 				{
 					if (tiles[id])
 					{
+						if (options.notOnSpecial && tiles[id].Resources.special)
+							continue;
+
 						let r = getTotalBonus(tiles, id, options);
 						r.capitalTileId = id;
 						list.push(r);
