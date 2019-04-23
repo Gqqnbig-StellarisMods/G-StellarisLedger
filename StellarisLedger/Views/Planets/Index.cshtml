@@ -40,79 +40,224 @@
 		.tiles .resource {
 			margin: 0.1em 0.2em;
 		}
+
+		.bg-highlight {
+			border: 3px dotted orange !important;
+		}
 	</style>
 }
 
 <div id="planets">
+	<fieldset class="planet" id="planetSectionTemplate">
+		<legend></legend>
 
+		<div class="container-fluid">
+			<div class="row">
+				<div class="col-md">
+					<table class='table-bordered tiles'></table>
+				</div>
+				<div class="best-colony col-md">
+					<label>@Lo["Adjacency Bonus"]</label>
+					<select class="adjacency-bonus-input">
+						<option value="1">1 - @YLo["building_capital_1"]</option>
+						<option value="2">2 - @YLo["building_capital_2"]</option>
+						<option value="3">3 - @YLo["building_capital_3"]</option>
+					</select>
+					<label class="form-check" style="padding-left: 0"><input class="ignore-food" type="checkbox" />@Lo["Ignore food, useful for machine empire who doesn't consume food."]</label>
+					<label class="form-check" style="padding-left: 0"><input class="not-on-special" type="checkbox" />@Lo["Do not build on special resources"]</label>
+
+
+					<button>@Lo["Find best tile for colony capital"]</button>
+
+					<div class="result-display"></div>
+				</div>
+			</div>
+		</div>
+	</fieldset>
 </div>
 
 
 @section Scripts
-	{
+{
 	<script type="text/javascript" src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
 	<script type="text/javascript">
+		'use strict';
+
 		var planetsData = @Html.Raw(Json.Serialize(Model));
 
 
-		planetsData.forEach(planet =>
+		let $template = $("#planetSectionTemplate");
+		$template.detach();
+
+		planetsData.forEach((planet, index) =>
 		{
-			let $planetTable = $(`<table class="table-bordered tiles"><caption>${planet.name}</caption></table>`);
+			let $section = $template.clone();
+			$section.removeAttr("id");
+			$section.attr("index", index);
 
-			let id = 0;
-			let tiles = planet.tiles;
-			let planetSize = Object.keys(tiles).length;
-			outside:
+			$section.find("legend").text(planet.name);
 
-				for (let row = 0; row < 5; row++)
-				{
-					let $tr = $("<tr>");
-					for (let column = 0; column < 5; column++)
-					{
-						let $td = $("<td>");
-						if (tiles[id])
-						{
-							let technologies = 0;
-							let special = 0;
-							for (let [resourceName,amount] of Object.entries(tiles[id].resources))
-							{
-								switch (resourceName)
-								{
-									case "minerals":
-										$td.append(`<span class="resource"><img src="https://stellaris.paradoxwikis.com/images/1/10/Minerals.png" title="@YLo["minerals"]">${amount}</span>`);
-										break;
-									case "energy":
-										$td.append(`<span class="resource"><img src="https://stellaris.paradoxwikis.com/images/5/58/Energy_Credits.png" title="@YLo["minerals"]">${amount}</span>`);
-										break;
-									case "food":
-										$td.append(`<span class="resource"><img src="https://stellaris.paradoxwikis.com/images/c/c6/Food.png" title="@YLo["minerals"]">${amount}</span>`);
-										break;
-									case "physics_research":
-									case "society_research":
-									case "engineering_research":
-										technologies += amount;
-										break;
-									default:
-										special += amount;
-								}
-							}
-							if (technologies > 0)
-								$td.append(`<span class="resource"><img src="https://stellaris.paradoxwikis.com/images/2/20/Research.png" width=22 title="@YLo["minerals"]">${technologies}</span>`);
-							if (special > 0)
-								$td.append(`<span class="resource"><img src="https://stellaris.paradoxwikis.com/images/8/83/Strategic.png" title="@YLo["minerals"]">${special}</span>`);
-						} else
-							$td.addClass("nonexistent");
-						$tr.append($td);
-						id++;
-					}
-					$planetTable.append($tr);
-					if (id > planetSize)
-						break outside;
-				}
+			buildTilesTable($section.find(".tiles"), planet.tiles);
 
+			let $button = $section.find(".best-colony button");
+			$button.click(bestColonyButton_Click);
 
-			$("#planets").append($planetTable);
+			$("#planets").append($section);
 		});
 
+		function bestColonyButton_Click()
+		{
+			let $section = $(this).closest(".planet");
+			let $form = $(this).closest(".best-colony");
+			let $resultDisplay = $form.find(".result-display");
+			$resultDisplay.empty();
+			$section.find("table.tiles td").removeClass("bg-highlight");
+
+
+			let planet = planetsData[parseInt($section.attr("index"))];
+			let options = {
+				adjacencyBonus: parseInt($form.find(".adjacency-bonus-input").val()),
+				notOnSpecial: $form.find(".not-on-special")[0].checked
+			};
+			let result = findBestTileForColonyCapital(planet.tiles, options);
+			let maxBonus = result[0].bonus;
+			//并列第一的都列出来
+			for (let i = 0; i < result.length && (i < 3 || result[i].bonus === maxBonus); i++)
+			{
+				$resultDisplay.append(`<p>都城建在<span class="${result[i].bonus === maxBonus ? "bg-highlight" : ""}" >${result[i].capitalTileId}</span>，加成为${result[i].bonus}${result[i].conditions}</p>`);
+				if (result[i].bonus === maxBonus)
+				{
+					let r = parseInt(result[i].capitalTileId / 5);
+					let c = result[i].capitalTileId % 5;
+					$section.find(`table.tiles tr:nth-child(${r + 1}) td:nth-child(${c + 1})`).addClass("bg-highlight");
+				}
+			}
+		};
+
+		function buildTilesTable($planetTable, tiles)
+		{
+			let id = 0;
+			//let planetSize = Object.keys(tiles).length;
+			//outside:
+
+			for (let row = 0; row < 5; row++)
+			{
+				let $tr = $("<tr>");
+				for (let column = 0; column < 5; column++)
+				{
+					let $td = $("<td>");
+					if (tiles[id])
+					{
+						let technologies = 0;
+						let special = 0;
+						for (let [resourceName, amount] of Object.entries(tiles[id].resources))
+						{
+							switch (resourceName)
+							{
+							case "minerals":
+								$td.append(`<span class="resource"><img src="https://stellaris.paradoxwikis.com/images/1/10/Minerals.png" title="@YLo["minerals"]">${amount}</span>`);
+								break;
+							case "energy":
+								$td.append(`<span class="resource"><img src="https://stellaris.paradoxwikis.com/images/5/58/Energy_Credits.png" title="@YLo["energy"]">${amount}</span>`);
+								break;
+							case "food":
+								$td.append(`<span class="resource"><img src="https://stellaris.paradoxwikis.com/images/c/c6/Food.png" title="@YLo["food"]">${amount}</span>`);
+								break;
+							case "research":
+								technologies += amount;
+								break;
+							default:
+								special += amount;
+							}
+						}
+						if (technologies > 0)
+							$td.append(`<span class="resource"><img src="https://stellaris.paradoxwikis.com/images/2/20/Research.png" width=22 title="@YLo["RESEARCH"]">${technologies}</span>`);
+						if (special > 0)
+							$td.append(`<span class="resource"><img src="https://stellaris.paradoxwikis.com/images/8/83/Strategic.png" title="@Lo["Special Resources, eg. alien pets, betharian"]">${special}</span>`);
+					} else
+						$td.addClass("nonexistent");
+					$tr.append($td);
+					id++;
+				}
+				$planetTable.append($tr);
+				//if (id > planetSize)
+				//	break outside;
+			}
+		};
+
+		function findBestTileForColonyCapital(tiles, options)
+		{
+			let id = 0;
+			let list = [];
+			for (let row = 0; row < 5; row++)
+			{
+				for (let column = 0; column < 5; column++)
+				{
+					if (tiles[id])
+					{
+						let r = getTotalBonus(tiles, id, options);
+						r.capitalTileId = id;
+						list.push(r);
+					}
+
+					id++;
+				}
+			}
+
+			list.sort((a, b) => b.bonus - a.bonus);
+			return list;
+		}
+
+		function getTotalBonus(tiles, capitalTileId, options)
+		{
+			let id = 0;
+			let bonus = 0;
+			let conditions = '';
+			for (let row = 0; row < 5; row++)
+			{
+				for (let column = 0; column < 5; column++)
+				{
+					if (tiles[id])
+					{
+						let res = Object.assign({}, tiles[id].resources);
+						//行星都城本格只能产电
+						if (id === capitalTileId)
+						{
+							if (options.notOnSpecial && res.special)
+								continue;
+
+							delete res.energy;
+							//除电以外的资源都被压了，减成
+							Object.keys(res).forEach(k => bonus -= res[k]);
+						} else if (isTileAdjacent(id, capitalTileId))
+						{
+							if (res.energy > 0 || res.minerals > 0 || res.food > 0)
+							{
+								bonus += options.adjacencyBonus;
+								if (res.research)
+									conditions += `; 假设地块${id}造基本建筑，${res.resource}点科研被压`;
+							} else if (res.research)
+							{
+								//不覆盖科研点
+							} else
+							{
+								conditions += `; 假设空地块${id}造基本建筑`;
+								bonus += options.adjacencyBonus;
+							}
+						}
+					}
+					id++;
+				}
+			}
+			return { bonus: bonus, conditions: conditions /*.substr(2)*/ };
+		}
+
+		function isTileAdjacent(id1, id2)
+		{
+			return id1 % 5 !== 0 && id1 - 1 === id2 ||
+				id1 % 5 !== 4 && id1 + 1 === id2 ||
+				parseInt(id1 / 5) > 0 && id1 - 5 === id2 ||
+				parseInt(id1 / 5) < 5 && id1 + 5 === id2;
+		}
 	</script>
 }

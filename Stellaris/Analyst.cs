@@ -310,7 +310,19 @@ namespace StellarisLedger
 						string resourceName = resource.GetChild(0).GetText();
 						var value = resource.GetChild(2).GetChild(1).GetText();
 						Debug.Assert(resource.GetChild(2).GetChild(2).GetText() == value, $"planetId={planetId}, tileId={tileData.GetChild(0).GetText()}，一项资源的两个数值不同：\n{resource.GetText()}");
-						tile.Resources[resourceName] = Convert.ToDouble(value);
+
+						//合并各种科技产出
+						if (resourceName == "physics_research" || resourceName == "society_research" || resourceName == "engineering_research")
+						{
+							if (tile.Resources.ContainsKey("research"))
+								tile.Resources["research"] += Convert.ToDouble(value);
+							else
+								tile.Resources["research"] = Convert.ToDouble(value);
+						}
+						else if (resourceName == "energy" || resourceName == "minerals" || resourceName == "food")
+							tile.Resources[resourceName] = Convert.ToDouble(value);
+						else
+							tile.Resources["special"] = 1;
 					}
 				}
 			}
