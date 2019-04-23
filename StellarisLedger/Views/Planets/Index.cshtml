@@ -145,13 +145,14 @@
 			let planet = document.planetsData[parseInt($section.attr("index"))];
 			let options = {
 				adjacencyBonus: parseInt($form.find(".adjacency-bonus-input").val()),
-				notOnSpecial: $form.find(".not-on-special-input")[0].checked
+				notOnSpecial: $form.find(".not-on-special-input")[0].checked,
+				ignoreFood: $form.find(".ignore-food-input")[0].checked
 			};
 
 			localStorage.setItem("planet-capital-options", JSON.stringify(options));
 
 
-			let result = findBestTileForColonyCapital(planet.tiles, options);
+			let result = findBestTileForColonyCapital(planet.Tiles, options);
 			let maxBonus = result[0].bonus;
 			//并列第一的都列出来
 			for (let i = 0; i < result.length && (i < 3 || result[i].bonus === maxBonus); i++)
@@ -276,11 +277,14 @@
 								continue;
 
 							delete res.energy;
+							if (options.ignoreFood)
+								delete res.food;
+
 							//除电以外的资源都被压了，减成
 							Object.keys(res).forEach(k => bonus -= res[k]);
 						} else if (isTileAdjacent(id, capitalTileId))
 						{
-							if (res.energy > 0 || res.minerals > 0 || res.food > 0)
+							if (res.energy > 0 || res.minerals > 0 || (!options.ignoreFood && res.food > 0))
 							{
 								bonus += options.adjacencyBonus;
 								if (res.research || res.special)
@@ -296,7 +300,10 @@
 								//不覆盖科研点
 							} else
 							{
-								conditions += `; 假设空地块<span class="tileId">${id}</span>造基本建筑`;
+								if (options.ignoreFood && res.food > 0)
+									conditions += `; 假设食物地块<span class="tileId">${id}</span>造基本建筑`;
+								else
+									conditions += `; 假设空地块<span class="tileId">${id}</span>造基本建筑`;
 								bonus += options.adjacencyBonus;
 							}
 						}
