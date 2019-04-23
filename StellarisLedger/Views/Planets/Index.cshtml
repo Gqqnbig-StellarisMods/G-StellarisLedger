@@ -196,7 +196,7 @@
 					{
 						let technologies = 0;
 						let special = 0;
-						for (let [resourceName, amount] of Object.entries(tiles[id].resources))
+						for (let [resourceName, amount] of Object.entries(tiles[id].Resources))
 						{
 							switch (resourceName)
 							{
@@ -268,7 +268,7 @@
 				{
 					if (tiles[id])
 					{
-						let res = Object.assign({}, tiles[id].resources);
+						let res = Object.assign({}, tiles[id].Resources);
 						//行星都城本格只能产电
 						if (id === capitalTileId)
 						{
