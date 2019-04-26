@@ -284,7 +284,7 @@ namespace StellarisLedger
 					select GetPlanetTitles(planetId)).ToList();
 		}
 
-		private PlanetTiles GetPlanetTitles(string planetId)
+		public PlanetTiles GetPlanetTitles(string planetId)
 		{
 			var planetData = GetValue(planetsData, planetId).GetChild(1);
 			var planetSize = Convert.ToInt32(GetValue(planetData, "planet_size")?.GetText());
