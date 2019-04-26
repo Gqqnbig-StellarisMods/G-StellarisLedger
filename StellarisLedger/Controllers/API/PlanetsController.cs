@@ -41,5 +41,20 @@ namespace StellarisLedger.Controllers.API
 			response.Content = new StringContent(json);
 			return response;
 		}
+
+		[ResponseCache(Duration = 3600 * 24 * 30)]
+		[HttpGet(@"{gameId}/{saveName}/Planets/{planetId}")]
+		public HttpResponseMessage GetPlanetTile(string gameId, string saveName, string planetId)
+		{
+			var content = Stellaris.GetGameSaveContent(Path.Combine(saveGamesPath, gameId, saveName));
+			var analyst = new Analyst(content);
+			var planetTiles = analyst.GetPlanetTitles(planetId);
+
+			string json = JsonConvert.SerializeObject(planetTiles, new JsonSerializerSettings { Formatting = serializerSettings.Formatting });
+
+			var response = new HttpResponseMessage(System.Net.HttpStatusCode.OK);
+			response.Content = new StringContent(json);
+			return response;
+		}
 	}
 }

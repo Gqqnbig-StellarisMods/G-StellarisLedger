@@ -52,30 +52,38 @@
 }
 
 <div id="planets">
-	<fieldset class="planet" id="planetSectionTemplate">
-		<legend></legend>
+	<div class="d-none">
+		<fieldset class="planet" id="planetSectionTemplate">
+			<legend></legend>
 
-		<div class="container-fluid">
-			<div class="row">
-				<div class="col-md">
-					<table class='table-bordered tiles'></table>
-				</div>
-				<div class="best-colony col-md">
-					<label>@Lo["Adjacency Bonus"]</label>
-					<select class="adjacency-bonus-input">
-						<option value="1">1 - @YLo["building_capital_1"]</option>
-						<option value="2">2 - @YLo["building_capital_2"]</option>
-						<option value="3">3 - @YLo["building_capital_3"]</option>
-					</select>
+			<div class="container-fluid">
+				<div class="row">
+					<div class="col-md">
+						<table class='table-bordered tiles'></table>
+					</div>
+					<div class="best-colony col-md">
+						<label>@Lo["Adjacency Bonus"]</label>
+						<select class="adjacency-bonus-input">
+							<option value="1">1 - @YLo["building_capital_1"]</option>
+							<option value="2">2 - @YLo["building_capital_2"]</option>
+							<option value="3">3 - @YLo["building_capital_3"]</option>
+						</select>
 					<label class="form-check" style="padding-left: 0"><input class="ignore-food-input" type="checkbox" />@Lo["Ignore food, useful for machine empire who doesn't consume food."]</label>
-					<label class="form-check" style="padding-left: 0"><input class="not-on-special-input" type="checkbox" />@Lo["Do not build on special resources"]</label>
+						<label class="form-check" style="padding-left: 0"><input class="not-on-special-input" type="checkbox" />@Lo["Do not build on special resources"]</label>
 
 
-					<button>@Lo["Find best tile for colony capital"]</button>
+						<button>@Lo["Find best tile for colony capital"]</button>
 
-					<div class="result-display"></div>
+						<div class="result-display"></div>
 				</div>
 			</div>
+		</fieldset>
+	</div>
+	<fieldset id="queryPlanet">
+		<legend>@Lo["Query a planet"]</legend>
+		<div>
+			<label>@Lo["Planet ID"] <input id="planetIdInput" type="number" /></label>
+			<button id="queryPlanetButton" type="submit">Submit</button>
 		</div>
 	</fieldset>
 </div>
@@ -89,10 +97,10 @@
 
 		document.planetsData = {}; //不用关键字var可成为全局变量，但这在严格模式不允许。
 
-		let saveGamePath = "@ViewData["saveGamePath"]";
-		if (saveGamePath)
+		document.saveGamePath = "@ViewData["saveGamePath"]";
+		if (document.saveGamePath)
 		{
-			fetch(`/api/${saveGamePath}/Countries/me/Planets`).then(response => response.json()).then(planetsData =>
+			fetch(`/api/${document.saveGamePath}/Countries/me/Planets`).then(response => response.json()).then(planetsData =>
 			{
 				document.planetsData = planetsData;
 
