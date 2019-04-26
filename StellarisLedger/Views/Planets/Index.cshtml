@@ -105,6 +105,7 @@
 @section Scripts
 {
 	<script type="text/javascript" src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+	<script src="~/content/planets.js"></script>
 	<script type="text/javascript">
 		'use strict';
 
@@ -222,14 +223,6 @@
 				findTileTd.call($this, parseInt($this.text())).removeClass("bg-active");
 			});
 		};
-
-		function findTileTd(id)
-		{
-			let r = parseInt(id / 5);
-			let c = id % 5;
-			return this.closest(".planet").find(`table.tiles  tr:nth-child(${r + 1}) td:nth-child(${c + 1})`);
-		}
-
 
 		function buildTilesTable($planetTable, tiles)
 		{
@@ -365,14 +358,7 @@
 			}
 			return { bonus: bonus, conditions: conditions /*.substr(2)*/ };
 		}
-
-		function isTileAdjacent(id1, id2)
-		{
-			return id1 % 5 !== 0 && id1 - 1 === id2 ||
-				id1 % 5 !== 4 && id1 + 1 === id2 ||
-				parseInt(id1 / 5) > 0 && id1 - 5 === id2 ||
-				parseInt(id1 / 5) < 5 && id1 + 5 === id2;
-		}
+		
 	</script>
 	<script>
 		$("#queryPlanetButton").click(function()
