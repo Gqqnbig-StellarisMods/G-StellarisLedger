@@ -4,10 +4,13 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Net.Http;
+using Antlr4.Runtime.Misc;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace StellarisLedger.Controllers.Api
 {
@@ -15,12 +18,16 @@ namespace StellarisLedger.Controllers.Api
     [Route("api/")]
     public class CountriesController : Controller
     {
+		static object lock_IsMachineEmpire = new object();
+
+		private readonly IMemoryCache memoryCache;
 		private readonly string saveGamesPath;
 		private readonly JsonSerializerSettings serializerSettings;
 
 
-		public CountriesController(IOptions<AppSettings> appSettings, IOptions<MvcJsonOptions> jsonOptions)
+		public CountriesController(IOptions<AppSettings> appSettings, IOptions<MvcJsonOptions> jsonOptions, IMemoryCache memoryCache)
 		{
+			this.memoryCache = memoryCache;
 			saveGamesPath = Path.GetFullPath(appSettings.Value.SaveGamesPath);
 			serializerSettings = jsonOptions.Value.SerializerSettings;
 		}
@@ -43,6 +50,10 @@ namespace StellarisLedger.Controllers.Api
 			var analyst = new Analyst(content);
 			var countries = analyst.GetCountries();
 			GC.Collect();
+
+
+			memoryCache.GetOrUpdateTag0IsMachineEmpire(true, () => countries[0].IsMachineEmpire, () => analyst.GetInGameDate());
+
 
 			string json = JsonConvert.SerializeObject(countries, new JsonSerializerSettings { ContractResolver = new SerializePopContractResolver(),
 																							  Formatting = serializerSettings.Formatting });

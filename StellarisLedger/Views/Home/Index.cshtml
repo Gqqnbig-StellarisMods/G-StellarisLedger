@@ -1,5 +1,7 @@
 ﻿@using StellarisLedger
+@*支持页面基础部分的本地化，字符串由Resources\View文件夹里的文件提供*@
 @inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer Lo
+@*支持群星游戏字符串的本地化，字符串由游戏的YAML文件提供*@
 @inject YamlStringLocalizer YLo
 
 @{ ViewData["Title"] = "Statistics"; }

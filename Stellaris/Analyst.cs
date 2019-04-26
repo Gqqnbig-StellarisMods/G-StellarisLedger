@@ -1,16 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using Antlr4.Runtime;
 using Antlr4.Runtime.Tree;
 using JetBrains.Annotations;
+using Microsoft.Extensions.Logging;
 
 namespace StellarisLedger
 {
 	public class Analyst
 	{
+		private readonly ILogger logger = ApplicationLogging.CreateLogger<Analyst>();
+		private readonly string content;
 		private readonly IParseTree countriesData;
 		private readonly IParseTree planetsData;
 		private readonly IParseTree popData;
@@ -19,6 +23,7 @@ namespace StellarisLedger
 
 		public Analyst(string content)
 		{
+			this.content = content;
 			string lineEndingSymbol = content.DetectLineEnding();
 			var p = content.IndexOf(lineEndingSymbol + "player={" + lineEndingSymbol);
 			p += lineEndingSymbol.Length;
@@ -67,6 +72,21 @@ namespace StellarisLedger
 			}
 		}
 
+		public DateTimeOffset GetInGameDate()
+		{
+			var p = content.IndexOf("date=\"");
+			if (p == -1)
+				throw new FormatException("save game doesn't have date field.");
+			p += "date=\"".Length;
+
+			var p2 = content.IndexOf('"', p + 1);
+
+			var s = content.Substring(p, p2 - p);
+
+			return DateTimeOffset.ParseExact(s, "yyyy.MM.dd", CultureInfo.InvariantCulture.DateTimeFormat);
+		}
+
+
 		public IList<Country> GetCountries()
 		{
 
@@ -88,7 +108,6 @@ namespace StellarisLedger
 					continue;
 				PopulateCountry(country, (ParadoxParser.ParadoxContext)rightValue.GetChild(1));
 
-				// ReSharper restore InconsistentNaming
 				countries.Add(country);
 			}
 
@@ -164,7 +183,6 @@ namespace StellarisLedger
 			//else
 			//    country.Unity = Convert.ToDouble(unity.GetText());
 
-			// ReSharper disable InconsistentNaming
 			var last_month = GetValue(standard_economy_module, "last_month")?.GetChild(1);
 			if (last_month != null)
 			{
@@ -200,6 +218,8 @@ namespace StellarisLedger
 				var engineering_research = GetValue(last_month, "engineering_research");
 				country.EngineeringResearchIncome = Convert.ToDouble(engineering_research.GetChild(1).GetText());
 			}
+
+			country.IsMachineEmpire = GetStringValue(kvPairs, "customization") == "machines";
 		}
 
 		/// <summary>

@@ -117,8 +117,14 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="({0} requires {1})" xml:space="preserve">
+    <value>（{0}要求建筑{1}）</value>
+  </data>
   <data name="Adjacency Bonus" xml:space="preserve">
     <value>邻接加成</value>
+  </data>
+  <data name="Can build {0}" xml:space="preserve">
+    <value>可以建造{0}</value>
   </data>
   <data name="Do not build on special resources" xml:space="preserve">
     <value>不要把都城建在特殊资源上</value>
@@ -128,6 +134,9 @@
   </data>
   <data name="Ignore food, useful for machine empire who doesn't consume food." xml:space="preserve">
     <value>忽略食物，如果是机械帝国就不需要食物</value>
+  </data>
+  <data name="Options have been optimized for {0} that you are playing." xml:space="preserve">
+    <value>检测到您玩的是{0}，选项已经针对性优化。</value>
   </data>
   <data name="Special Resources, eg. alien pets, betharian" xml:space="preserve">
     <value>特殊资源，如外星宠物、倍燃石</value>

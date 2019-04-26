@@ -44,8 +44,10 @@ namespace StellarisLedger
         public double SocietyResearchIncomeWithPenalty => SocietyResearchIncome / GetPenalty();
         public double EngineeringResearchIncomeWithPenalty => EngineeringResearchIncome / GetPenalty();
 
+		[JsonIgnore]
+		public bool IsMachineEmpire { get; set; }
 
-        private double GetPenalty()
+		private double GetPenalty()
         {
             return 1 + (Colonies.Count - 1) * 0.1 + Math.Max(0, Population - 10) * 0.01;
         }

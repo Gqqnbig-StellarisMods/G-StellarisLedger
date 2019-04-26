@@ -1,21 +1,16 @@
-﻿@*
-	For more information on enabling MVC for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@using Microsoft.AspNetCore.Mvc.Localization
-@using Newtonsoft.Json
-@*支持页面基础部分的本地化，字符串由Resources\View文件夹里的文件提供*@
+﻿@*支持页面基础部分的本地化，字符串由Resources\View文件夹里的文件提供*@
 @inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer Lo
 @*支持群星游戏字符串的本地化，字符串由游戏的YAML文件提供*@
 @inject YamlStringLocalizer YLo
 
-@model PlanetTiles[]
+@model StellarisLedger.Models.PlanetsIndexViewModel
 
 @{
-	ViewData["Title"] = "Planets";
+	ViewData["Title"] = YLo["PLANETS"];
 }
 
 @section head
-	{
+{
 	<style type="text/css">
 		.nonexistent {
 			background-color: lightgray;
@@ -48,9 +43,22 @@
 		.bg-active {
 			border: 3px dotted lightblue !important;
 		}
+
+		.allowNeuroElectricAmplifierLabel[disabled] {
+			color: gray;
+		}
+		.allowNeuroElectricAmplifierLabel[disabled]::after {
+			content: "@Lo["({0} requires {1})", YLo["building_neuro_electric_amplifier"], YLo["building_capital_2"]]";
+			margin-left: 1em;
+		}
 	</style>
 }
-
+@if (Model.IsMachineEmpire)
+{
+	<p class="bg-info text-light">
+		@Lo["Options have been optimized for {0} that you are playing.", YLo["machine_intelligence"]]
+	</p>
+}
 <div id="planets">
 	<div class="d-none">
 		<fieldset class="planet" id="planetSectionTemplate">
@@ -68,13 +76,18 @@
 							<option value="2">2 - @YLo["building_capital_2"]</option>
 							<option value="3">3 - @YLo["building_capital_3"]</option>
 						</select>
-					<label class="form-check" style="padding-left: 0"><input class="ignore-food-input" type="checkbox" />@Lo["Ignore food, useful for machine empire who doesn't consume food."]</label>
+
 						<label class="form-check" style="padding-left: 0"><input class="not-on-special-input" type="checkbox" />@Lo["Do not build on special resources"]</label>
+						@if (Model.IsMachineEmpire)
+						{
+							<label class="form-check allowNeuroElectricAmplifierLabel" style="padding-left: 0" disabled><input class="allowNeuroElectricAmplifierInput" type="checkbox" disabled />@Lo["Can build {0}",YLo["building_neuro_electric_amplifier"]]</label>
+						}
 
 
 						<button>@Lo["Find best tile for colony capital"]</button>
 
 						<div class="result-display"></div>
+					</div>
 				</div>
 			</div>
 		</fieldset>
@@ -97,7 +110,7 @@
 
 		document.planetsData = {}; //不用关键字var可成为全局变量，但这在严格模式不允许。
 
-		document.saveGamePath = "@ViewData["saveGamePath"]";
+		document.saveGamePath = "@Model.LatestSaveGamesPath.Replace('\\', '/')";
 		if (document.saveGamePath)
 		{
 			fetch(`/api/${document.saveGamePath}/Countries/me/Planets`).then(response => response.json()).then(planetsData =>
@@ -106,43 +119,66 @@
 
 
 				let $template = $("#planetSectionTemplate");
-				$template.detach();
 
 				planetsData.forEach((planet, index) =>
 				{
 					let $section = $template.clone();
 					$section.removeAttr("id");
-					$section.attr("index", index);
-
-					$section.find("legend").text(planet.Name);
-
-					buildTilesTable($section.find(".tiles"), planet.Tiles);
-
-					let $form = $section.find(".best-colony");
-					let $button = $form.find("button");
-					$button.click(bestColonyButton_Click);
-
-
-					let s = localStorage.getItem("planet-capital-options");
-					if (s)
-					{
-						try
-						{
-							let options = JSON.parse(s);
-							$form.find(".adjacency-bonus-input").val(options.adjacencyBonus);
-							$form.find(".ignore-food-input")[0].checked = options.ignoreFood;
-							$form.find(".not-on-special-input")[0].checked = options.notOnSpecial;
-						} catch (e)
-						{
-							localStorage.removeItem("planet-capital-options");
-						}
-					}
-
+					buildPlanetSection($section, planet, index);
 					$("#planets").append($section);
 				});
 			});
 		} else
 			$("body").text("No save games!");
+
+
+		function buildPlanetSection($section, planet, index)
+		{
+			$section.attr("index", index);
+
+			$section.find("legend").text(planet.Name);
+
+			buildTilesTable($section.find(".tiles"), planet.Tiles);
+
+			let $form = $section.find(".best-colony");
+			let $button = $form.find("button");
+			$button.click(bestColonyButton_Click);
+			if (@Model.IsMachineEmpire.ToString().ToLower())
+			{
+				$form.find("select").change(function()
+				{
+					let v = parseInt($(this).val());
+					let $label = $(this).closest(".best-colony").find(".allowNeuroElectricAmplifierInput").closest("label");
+					if (v < 2)
+					{
+						$label[0].setAttribute("disabled", "");
+						$label.find("input")[0].setAttribute("disabled", "");
+					} else
+					{
+						$label[0].removeAttribute("disabled");
+						$label.find("input")[0].removeAttribute("disabled");
+					}
+				});
+			}
+
+			let s = localStorage.getItem("planet-capital-options");
+			if (s)
+			{
+				try
+				{
+					let options = JSON.parse(s);
+					$form.find(".adjacency-bonus-input").val(options.adjacencyBonus);
+					$form.find(".not-on-special-input")[0].checked = options.notOnSpecial;
+					@if (Model.IsMachineEmpire)
+					{
+						@:$form.find(".allowNeuroElectricAmplifierInput")[0].checked = options.allowNeuroElectricAmplifier;
+					}
+				} catch (e)
+				{
+					localStorage.removeItem("planet-capital-options");
+				}
+			}
+		}
 
 		function bestColonyButton_Click()
 		{
@@ -153,11 +189,14 @@
 			$section.find("table.tiles td").removeClass("bg-highlight");
 
 
-			let planet = document.planetsData[parseInt($section.attr("index"))];
+			let planet = $section.attr("index") === "query" ? document.queriedPlanet : document.planetsData[parseInt($section.attr("index"))];
 			let options = {
 				adjacencyBonus: parseInt($form.find(".adjacency-bonus-input").val()),
 				notOnSpecial: $form.find(".not-on-special-input")[0].checked,
-				ignoreFood: $form.find(".ignore-food-input")[0].checked
+				@if (Model.IsMachineEmpire)
+				{
+					@:allowNeuroElectricAmplifier: $form.find(".allowNeuroElectricAmplifierInput")[0].checked
+				}
 			};
 
 			localStorage.setItem("planet-capital-options", JSON.stringify(options));
@@ -245,12 +284,13 @@
 
 		function findBestTileForColonyCapital(tiles, options)
 		{
-			let id = 0;
+			let id = -1;
 			let list = [];
 			for (let row = 0; row < 5; row++)
 			{
 				for (let column = 0; column < 5; column++)
 				{
+					id++;
 					if (tiles[id])
 					{
 						if (options.notOnSpecial && tiles[id].Resources.special)
@@ -260,8 +300,6 @@
 						r.capitalTileId = id;
 						list.push(r);
 					}
-
-					id++;
 				}
 			}
 
@@ -271,6 +309,9 @@
 
 		function getTotalBonus(tiles, capitalTileId, options)
 		{
+			options.ignoreFood = @Model.IsMachineEmpire.ToString().ToLower();
+
+
 			let id = 0;
 			let bonus = 0;
 			let conditions = '';
@@ -332,5 +373,29 @@
 				parseInt(id1 / 5) > 0 && id1 - 5 === id2 ||
 				parseInt(id1 / 5) < 5 && id1 + 5 === id2;
 		}
+	</script>
+	<script>
+		$("#queryPlanetButton").click(function()
+		{
+			let thisButton = this;
+			thisButton.disabled = true;
+
+			$("#queryPlanetDynamicSection").detach();
+
+			fetch(`/api/${document.saveGamePath}/Planets/${$("#planetIdInput").val()}`).then(response => response.json()).then(planetTiles =>
+			{
+				document.queriedPlanet = planetTiles;
+
+				let $section = $("#planetSectionTemplate").clone();
+				$section.attr("id", "queryPlanetDynamicSection");
+				buildPlanetSection($section, planetTiles, "query");
+				$("#queryPlanet").append($section);
+				thisButton.disabled = false;
+			}).catch(function(reason)
+			{
+				thisButton.disabled = false;
+				alert(reason);
+			});
+		});
 	</script>
 }

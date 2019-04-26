@@ -40,6 +40,7 @@ namespace StellarisLedger
 			            options.SerializerSettings.Formatting = Newtonsoft.Json.Formatting.None;
 #endif
 					});
+			services.AddMemoryCache();
 
 			services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
 
