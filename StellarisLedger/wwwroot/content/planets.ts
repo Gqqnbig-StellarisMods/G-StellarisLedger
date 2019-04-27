@@ -26,7 +26,7 @@ function flatPaths(nodes: SearchNode[]): SearchNode[][]
 		{
 			let flat = flatPaths(nodes[i].children);
 			for (let j = 0; j < flat.length; j++)
-				flat[j].unshift(nodes[i]);
+				flat[j].unshift(nodes[i].clone());
 			list = list.concat(flat);
 		} else
 		{
@@ -64,6 +64,9 @@ function joinString(s1: string, s2: string): string
  */
 function mergeCapitalNodes(row: SearchNode[]): void
 {
+	if (row[0].description)
+		throw new Error("第一个首都节点不能有description");
+
 	for (let i = 1; i < row.length; i++)
 	{
 		if (row[i].tileId === row[0].tileId)
@@ -90,6 +93,14 @@ class SearchNode
 	constructor(tileId: number)
 	{
 		this.tileId = tileId;
+	}
+
+	clone()
+	{
+		let c = new SearchNode(this.tileId);
+		c.bonus = this.bonus;
+		c.description = this.description;
+		return c;
 	}
 
 
