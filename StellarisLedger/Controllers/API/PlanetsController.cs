@@ -10,7 +10,7 @@ using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using StellarisLedger.Controllers.Api;
 
-namespace StellarisLedger.Controllers.API
+namespace StellarisLedger.Controllers.Api
 {
 	[Route("api/")]
 	public class PlanetsController
