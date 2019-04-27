@@ -58,28 +58,6 @@ function joinString(s1: string, s2: string): string
 	return "";
 }
 
-/**
- * row[0]是首都节点，后面可能还会有首都节点，把这两个节点合并起来。
- * @param row
- */
-function mergeCapitalNodes(row: SearchNode[]): void
-{
-	if (row[0].description)
-		throw new Error("第一个首都节点不能有description");
-
-	for (let i = 1; i < row.length; i++)
-	{
-		if (row[i].tileId === row[0].tileId)
-		{
-			if (row[i].description)
-				row[0].description = joinStringWithSeparator(row[0].description, "，", row[i].description);
-			row[0].bonus += row[i].bonus;
-			row.splice(i, 1);
-			break;
-		}
-	}
-}
-
 
 
 class SearchNode

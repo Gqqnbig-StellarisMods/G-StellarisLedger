@@ -7,6 +7,12 @@
 
 @{
 	ViewData["Title"] = YLo["PLANETS"];
+
+#if DEBUG
+	ViewBag.IsDebug = true;
+#else
+	ViewBag.IsDebug = false;
+#endif
 }
 
 @section head
@@ -352,20 +358,19 @@
 					return generateBonusTree(id - 1, tiles, capitalTileId, options, allowNeuroElectricAmplifier);
 
 				delete res.energy;
-				if (options.ignoreFood)
-					delete res.food;
 
 
 				let node = new SearchNode(id);
-				//除电以外的资源都被压了，减成
-				Object.keys(res).forEach(k => node.bonus -= res[k]);
 				if (res.minerals)
 					node.description = (node.description || "") + `压${res.minerals}矿`;
 				if (res.research)
-					node.description = (node.description || "") + `压${res.research}科研`;
+					node.description = (node.description || "") + `压科研`;
 				if (res.food)
 					node.description = (node.description || "") + `压${res.food}食物`;
-
+				//除电以外的资源都被压了，减成
+				node.bonus = -(res.minerals || 0) - (res.food || 0);
+				if (!options.ignoreFood)
+					node.bonus -= res.food || 0;
 
 				node.children = generateBonusTree(id - 1, tiles, capitalTileId, options, allowNeuroElectricAmplifier);
 
@@ -432,7 +437,33 @@
 			}
 			return bestId;
 		}
-		
+
+
+		/**
+		 * row[0]是首都节点，后面可能还会有首都节点，把这两个节点合并起来。
+		 * @@param row
+		 */
+		function mergeCapitalNodes(row)
+		{
+			@if (ViewBag.IsDebug)
+			{
+				@:if (row[0].description) throw new Error("第一个首都节点不能有description");
+			}
+
+			for (let i = 1; i < row.length; i++)
+			{
+				if (row[i].tileId === row[0].tileId)
+				{
+					if (row[i].description)
+						row[0].description = joinStringWithSeparator(row[0].description, "，", row[i].description);
+					row[0].bonus += row[i].bonus;
+					row.splice(i, 1);
+					break;
+				}
+			}
+		}
+
+
 	</script>
 	<script>
 		$("#queryPlanetButton").click(function()
