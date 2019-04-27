@@ -11,14 +11,14 @@ using Microsoft.Extensions.Logging;
 
 namespace StellarisLedger
 {
-	public class Analyst
+	public class Analyst : IDisposable
 	{
 		private readonly ILogger logger = ApplicationLogging.CreateLogger<Analyst>();
-		private readonly string content;
-		private readonly IParseTree countriesData;
-		private readonly IParseTree planetsData;
-		private readonly IParseTree popData;
-		private readonly IParseTree pop_factionsData;
+		private string content;
+		private IParseTree countriesData;
+		private IParseTree planetsData;
+		private IParseTree popData;
+		private IParseTree pop_factionsData;
 		public string PlayerTag { get; }
 
 		public Analyst(string content)
@@ -243,19 +243,6 @@ namespace StellarisLedger
 			return new Planet() { Id = planetId, Name = name, Pops = GetPlanetPops(tileData, popData) };
 		}
 
-		private static int GetTechnologyCount(ParadoxParser.ParadoxContext kvPairs)
-		{
-			var tech_status = GetValue(kvPairs, "tech_status").GetChild(1);
-			int levels = 0;
-			for (int j = 0; j < tech_status.ChildCount; j++)
-			{
-				if (tech_status.GetChild(j).GetChild(0).GetText() == "level")
-					levels += Convert.ToInt32(tech_status.GetChild(j).GetChild(2).GetText().Trim('"'));
-			}
-
-			return levels;
-		}
-
 		private List<Pop> GetPlanetPops(IParseTree tileData, IParseTree popData)
 		{
 			var pops = new List<Pop>();
@@ -350,49 +337,97 @@ namespace StellarisLedger
 			return planetTiles;
 		}
 
+		#region dispose
+		/// <summary>
+		/// 获取或设置一个值。该值指示资源已经被释放。
+		/// </summary>
+		private bool disposed;
 
-		private static string GetMatchedScope(string content, string scopeName)
+		public void Dispose()
 		{
-			string lineEndingSymbol = content.DetectLineEnding();
+			Dispose(true);
+			GC.SuppressFinalize(this);
+		}
 
-			int bracketBalance = 0;
-			var start = content.IndexOf(scopeName + "={");
-			int i = start;
-			for (; i < content.Length; i++)
+		~Analyst()
+		{
+			Dispose(false);
+		}
+
+		/// <summary>
+		/// 执行与释放或重置非托管资源相关的应用程序定义的任务。
+		/// 派生类中重写此方法时，需要释放派生类中额外使用的资源。
+		/// </summary>
+		protected virtual void Dispose(bool disposing)
+		{
+			if (disposed)
 			{
-				if (content[i] == '{')
-					bracketBalance++;
-				else if (content[i] == '}')
-				{
-					bracketBalance--;
-					if (bracketBalance == 0)
-						return content.Substring(start, i - start + 1);
-				}
-				else if (content[i] == '"')
-				{
-					i = content.IndexOf('"', i + 1);
-					if (i == -1)
-						break;
-				}
-				else if (content[i] == '#')
-				{
-					i = content.IndexOf(lineEndingSymbol, i + 1);
-					if (i == -1)
-						break;
-				}
+				return;
 			}
+			if (disposing)
+			{
+				// 清理托管资源
 
-			return null;
+				content = null;
+				countriesData = null;
+				planetsData = null;
+				popData = null;
+				pop_factionsData = null;
+			}
+			// 清理非托管资源
+			// if (nativeResource != IntPtr.Zero)
+			// {
+			//     Marshal.FreeHGlobal(nativeResource);
+			//     nativeResource = IntPtr.Zero;
+			// }
+			// 标记已经被释放。
+			disposed = true;
 		}
-
-		public static async Task<IParseTree> GetScopeBodyAsync(string input)
-		{
-			//ICharStream cstream = CharStreams.fromStream(stream);
+		#endregion
 
 
-			var d = await Task.Run(() => GetScopeBody(input));
-			return d;
-		}
+		//private static string GetMatchedScope(string content, string scopeName)
+		//{
+		//	string lineEndingSymbol = content.DetectLineEnding();
+
+		//	int bracketBalance = 0;
+		//	var start = content.IndexOf(scopeName + "={");
+		//	int i = start;
+		//	for (; i < content.Length; i++)
+		//	{
+		//		if (content[i] == '{')
+		//			bracketBalance++;
+		//		else if (content[i] == '}')
+		//		{
+		//			bracketBalance--;
+		//			if (bracketBalance == 0)
+		//				return content.Substring(start, i - start + 1);
+		//		}
+		//		else if (content[i] == '"')
+		//		{
+		//			i = content.IndexOf('"', i + 1);
+		//			if (i == -1)
+		//				break;
+		//		}
+		//		else if (content[i] == '#')
+		//		{
+		//			i = content.IndexOf(lineEndingSymbol, i + 1);
+		//			if (i == -1)
+		//				break;
+		//		}
+		//	}
+
+		//	return null;
+		//}
+
+		//public static async Task<IParseTree> GetScopeBodyAsync(string input)
+		//{
+		//	//ICharStream cstream = CharStreams.fromStream(stream);
+
+
+		//	var d = await Task.Run(() => GetScopeBody(input));
+		//	return d;
+		//}
 
 		private static IParseTree GetScopeBody(string input)
 		{
@@ -431,6 +466,20 @@ namespace StellarisLedger
 		public static string GetStringValue(IParseTree tree, string key)
 		{
 			return GetValue(tree, key)?.GetText().Trim('"');
+		}
+
+
+		private static int GetTechnologyCount(ParadoxParser.ParadoxContext kvPairs)
+		{
+			var tech_status = GetValue(kvPairs, "tech_status").GetChild(1);
+			int levels = 0;
+			for (int j = 0; j < tech_status.ChildCount; j++)
+			{
+				if (tech_status.GetChild(j).GetChild(0).GetText() == "level")
+					levels += Convert.ToInt32(tech_status.GetChild(j).GetChild(2).GetText().Trim('"'));
+			}
+
+			return levels;
 		}
 	}
 }

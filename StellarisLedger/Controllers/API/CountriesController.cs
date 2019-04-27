@@ -46,22 +46,20 @@ namespace StellarisLedger.Controllers.Api
             }
 
 			var content = Stellaris.GetGameSaveContent(fileName);
+			IList<Country> countries1;
+			using (var analyst = new Analyst(content))
+			{
+				countries1 = analyst.GetCountries();
+				//memoryCache.GetOrUpdateTag0IsMachineEmpire(true, () => countries1[0].IsMachineEmpire, () => analyst.GetInGameDate());
+			}
 
-			var analyst = new Analyst(content);
-			var countries = analyst.GetCountries();
 			GC.Collect();
+			//IList<Country> countries = countries1;
 
-
-			memoryCache.GetOrUpdateTag0IsMachineEmpire(true, () => countries[0].IsMachineEmpire, () => analyst.GetInGameDate());
-
-
-			string json = JsonConvert.SerializeObject(countries, new JsonSerializerSettings { ContractResolver = new SerializePopContractResolver(),
-																							  Formatting = serializerSettings.Formatting });
+			string json = JsonConvert.SerializeObject(countries1);
 
 			var response = new HttpResponseMessage(System.Net.HttpStatusCode.OK);
-#pragma warning disable DF0022 // Marks undisposed objects assinged to a property, originated in an object creation.
 			response.Content = new StringContent(json);
-#pragma warning restore DF0022 // Marks undisposed objects assinged to a property, originated in an object creation.
 			return response;
 		}
 
@@ -77,11 +75,11 @@ namespace StellarisLedger.Controllers.Api
 		    }
 
 			var content = Stellaris.GetGameSaveContent(fileName);
-
-			var analyst = new Analyst(content);
-		    var country= analyst.GetCountry(analyst.PlayerTag);
-
-			GC.Collect();
+			Country country;
+			using (var analyst = new Analyst(content))
+			{
+				country = analyst.GetCountry(analyst.PlayerTag);
+			}
 			string json = JsonConvert.SerializeObject(country, Formatting.Indented, new JsonSerializerSettings { ContractResolver = new SerializePopContractResolver() });
 
 			var response = new HttpResponseMessage(System.Net.HttpStatusCode.OK);

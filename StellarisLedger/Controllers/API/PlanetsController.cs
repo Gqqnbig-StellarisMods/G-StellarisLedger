@@ -32,13 +32,17 @@ namespace StellarisLedger.Controllers.API
 				tag = "0";
 
 			var content = Stellaris.GetGameSaveContent(Path.Combine(saveGamesPath,gameId,saveName));
-			var analyst = new Analyst(content);
-			var planetTilesData = analyst.GetCountryPlanetTiles(tag);
-
+			List<PlanetTiles> planetTilesData;
+			using (var analyst = new Analyst(content))
+			{
+				planetTilesData = analyst.GetCountryPlanetTiles(tag);
+			}
 			string json = JsonConvert.SerializeObject(planetTilesData, new JsonSerializerSettings { Formatting = serializerSettings.Formatting});
 
 			var response = new HttpResponseMessage(System.Net.HttpStatusCode.OK);
+#pragma warning disable DF0022 // Marks undisposed objects assinged to a property, originated in an object creation.
 			response.Content = new StringContent(json);
+#pragma warning restore DF0022 // Marks undisposed objects assinged to a property, originated in an object creation.
 			return response;
 		}
 
@@ -47,13 +51,17 @@ namespace StellarisLedger.Controllers.API
 		public HttpResponseMessage GetPlanetTile(string gameId, string saveName, string planetId)
 		{
 			var content = Stellaris.GetGameSaveContent(Path.Combine(saveGamesPath, gameId, saveName));
-			var analyst = new Analyst(content);
-			var planetTiles = analyst.GetPlanetTitles(planetId);
-
+			PlanetTiles planetTiles;
+			using (var analyst = new Analyst(content))
+			{
+				planetTiles = analyst.GetPlanetTitles(planetId);
+			}
 			string json = JsonConvert.SerializeObject(planetTiles, new JsonSerializerSettings { Formatting = serializerSettings.Formatting });
 
 			var response = new HttpResponseMessage(System.Net.HttpStatusCode.OK);
+#pragma warning disable DF0022 // Marks undisposed objects assinged to a property, originated in an object creation.
 			response.Content = new StringContent(json);
+#pragma warning restore DF0022 // Marks undisposed objects assinged to a property, originated in an object creation.
 			return response;
 		}
 	}
