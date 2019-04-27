@@ -38,7 +38,9 @@ namespace StellarisLedger.Controllers.Api
 			string json = JsonConvert.SerializeObject(planetTilesData, new JsonSerializerSettings { Formatting = serializerSettings.Formatting});
 
 			var response = new HttpResponseMessage(System.Net.HttpStatusCode.OK);
+#pragma warning disable DF0022 // Marks undisposed objects assinged to a property, originated in an object creation.
 			response.Content = new StringContent(json);
+#pragma warning restore DF0022 // Marks undisposed objects assinged to a property, originated in an object creation.
 			return response;
 		}
 
@@ -53,7 +55,9 @@ namespace StellarisLedger.Controllers.Api
 			string json = JsonConvert.SerializeObject(planetTiles, new JsonSerializerSettings { Formatting = serializerSettings.Formatting });
 
 			var response = new HttpResponseMessage(System.Net.HttpStatusCode.OK);
+#pragma warning disable DF0022 // Marks undisposed objects assinged to a property, originated in an object creation.
 			response.Content = new StringContent(json);
+#pragma warning restore DF0022 // Marks undisposed objects assinged to a property, originated in an object creation.
 			return response;
 		}
 	}
