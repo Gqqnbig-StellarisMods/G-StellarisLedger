@@ -36,12 +36,30 @@
 			margin: 0.1em 0.2em;
 		}
 
+		.tileId {
+			color: #fd7e14;
+			font-weight: bold;
+		}
+		.tileId::before {
+			content: "地块";
+		}
+
 		.bg-highlight {
 			border: 3px dotted orange !important;
+			padding: 0.1em;
 		}
 
 		.bg-active {
 			border: 3px dotted lightblue !important;
+			padding: 0.1em;
+		}
+
+		.tileId.bg-highlight {
+			padding: 0.1em;
+		}
+
+		.tileId.bg-active {
+			padding: 0.1em;
 		}
 
 		.allowNeuroElectricAmplifierLabel[disabled] {
@@ -80,7 +98,7 @@
 						<label class="form-check" style="padding-left: 0"><input class="not-on-special-input" type="checkbox" />@Lo["Do not build on special resources"]</label>
 						@if (Model.IsMachineEmpire)
 						{
-							<label class="form-check allowNeuroElectricAmplifierLabel" style="padding-left: 0" disabled><input class="allowNeuroElectricAmplifierInput" type="checkbox" disabled />@Lo["Can build {0}",YLo["building_neuro_electric_amplifier"]]</label>
+							<label class="form-check allowNeuroElectricAmplifierLabel" style="padding-left: 0"><input class="allowNeuroElectricAmplifierInput" type="checkbox"/>@Lo["Can build {0}", YLo["building_neuro_electric_amplifier"]]</label>
 						}
 
 
@@ -160,6 +178,7 @@
 						$label.find("input")[0].removeAttribute("disabled");
 					}
 				});
+				$form.find("select").change();
 			}
 
 			let s = localStorage.getItem("planet-capital-options");
@@ -174,6 +193,7 @@
 					{
 						@:$form.find(".allowNeuroElectricAmplifierInput")[0].checked = options.allowNeuroElectricAmplifier;
 					}
+					$form.find("select").change();
 				} catch (e)
 				{
 					localStorage.removeItem("planet-capital-options");
@@ -202,15 +222,22 @@
 
 			localStorage.setItem("planet-capital-options", JSON.stringify(options));
 
+			if (options.adjacencyBonus === 1)
+				options.allowNeuroElectricAmplifier = false;
 
 			let result = findBestTileForColonyCapital(planet.Tiles, options);
-			let maxBonus = result[0].bonus;
+			let maxBonus = result[0].totalBonus;
 			//并列第一的都列出来
-			for (let i = 0; i < result.length && (i < 3 || result[i].bonus === maxBonus); i++)
+			for (let i = 0; i < result.length && (i < 3 || result[i].totalBonus === maxBonus); i++)
 			{
-				$resultDisplay.append(`<p>都城建在<span class="tileId ${result[i].bonus === maxBonus ? "bg-highlight" : ""}" >${result[i].capitalTileId}</span>，加成为${result[i].bonus}${result[i].conditions}</p>`);
-				if (result[i].bonus === maxBonus)
-					findTileTd.call($section, result[i].capitalTileId).addClass("bg-highlight");
+				let description = result[i].config.slice(1).reduce((s, element) =>
+				{
+					return s + (element.toString() ? "；" + element.toString() : "");
+				}, "");
+				let html = `<p>都城建在<span class="tileId ${result[i].totalBonus === maxBonus ? "bg-highlight" : ""}">${result[i].config[0].tileId}</span>，加成为${result[i].totalBonus}${result[i].config[0].description ? result[i].config[0].description : ""}${description}</p>`;
+				$resultDisplay.append(html);
+				if (result[i].totalBonus === maxBonus)
+					findTileTd.call($section, result[i].config[0].tileId).addClass("bg-highlight");
 			}
 
 			$form.find(".tileId").hover(function()
@@ -277,8 +304,9 @@
 
 		function findBestTileForColonyCapital(tiles, options)
 		{
+			options.ignoreFood = @Model.IsMachineEmpire.ToString().ToLower();
 			let id = -1;
-			let list = [];
+			let nodes = [];
 			for (let row = 0; row < 5; row++)
 			{
 				for (let column = 0; column < 5; column++)
@@ -289,74 +317,120 @@
 						if (options.notOnSpecial && tiles[id].Resources.special)
 							continue;
 
-						let r = getTotalBonus(tiles, id, options);
-						r.capitalTileId = id;
-						list.push(r);
+						let node = new SearchNode(id);
+						node.children = generateBonusTree(24, tiles, id, options, options.allowNeuroElectricAmplifier);
+						nodes.push(node);
 					}
 				}
 			}
+			let list = flatPaths(nodes);
+			list = list.map(row =>
+			{
+				mergeCapitalNodes(row);
+				return {
+					totalBonus: row.reduce((v, a) => v + a.bonus, 0),
+					config: row
+				};
+			});
 
-			list.sort((a, b) => b.bonus - a.bonus);
+			list.sort((a, b) => b.totalBonus - a.totalBonus);
 			return list;
 		}
 
-		function getTotalBonus(tiles, capitalTileId, options)
+		function generateBonusTree(id, tiles, capitalTileId, options, allowNeuroElectricAmplifier)
 		{
-			options.ignoreFood = @Model.IsMachineEmpire.ToString().ToLower();
+			if (id < 0)
+				return [];
 
+			if (!tiles[id])
+				return generateBonusTree(id - 1, tiles, capitalTileId, options, allowNeuroElectricAmplifier);
 
-			let id = 0;
-			let bonus = 0;
-			let conditions = '';
-			for (let row = 0; row < 5; row++)
+			if (id === capitalTileId)
 			{
-				for (let column = 0; column < 5; column++)
+				let res = Object.assign({}, tiles[id].Resources);
+				if (options.notOnSpecial && res.special)
+					return generateBonusTree(id - 1, tiles, capitalTileId, options, allowNeuroElectricAmplifier);
+
+				delete res.energy;
+				if (options.ignoreFood)
+					delete res.food;
+
+
+				let node = new SearchNode(id);
+				//除电以外的资源都被压了，减成
+				Object.keys(res).forEach(k => node.bonus -= res[k]);
+				if (res.minerals)
+					node.description = (node.description || "") + `压${res.minerals}矿`;
+				if (res.research)
+					node.description = (node.description || "") + `压${res.research}科研`;
+				if (res.food)
+					node.description = (node.description || "") + `压${res.food}食物`;
+
+
+				node.children = generateBonusTree(id - 1, tiles, capitalTileId, options, allowNeuroElectricAmplifier);
+
+				return [node];
+			} else if (isTileAdjacent(id, capitalTileId))
+			{
+				let res = Object.assign({}, tiles[id].Resources);
+				let nodes = [];
+				if ((res.energy > 0 || res.minerals > 0) && allowNeuroElectricAmplifier)
 				{
-					if (tiles[id])
+					let neaNode = new SearchNode(id);
+					neaNode.bonus = options.adjacencyBonus * 2;
+					neaNode.description = "造神经电放大器";
+					//只有机械帝国才能造神经电放大器，而机械帝国不需要食物，所以不用对食物减成。
+
+					//神经电放大器是星球唯一的。
+					let bestTileIdForNea = findBestCandidateForNeuroElectricAmplifier(tiles);
+					if (bestTileIdForNea != id && bestTileIdForNea>=0)
 					{
-						let res = Object.assign({}, tiles[id].Resources);
-						//行星都城本格只能产电
-						if (id === capitalTileId)
+						let lost = Math.min(tiles[bestTileIdForNea].Resources.energy, tiles[bestTileIdForNea].Resources.minerals);
+						if (lost > 0)
 						{
-							if (options.notOnSpecial && res.special)
-								continue;
-
-							delete res.energy;
-							if (options.ignoreFood)
-								delete res.food;
-
-							//除电以外的资源都被压了，减成
-							Object.keys(res).forEach(k => bonus -= res[k]);
-						} else if (isTileAdjacent(id, capitalTileId))
-						{
-							if (res.energy > 0 || res.minerals > 0 || (!options.ignoreFood && res.food > 0))
-							{
-								bonus += options.adjacencyBonus;
-								if (res.research || res.special)
-								{
-									conditions += `; 假设地块<span class="tileId">${id}</span>造基本建筑`;
-									if (res.research)
-										conditions += `，${res.resource}点科研被压`;
-									if (res.special)
-										conditions += "，特殊资源被压";
-								}
-							} else if (res.research)
-							{
-								//不覆盖科研点
-							} else
-							{
-								if (options.ignoreFood && res.food > 0)
-									conditions += `; 假设食物地块<span class="tileId">${id}</span>造基本建筑`;
-								else
-									conditions += `; 假设空地块<span class="tileId">${id}</span>造基本建筑`;
-								bonus += options.adjacencyBonus;
-							}
+							neaNode.description = joinString(neaNode.description, `并导致<span class="tileId">${bestTileIdForNea}</span>不能造`);
+							neaNode.bonus -= lost;
 						}
 					}
-					id++;
+					if (res.resource)
+						neaNode.description = joinStringWithSeparator(neaNode.description, "，", `压${res.resource}科研`);
+
+					neaNode.children = generateBonusTree(id - 1, tiles, capitalTileId, options, false);
+					nodes.push(neaNode);
+				}
+
+				let node = new SearchNode(id);
+				node.bonus = options.adjacencyBonus;
+				if (!res.energy && !res.minerals && (!res.food || options.ignoreFood) && !res.research && !res.special)
+					node.description = "造基本建筑";
+				else
+					node.description = (res.research > 0 ? `基本建筑压${res.research}科研` : "") + (res.special ? "基本建筑压特殊资源" : "");
+
+				node.children = generateBonusTree(id - 1, tiles, capitalTileId, options, allowNeuroElectricAmplifier);
+				nodes.push(node);
+				return nodes;
+			} else
+				return generateBonusTree(id - 1, tiles, capitalTileId, options, allowNeuroElectricAmplifier);
+		}
+
+
+		function findBestCandidateForNeuroElectricAmplifier(tiles)
+		{
+			let best = Number.MIN_SAFE_INTEGER;
+			let bestId = -1;
+			for (const [id, tile] of Object.entries(tiles))
+			{
+				if (tile.Resources.energy > 0 && tile.Resources.minerals > 0)
+				{
+					let total = tile.Resources.energy+ tile.Resources.minerals;
+					if (total > best)
+					{
+						best = total;
+						bestId = id;
+					}
 				}
 			}
-			return { bonus: bonus, conditions: conditions /*.substr(2)*/ };
+			return bestId;
 		}
 		
 	</script>
