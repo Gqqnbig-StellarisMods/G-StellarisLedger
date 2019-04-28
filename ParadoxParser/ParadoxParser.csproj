@@ -62,7 +62,7 @@
   <PropertyGroup>
     <PreBuildEvent>cd /d "$(ProjectDir)"
 set CLASSPATH=%25CLASSPATH%25;$(ProjectDir)antlr-4.7.1-complete.jar
-antlr4.bat -Dlanguage=CSharp  -no-listener -no-visitor -o generated  Paradox.g4 ParadoxYaml.g4</PreBuildEvent>
+antlr4.bat -Dlanguage=CSharp  -no-listener -no-visitor -o generated -package StellarisLedger.Antlr  Paradox.g4 ParadoxYaml.g4</PreBuildEvent>
   </PropertyGroup>
 
   <Target Name="AfterClean">
