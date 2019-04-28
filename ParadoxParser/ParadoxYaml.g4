@@ -10,7 +10,7 @@ LANGUAGE_INDICATOR: 'l_' [a-z]+ ':';
 
 
 localization:
-  Key Text
+  Key Text 
   ;
 
 Key:
@@ -23,8 +23,7 @@ Text:
 
 
 COMMENT:
-  '#' .+
-  ;
+  '#'  ~[\r\n]* -> skip;
 
 
 NEWLINE: '\r'? '\n';
