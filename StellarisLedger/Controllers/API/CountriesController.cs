@@ -4,12 +4,8 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
-using System.IO.Compression;
-using System.Linq;
 using System.Net.Http;
-using Antlr4.Runtime.Misc;
 using Microsoft.Extensions.Caching.Memory;
 
 namespace StellarisLedger.Controllers.Api
@@ -18,8 +14,6 @@ namespace StellarisLedger.Controllers.Api
     [Route("api/")]
     public class CountriesController : Controller
     {
-		static object lock_IsMachineEmpire = new object();
-
 		private readonly IMemoryCache memoryCache;
 		private readonly string saveGamesPath;
 		private readonly JsonSerializerSettings serializerSettings;
