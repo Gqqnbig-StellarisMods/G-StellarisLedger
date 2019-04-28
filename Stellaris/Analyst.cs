@@ -20,7 +20,7 @@ namespace StellarisLedger
 
 		private readonly IParseTree popData;
 		private readonly IParseTree pop_factionsData;
-		public string PlayerTag { get; }
+		public int PlayerTag { get; }
 
 		public Analyst(string content)
 		{
@@ -34,7 +34,7 @@ namespace StellarisLedger
 
 			ParadoxParser.ParadoxContext playerData = (ParadoxParser.ParadoxContext)GetScopeBody(contentSpan.ToString());
 			var playerCountryTag = playerData.GetChild(0).GetChild(0).GetChild(1);
-			PlayerTag = GetValue(playerCountryTag, "country").GetText();
+			PlayerTag = Convert.ToInt32(GetValue(playerCountryTag, "country").GetText());
 			//+3是因为GetScopeBody返回children，不含右大括号。
 			contentSpan = contentSpan.Slice(playerData.Stop.StopIndex + 3);
 
@@ -138,7 +138,7 @@ namespace StellarisLedger
 
 				var countryData = countriesData.GetChild(i);
 
-				country.Tag = countryData.GetChild(0).GetText();
+				country.Tag = Convert.ToInt32(countryData.GetChild(0).GetText());
 				var rightValue = countryData.GetChild(2);
 
 				if (!(rightValue is ParadoxParser.ScopeContext))
@@ -157,12 +157,12 @@ namespace StellarisLedger
 			return countries;
 		}
 
-		public Country GetCountry(string tag)
+		public Country GetCountry(int tag)
 		{
 			var country = new Country();
 			country.Tag = tag;
 
-			var countryData = GetValue(countriesData, tag);
+			var countryData = GetValue(countriesData, tag.ToString());
 			var scope = countryData as ParadoxParser.ScopeContext;
 			if (scope == null)
 				throw new ArgumentException($"{tag} is not a playable country.");

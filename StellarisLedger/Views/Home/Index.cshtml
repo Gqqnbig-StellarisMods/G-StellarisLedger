@@ -178,16 +178,17 @@
 		google.charts.setOnLoadCallback(() =>
 		{
 			let incomeFormat = new google.visualization.NumberFormat({ fractionDigits: 2, groupingSymbol: "", negativeColor: "red" });
-			let totalFormat = new google.visualization.NumberFormat({ fractionDigits: 0, groupingSymbol: "" });
+			let integerFormat = new google.visualization.NumberFormat({ fractionDigits: 0, groupingSymbol: "" });
 			columns = {
+				tag: { format: integerFormat},
 				name: { header: "@Html.RawResource(YLo["NAME"])" },
-				militaryPower: { header: "@Html.RawResource(YLo["MILITARY_POWER_HEADER"])", format: totalFormat },
+				militaryPower: { header: "@Html.RawResource(YLo["MILITARY_POWER_HEADER"])", format: integerFormat },
 				technologyCount: { header: "@Html.RawResource(Lo["Technologies"])" },
 				colonies: { compactHeader: '<img src="https://stellaris.paradoxwikis.com/images/6/6e/Planet_gaia.png" title="Colonies">', type: "number", getValue: d => d.length },
 				traditionCount: { header: "@Html.RawResource(YLo["topbar_button_traditions_name"])" },
-				energy: { header: "@Html.RawResource(YLo["energy"])", compactHeader: '<img src="https://stellaris.paradoxwikis.com/images/5/58/Energy_Credits.png" title="@YLo["energy"]">', format: totalFormat },
-				minerals: { header: "@Html.RawResource(YLo["minerals"])", compactHeader: '<img src="https://stellaris.paradoxwikis.com/images/1/10/Minerals.png" title="@YLo["minerals"]">', format: totalFormat },
-				food: { header: "@Html.RawResource(YLo["food"])", compactHeader: '<img src="https://stellaris.paradoxwikis.com/images/c/c6/Food.png" title="@YLo["food"]">', format: totalFormat },
+				energy: { header: "@Html.RawResource(YLo["energy"])", compactHeader: '<img src="https://stellaris.paradoxwikis.com/images/5/58/Energy_Credits.png" title="@YLo["energy"]">', format: integerFormat },
+				minerals: { header: "@Html.RawResource(YLo["minerals"])", compactHeader: '<img src="https://stellaris.paradoxwikis.com/images/1/10/Minerals.png" title="@YLo["minerals"]">', format: integerFormat },
+				food: { header: "@Html.RawResource(YLo["food"])", compactHeader: '<img src="https://stellaris.paradoxwikis.com/images/c/c6/Food.png" title="@YLo["food"]">', format: integerFormat },
 				influence: { header: "@Html.RawResource(YLo["influence"])", compactHeader: '<img src="https://stellaris.paradoxwikis.com/images/9/91/Influence.png" title="@YLo["influence"]">', format: new google.visualization.NumberFormat({ fractionDigits: 2, groupingSymbol: "" }) },
 				energyIncome: { header: "@Html.Raw(Lo["{0} Income"], YLo["energy"])", format: incomeFormat },
 				mineralsIncome: { header: "@Html.Raw(Lo["{0} Income"], YLo["minerals"])", format: incomeFormat },

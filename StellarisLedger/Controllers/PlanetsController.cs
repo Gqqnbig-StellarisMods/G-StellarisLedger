@@ -32,7 +32,7 @@ namespace StellarisLedger.Controllers
 				var content = Stellaris.GetGameSaveContent(Path.Combine(saveGamesPath, fileName));
 				return new Analyst(content);
 			});
-			model.IsMachineEmpire = memoryCache.GetOrUpdateTag0IsMachineEmpire(false, () => analyst.Value.GetCountry("0").IsMachineEmpire, () => analyst.Value.GetInGameDate());
+			model.IsMachineEmpire = memoryCache.GetOrUpdateTag0IsMachineEmpire(false, () => analyst.Value.GetCountry(0).IsMachineEmpire, () => analyst.Value.GetInGameDate());
 
 			return View(model);
 		}

@@ -8,7 +8,7 @@ namespace StellarisLedger
 {
     public class Country
     {
-        public string Tag { get; set; }
+        public int Tag { get; set; }
         public string Name { get; internal set; }
         public int TechnologyCount { get; set; }
         public double MilitaryPower { get; set; }
