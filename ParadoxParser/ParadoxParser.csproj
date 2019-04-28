@@ -47,10 +47,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ParadoxLexer.cs" />
-    <Compile Include="ParadoxParser.cs" />
-    <Compile Include="ParadoxYamlLexer.cs" />
-    <Compile Include="ParadoxYamlParser.cs" />
+    <Compile Include="generated\ParadoxLexer.cs" />
+    <Compile Include="generated\ParadoxParser.cs" />
+    <Compile Include="generated\ParadoxYamlLexer.cs" />
+    <Compile Include="generated\ParadoxYamlParser.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -62,6 +62,10 @@
   <PropertyGroup>
     <PreBuildEvent>cd /d "$(ProjectDir)"
 set CLASSPATH=%25CLASSPATH%25;$(ProjectDir)antlr-4.7.1-complete.jar
-antlr4.bat -Dlanguage=CSharp  -no-listener -no-visitor  Paradox.g4 ParadoxYaml.g4</PreBuildEvent>
+antlr4.bat -Dlanguage=CSharp  -no-listener -no-visitor -o generated  Paradox.g4 ParadoxYaml.g4</PreBuildEvent>
   </PropertyGroup>
+
+  <Target Name="AfterClean">
+    <RemoveDir Directories="$(ProjectDir)generated"/>
+  </Target>
 </Project>
