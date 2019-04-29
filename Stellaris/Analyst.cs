@@ -24,51 +24,59 @@ namespace StellarisLedger
 		public Analyst(string content)
 		{
 			this.content = content;
-			string lineEndingSymbol = content.DetectLineEnding();
-			var p = content.IndexOf(lineEndingSymbol + "player={" + lineEndingSymbol);
-			p += lineEndingSymbol.Length;
-			content = content.Substring(p);
+			var contentSpan = content.AsSpan();
 
-			ParadoxParser.ParadoxContext playerData = (ParadoxParser.ParadoxContext)GetScopeBody(content);
+			var lineEndingSymbol = content.DetectLineEnding();
+			var p = contentSpan.IndexOf((lineEndingSymbol + "player={" + lineEndingSymbol).AsSpan(), StringComparison.OrdinalIgnoreCase);
+			p += lineEndingSymbol.Length;
+			contentSpan = contentSpan.Slice(p);
+
+			ParadoxParser.ParadoxContext playerData = (ParadoxParser.ParadoxContext)GetScopeBody(contentSpan.ToString());
 			var playerCountryTag = playerData.GetChild(0).GetChild(0).GetChild(1);
 			PlayerTag = GetValue(playerCountryTag, "country").GetText();
 			//+3是因为GetScopeBody返回children，不含右大括号。
-			content = content.Substring(playerData.Stop.StopIndex + 3);
+			contentSpan = contentSpan.Slice(playerData.Stop.StopIndex + 3);
 
 
-			p = content.IndexOf(lineEndingSymbol + "pop={" + lineEndingSymbol);
+			p = contentSpan.IndexOf((lineEndingSymbol + "pop={" + lineEndingSymbol).AsSpan(), StringComparison.OrdinalIgnoreCase);
 			p += lineEndingSymbol.Length;
-			content = content.Substring(p);
-			ParadoxParser.ParadoxContext popData = (ParadoxParser.ParadoxContext)GetScopeBody(content);
+			contentSpan = contentSpan.Slice(p);
+			ParadoxParser.ParadoxContext popData = (ParadoxParser.ParadoxContext)GetScopeBody(contentSpan.ToString());
 			this.popData = popData;
 			//+3是因为GetScopeBody返回children，不含右大括号。
-			content = content.Substring(popData.Stop.StopIndex + 3);
+			contentSpan = contentSpan.Slice(popData.Stop.StopIndex + 3);
 
-			p = content.IndexOf(lineEndingSymbol + "planet={" + lineEndingSymbol);
+			p = contentSpan.IndexOf((lineEndingSymbol + "planet={" + lineEndingSymbol).AsSpan(), StringComparison.OrdinalIgnoreCase);
 			p += lineEndingSymbol.Length;
-			content = content.Substring(p);
-			ParadoxParser.ParadoxContext planetsData = (ParadoxParser.ParadoxContext)GetScopeBody(content);
+			contentSpan = contentSpan.Slice(p);
+
+			//var planetsText = GetMatchedScope(contentSpan, "planet", lineEndingSymbol);
+			//logger.LogInformation(planetsText.Substring(0, 100));
+			//logger.LogInformation(planetsText.Substring(planetsText.Length - 100, 100));
+			//SplitPlanetsText(planetsText, lineEndingSymbol);
+
+			ParadoxParser.ParadoxContext planetsData = (ParadoxParser.ParadoxContext)GetScopeBody(contentSpan.ToString());
 			this.planetsData = planetsData;
 			//+3是因为GetScopeBody返回children，不含右大括号。
-			content = content.Substring(planetsData.Stop.StopIndex + 3);
+			contentSpan = contentSpan.Slice(planetsData.Stop.StopIndex + 3);
 
-			p = content.IndexOf(lineEndingSymbol + "country={" + lineEndingSymbol);
+			p = contentSpan.IndexOf((lineEndingSymbol + "country={" + lineEndingSymbol).AsSpan(), StringComparison.OrdinalIgnoreCase);
 			p += lineEndingSymbol.Length;
-			content = content.Substring(p);
-			ParadoxParser.ParadoxContext countriesData = (ParadoxParser.ParadoxContext)GetScopeBody(content);
+			contentSpan = contentSpan.Slice(p);
+			ParadoxParser.ParadoxContext countriesData = (ParadoxParser.ParadoxContext)GetScopeBody(contentSpan.ToString());
 			this.countriesData = countriesData;
-			content = content.Substring(countriesData.Stop.StopIndex + 3);
+			contentSpan = contentSpan.Slice(countriesData.Stop.StopIndex + 3);
 
 
-			p = content.IndexOf(lineEndingSymbol + "pop_factions={" + lineEndingSymbol);
+			p = contentSpan.IndexOf((lineEndingSymbol + "pop_factions={" + lineEndingSymbol).AsSpan(), StringComparison.OrdinalIgnoreCase);
 			if (p != -1)
 			{
 				//机械帝国没有派系
 				p += lineEndingSymbol.Length;
-				content = content.Substring(p);
-				ParadoxParser.ParadoxContext pop_factionsData = (ParadoxParser.ParadoxContext)GetScopeBody(content);
+				contentSpan = contentSpan.Slice(p);
+				ParadoxParser.ParadoxContext pop_factionsData = (ParadoxParser.ParadoxContext)GetScopeBody(contentSpan.ToString());
 				this.pop_factionsData = pop_factionsData;
-				content = content.Substring(pop_factionsData.Stop.StopIndex + 3);
+				contentSpan = contentSpan.Slice(pop_factionsData.Stop.StopIndex + 3);
 			}
 		}
 
