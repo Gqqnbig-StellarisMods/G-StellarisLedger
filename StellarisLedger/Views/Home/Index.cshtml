@@ -288,6 +288,8 @@
 					}
 
 					updateHistoryCharts();
+
+					fetch("/api/gc/run");
 				});
 			}).catch(function(error) {$("body").text("Error in loading recent save games. Check console output for details.")});
 		});
