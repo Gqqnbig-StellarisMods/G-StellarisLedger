@@ -16,7 +16,8 @@ namespace StellarisLedger
 		private readonly ILogger logger = ApplicationLogging.CreateLogger<Analyst>();
 		private readonly string content;
 		private readonly IParseTree countriesData;
-		private readonly IParseTree planetsData;
+		private readonly Dictionary<int, string> planetsData;
+
 		private readonly IParseTree popData;
 		private readonly IParseTree pop_factionsData;
 		public string PlayerTag { get; }
@@ -50,15 +51,14 @@ namespace StellarisLedger
 			p += lineEndingSymbol.Length;
 			contentSpan = contentSpan.Slice(p);
 
-			//var planetsText = GetMatchedScope(contentSpan, "planet", lineEndingSymbol);
-			//logger.LogInformation(planetsText.Substring(0, 100));
-			//logger.LogInformation(planetsText.Substring(planetsText.Length - 100, 100));
-			//SplitPlanetsText(planetsText, lineEndingSymbol);
+			var planetsText = GetMatchedScope(contentSpan, "planet", lineEndingSymbol);
+			Debug.Assert(planetsText[0] == '{');
+			Debug.Assert(planetsText[planetsText.Length - 1] == '}');
+			this.planetsData = SplitPlanetsText(planetsText, lineEndingSymbol);
 
-			ParadoxParser.ParadoxContext planetsData = (ParadoxParser.ParadoxContext)GetScopeBody(contentSpan.ToString());
-			this.planetsData = planetsData;
+			//ParadoxParser.ParadoxContext planetsData = (ParadoxParser.ParadoxContext)GetScopeBody(contentSpan.ToString());
 			//+3是因为GetScopeBody返回children，不含右大括号。
-			contentSpan = contentSpan.Slice(planetsData.Stop.StopIndex + 3);
+			contentSpan = contentSpan.Slice(planetsText.Length);
 
 			p = contentSpan.IndexOf((lineEndingSymbol + "country={" + lineEndingSymbol).AsSpan(), StringComparison.OrdinalIgnoreCase);
 			p += lineEndingSymbol.Length;
@@ -78,6 +78,38 @@ namespace StellarisLedger
 				this.pop_factionsData = pop_factionsData;
 				contentSpan = contentSpan.Slice(pop_factionsData.Stop.StopIndex + 3);
 			}
+		}
+
+
+		Dictionary<int, string> SplitPlanetsText(ReadOnlySpan<char> scopeContent, string lineEndingSymbol)
+		{
+#if DEBUG
+			if (scopeContent[0] != '{')
+				throw new ArgumentException("scopeContent[0]必须是'{'。");
+			if (scopeContent[scopeContent.Length - 1] != '}')
+				throw new ArgumentException("scopeContent的最后一个元素必须是'}'。");
+#endif
+
+			var dic = new Dictionary<int, string>();
+
+			scopeContent = scopeContent.Slice(1, scopeContent.Length - 2).Trim();
+			while (scopeContent.Length > 0)
+			{
+				var p = scopeContent.IndexOf("={".AsSpan());
+
+				var s = scopeContent.Slice(0, p).ToString();
+				var key = Convert.ToInt32(s);
+				var value = GetMatchedScope(scopeContent, "", lineEndingSymbol);
+				Debug.Assert(value[0] == '{');
+				Debug.Assert(value[value.Length - 1] == '}');
+
+				Debug.Assert(dic.ContainsKey(key) == false, $"虽然Paradox存档允许重复的键，但在planets节里面键不能重复。重复的键为{key}。");
+				dic[key] = value.Slice(1, value.Length - 2).Trim().ToString();
+
+				scopeContent = scopeContent.Slice(p + 1 + value.Length).TrimStart();//循环外已经Trim过了，所以结尾不会再有空白。
+			}
+
+			return dic;
 		}
 
 		public DateTimeOffset GetInGameDate()
@@ -245,10 +277,23 @@ namespace StellarisLedger
 
 		private Planet GetPlanet(string planetId)
 		{
-			var planetData = GetValue(planetsData, planetId).GetChild(1);
+			var planetData = GetPlanetParserTree(planetId);
+
 			var tileData = GetValue(planetData, "tiles").GetChild(1);
 			var name = GetStringValue(planetData, "name");
 			return new Planet() { Id = planetId, Name = name, Pops = GetPlanetPops(tileData, popData) };
+		}
+
+		private ParadoxParser.ParadoxContext GetPlanetParserTree(string planetId)
+		{
+			var planetText = planetsData[Convert.ToInt32(planetId)];
+
+			ICharStream cstream = CharStreams.fromstring(planetText);
+			ITokenSource lexer = new ParadoxLexer(cstream);
+			ITokenStream tokens = new CommonTokenStream(lexer);
+			var parser = new ParadoxParser(tokens);
+			var planetData = parser.paradox();
+			return planetData;
 		}
 
 		private static int GetTechnologyCount(ParadoxParser.ParadoxContext kvPairs)
@@ -314,7 +359,7 @@ namespace StellarisLedger
 
 		public PlanetTiles GetPlanetTitles(string planetId)
 		{
-			var planetData = GetValue(planetsData, planetId).GetChild(1);
+			var planetData = GetPlanetParserTree(planetId);
 			var planetSize = Convert.ToInt32(GetValue(planetData, "planet_size")?.GetText());
 
 			var tiles = GetValue(planetData, "tiles").GetChild(1);
@@ -358,13 +403,26 @@ namespace StellarisLedger
 			return planetTiles;
 		}
 
-
-		private static string GetMatchedScope(string content, string scopeName)
+		/// <summary>
+		/// 返回{ ... }. [0]一定是{，[length-1]一定是}。
+		/// </summary>
+		/// <param name="content"></param>
+		/// <param name="scopeName"></param>
+		/// <param name="lineEndingSymbol"></param>
+		/// <returns></returns>
+		private static ReadOnlySpan<char> GetMatchedScope(ReadOnlySpan<char> content, string scopeName, string lineEndingSymbol)
 		{
-			string lineEndingSymbol = content.DetectLineEnding();
+			//if (lineEndingSymbol == null)
+			//	lineEndingSymbol = content.DetectLineEnding();
 
 			int bracketBalance = 0;
-			var start = content.IndexOf(scopeName + "={");
+			var start = content.IndexOf((scopeName + "={").AsSpan());
+			if (start == -1)
+				return null;
+			var s1 = "\"".AsSpan();
+			var lineEndingSymbolSpan = lineEndingSymbol.AsSpan();
+
+			start += scopeName.Length + 1;
 			int i = start;
 			for (; i < content.Length; i++)
 			{
@@ -374,17 +432,17 @@ namespace StellarisLedger
 				{
 					bracketBalance--;
 					if (bracketBalance == 0)
-						return content.Substring(start, i - start + 1);
+						return content.Slice(start, i - start + 1);
 				}
 				else if (content[i] == '"')
 				{
-					i = content.IndexOf('"', i + 1);
+					i = content.IndexOf(s1, i + 1);
 					if (i == -1)
 						break;
 				}
 				else if (content[i] == '#')
 				{
-					i = content.IndexOf(lineEndingSymbol, i + 1);
+					i = content.IndexOf(lineEndingSymbolSpan, i + 1);
 					if (i == -1)
 						break;
 				}
