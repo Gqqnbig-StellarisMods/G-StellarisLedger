@@ -191,13 +191,17 @@ namespace StellarisLedger
 			var standard_economy_module = GetValue(modules, "standard_economy_module").GetChild(1);
 			var resources = GetValue(standard_economy_module, "resources").GetChild(1);
 			var energy = GetValue(resources, "energy");
-			if (energy is ParadoxParser.ScopeContext)
+			if (energy == null)
+				country.Energy = 0;
+			else if (energy is ParadoxParser.ScopeContext)
 				country.Energy = Convert.ToDouble(energy.GetChild(1).GetText());
 			else
 				country.Energy = Convert.ToDouble(energy.GetText());
 
 			var minerals = GetValue(resources, "minerals");
-			if (minerals is ParadoxParser.ScopeContext)
+			if (minerals == null)
+				country.Minerals = 0;
+			else if (minerals is ParadoxParser.ScopeContext)
 				country.Minerals = Convert.ToDouble(minerals.GetChild(1).GetText());
 			else
 				country.Minerals = Convert.ToDouble(minerals.GetText());
