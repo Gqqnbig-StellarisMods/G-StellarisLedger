@@ -268,8 +268,8 @@
 					const filterPanel = $("#countryFilterPanel");
 					for (let tag of tags)
 					{
-						const label = $(`<label>${tag.name}</label>`);
-						const checkBox = $(`<input type='checkbox' name='${tag.name}'>`);
+						const label = $(`<label>${_.escape(tag.name)}</label>`);
+						const checkBox = $(`<input type='checkbox' name='${_.escape(tag.name)}'>`);
 
 						let v = localStorage.getItem("history-" + tag.name);
 						if (v == undefined)
@@ -383,7 +383,7 @@
 
 				const view = new google.visualization.DataView(lineChartData);
 				var viewColumns = view.getViewColumns();
-				viewColumns = viewColumns.filter(columnIndex => columnIndex === 0 || $(`#countryFilterPanel input[name="${view.getColumnLabel(columnIndex)}"]`).prop("checked"));
+				viewColumns = viewColumns.filter(columnIndex => columnIndex === 0 || $(`#countryFilterPanel input[name="${CSS.escape(view.getColumnLabel(columnIndex))}"]`).prop("checked"));
 				view.setColumns(viewColumns);
 
 
