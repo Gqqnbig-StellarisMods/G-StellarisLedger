@@ -56,7 +56,7 @@
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="xcopy /i /s  &quot;$(ProjectDir)Views\*&quot; &quot;$(TargetDir)Views&quot;&#xD;&#xA;copy &quot;$(ProjectDir)appsettings.json&quot; &quot;$(TargetDir)&quot;" />
+    <Exec Command="xcopy /i /s /y &quot;$(ProjectDir)Views\*&quot; &quot;$(TargetDir)Views&quot;&#xD;&#xA;copy &quot;$(ProjectDir)appsettings.json&quot; &quot;$(TargetDir)&quot;" />
   </Target>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
