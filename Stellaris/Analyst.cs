@@ -9,6 +9,7 @@ using Antlr4.Runtime.Tree;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 using StellarisLedger.Antlr;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace StellarisLedger
 {
@@ -16,6 +17,8 @@ namespace StellarisLedger
 	{
 		private readonly ILogger logger = ApplicationLogging.CreateLogger<Analyst>();
 		private readonly string content;
+		private readonly IMemoryCache memoryCache;
+		private readonly string cacheKey;
 		private readonly IParseTree countriesData;
 		private readonly Dictionary<int, string> planetsData;
 
