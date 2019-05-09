@@ -62,10 +62,4 @@ namespace StellarisLedger
 		public string Name { get; set; }
 		public int PopCount { get; set; }
 	}
-
-	public class Pop
-	{
-		public string Id { get; set; }
-		public string Faction { get; set; }
-	}
 }

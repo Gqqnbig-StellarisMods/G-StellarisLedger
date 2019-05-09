@@ -10,6 +10,7 @@ using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 using StellarisLedger.Antlr;
 using Microsoft.Extensions.Caching.Memory;
+using StellarisLedger.SaveGame;
 
 namespace StellarisLedger
 {
@@ -324,40 +325,38 @@ namespace StellarisLedger
 			return levels;
 		}
 
-		private List<Pop> GetPlanetPops(IParseTree tileData, IParseTree popData)
-		{
-			var pops = new List<Pop>();
-			for (int i = 0; i < tileData.ChildCount; i++)
-			{
-				var popId = GetValue(tileData.GetChild(i).GetChild(2).GetChild(1), "pop")?.GetText();
+		//private List<Pop> GetPlanetPops(IParseTree tileData, IParseTree popData)
+		//{
+		//	var pops = new List<Pop>();
+		//	for (int i = 0; i < tileData.ChildCount; i++)
+		//	{
+		//		var popId = GetValue(tileData.GetChild(i).GetChild(2).GetChild(1), "pop")?.GetText();
 
-				if (popId != null)
-				{
-					var pop = GetPop(popId, popData);
-					if (pop != null)
-						pops.Add(pop);
-				}
-			}
+		//		if (popId != null)
+		//		{
+		//			var pop = GetPop(popId);
+		//			if (pop != null)
+		//				pops.Add(pop);
+		//		}
+		//	}
 
-			return pops;
-		}
+		//	return pops;
+		//}
 
-		private Pop GetPop(string popId, IParseTree popData)
+		public Pop GetPop(int popId)
 		{
 			//当行星被轰炸时，可能人口死亡，行星数据里还有pop id，但pop数据库里已经没有了。
-			var body = GetValue(popData, popId)?.GetChild(1);
+			var body = GetValue(popData, popId.ToString())?.GetChild(1);
 			if (body == null)
 				return null;
 
-			var factionId = GetValue(body, "pop_faction")?.GetText();
-			string factionName = null;
-			if (factionId != null)
-			{
-				var faction = GetValue(pop_factionsData, factionId).GetChild(1);
-				factionName = GetStringValue(faction, "name");
-			}
+			return new Pop { Id = popId, SpeciesIndex = GetValue<int>(body, "species_index").Value, FactionId = GetValue<int>(body, "pop_faction") };
+		}
 
-			return new Pop { Id = popId, Faction = factionName };
+		public string GetFactionName(int factionId)
+		{
+			var factionData = GetValue(pop_factionsData, factionId.ToString()).GetChild(1);
+			return GetStringValue(factionData, "name");
 		}
 
 		public List<PlanetTiles> GetCountryPlanetTiles(string tag)
@@ -388,7 +387,7 @@ namespace StellarisLedger
 
 				var tile = new PlanetTiles.Tile();
 				tile.PopId = GetValue<int>(tileData.GetChild(2).GetChild(1), "pop");
-				
+
 
 				planetTiles.Tiles[Convert.ToInt32(tileData.GetChild(0).GetText())] = tile;
 
@@ -532,5 +531,6 @@ namespace StellarisLedger
 			else
 				return (T)Convert.ChangeType(t.GetText().Trim('"'), typeof(T));
 		}
+
 	}
 }
