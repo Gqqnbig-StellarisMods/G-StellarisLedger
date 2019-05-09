@@ -23,54 +23,47 @@
 
 	<script>
 		google.charts.load('current', { 'packages': ['corechart', 'table'] });
-		let factions = [];
+		let allFactions = [];
 		let dataTable;
-		
-		document.saveGamePath = "@Model.LatestSaveGamesPath.Replace('\\', '/')";
+
+		document.saveGamePath = "@(((String)ViewData["LatestSaveGamesPath"]).Replace('\\', '/'))";
 		google.charts.setOnLoadCallback(() =>
 		{
-			fetch(`/api/${document.saveGamePath}/Countries/me/Planets`).then(response => response.json()).then(data =>
+			fetch(`/api/${document.saveGamePath}/Countries/1/Factions`).then(response => response.json()).then(colonies =>
 			{
-					let colonies = data.content.colonies;
-					for (let colony of colonies)
+				for (let colony of colonies)
+				{
+					Array.prototype.push.apply(allFactions, Object.keys(colony.factions));
+				}
+				allFactions = _.uniq(allFactions);
+
+				dataTable = new google.visualization.DataTable();
+				dataTable.addColumn('string', 'Planet');
+				//每个派系都是一列
+				for (let i = 0; i < allFactions.length; i++)
+				{
+					dataTable.addColumn('number', allFactions[i]);
+				}
+
+				for (let colony of colonies)
+				{
+					let row = [];
+					for (let faction in colony.factions)
 					{
-						let pops = colony.pops;
-						pops.forEach(faction =>
-						{
-							if (factions.indexOf(faction) === -1)
-							{
-								factions.push(faction);
-							}
-						});
+						let p = allFactions.indexOf(faction);
+						row[p] = colony.factions[faction];
 					}
 
-					dataTable = new google.visualization.DataTable();
-					dataTable.addColumn('string', 'Planet');
-					for (let i = 0; i < factions.length; i++)
-					{
-						dataTable.addColumn('number', factions[i]);
-					}
+					if (row.length < allFactions.length)
+						row[allFactions.length - 1] = null;
 
-					for (let colony of colonies)
-					{
-						let groups = _.groupBy(colony.pops);
-						let row = [];
-						for (let faction in groups)
-						{
-							let p = factions.indexOf(faction);
-							row[p] = groups[faction].length;
-						}
+					row.unshift(colony.name);
+					dataTable.addRow(row);
+				}
 
-						if (row.length < factions.length)
-							row[factions.length - 1] = null;
+				showFactionFilters(allFactions);
 
-						row.unshift(colony.name);
-						dataTable.addRow(row);
-					}
-
-					showFactionFilters(factions);
-
-					refreshFactionsView();
+				refreshFactionsView();
 			});
 		});
 
@@ -105,9 +98,9 @@
 			let view = new google.visualization.DataView(dataTable);
 			let visibleColumns = [0];
 
-			for (let i = 0; i < factions.length; i++)
+			for (let i = 0; i < allFactions.length; i++)
 			{
-				if ($(`#visibleFactions input[name="${factions[i]}"]`).prop("checked"))
+				if ($(`#visibleFactions input[name="${allFactions[i]}"]`).prop("checked"))
 					visibleColumns.push(i+1);
 			}
 
@@ -115,9 +108,9 @@
 				calc: (dataTable, rowNum) =>
 				{
 					let sum = 0;
-					for (let i = 0; i < factions.length; i++)
+					for (let i = 0; i < allFactions.length; i++)
 					{
-						if ($(`#visibleFactions input[name="${factions[i]}"]`).prop("checked"))
+						if ($(`#visibleFactions input[name="${allFactions[i]}"]`).prop("checked"))
 							sum += dataTable.getValue(rowNum, i + 1);
 					}
 					return sum;
