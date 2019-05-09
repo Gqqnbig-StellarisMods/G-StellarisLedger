@@ -287,9 +287,12 @@ namespace StellarisLedger
 		{
 			var planetData = GetPlanetParserTree(planetId);
 
-			var tileData = GetValue(planetData, "tiles").GetChild(1);
+			var tilesData = GetValue(planetData, "tiles").GetChild(1);
 			var name = GetStringValue(planetData, "name");
-			return new Planet() { Id = planetId, Name = name, Pops = GetPlanetPops(tileData, popData) };
+
+			var popCount = GetValue(planetData, "pop")?.GetChild(1)?.ChildCount ?? 0;
+
+			return new Planet() { Id = planetId, Name = name, PopCount = popCount };
 		}
 
 		private ParadoxParser.ParadoxContext GetPlanetParserTree(string planetId)

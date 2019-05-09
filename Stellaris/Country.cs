@@ -60,7 +60,7 @@ namespace StellarisLedger
 		public string Id { get; set; }
 
 		public string Name { get; set; }
-		public List<Pop> Pops { get; set; }
+		public int PopCount { get; set; }
 	}
 
 	public class Pop
