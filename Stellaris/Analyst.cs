@@ -343,9 +343,13 @@ namespace StellarisLedger
 		//	return pops;
 		//}
 
+		/// <summary>
+		/// 当行星被轰炸时，可能人口死亡，行星数据里还有pop id，但pop数据库里已经没有了。
+		/// </summary>
+		/// <param name="popId"></param>
+		/// <returns></returns>
 		public Pop GetPop(int popId)
 		{
-			//当行星被轰炸时，可能人口死亡，行星数据里还有pop id，但pop数据库里已经没有了。
 			var body = GetValue(popData, popId.ToString())?.GetChild(1);
 			if (body == null)
 				return null;

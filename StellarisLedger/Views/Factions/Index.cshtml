@@ -25,38 +25,12 @@
 		google.charts.load('current', { 'packages': ['corechart', 'table'] });
 		let factions = [];
 		let dataTable;
-
+		
+		document.saveGamePath = "@Model.LatestSaveGamesPath.Replace('\\', '/')";
 		google.charts.setOnLoadCallback(() =>
 		{
-			fetch("/api/RecentSaves?limit=1").then(response => response.json()).then(recentSaves =>
+			fetch(`/api/${document.saveGamePath}/Countries/me/Planets`).then(response => response.json()).then(data =>
 			{
-				if (recentSaves.length === 0)
-				{
-					$("body").html("No savegames");
-					return;
-				}
-
-				path = recentSaves[0];
-				fetch(`/api/${path.replace("\\", "/")}/Countries/Player`).then(r =>
-				{
-					const i = path.indexOf("\\") + 1;
-					//定义一个新的承诺，当r.json()承诺实现时，新的承诺也实现。
-					return new Promise(function(resolve, reject)
-					{
-						r.json().then(json =>
-						{
-							resolve({
-								date: path.substr(i, path.length - i - ".sav".length),
-								content: json
-							});
-						}).catch(function(ex)
-						{
-							$("body").text("Error");
-							throw ex;
-						});
-					});
-				}).then(data =>
-				{
 					let colonies = data.content.colonies;
 					for (let colony of colonies)
 					{
@@ -97,7 +71,6 @@
 					showFactionFilters(factions);
 
 					refreshFactionsView();
-				});
 			});
 		});
 

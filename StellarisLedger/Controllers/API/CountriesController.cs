@@ -92,32 +92,32 @@ namespace StellarisLedger.Controllers.Api
 		{
 		    public static readonly SerializePopContractResolver Instance = new SerializePopContractResolver();
 
-		    protected override JsonProperty CreateProperty(System.Reflection.MemberInfo member, Newtonsoft.Json.MemberSerialization memberSerialization)
-		    {
-			    JsonProperty property = base.CreateProperty(member, memberSerialization);
+		    //protected override JsonProperty CreateProperty(System.Reflection.MemberInfo member, Newtonsoft.Json.MemberSerialization memberSerialization)
+		    //{
+			   // JsonProperty property = base.CreateProperty(member, memberSerialization);
 
-			    if (property.DeclaringType == typeof(Planet) && property.PropertyName.Equals(nameof(Planet.Pops),StringComparison.OrdinalIgnoreCase))
-			    {
-				    property.PropertyType = typeof(string[]);
-				    property.ItemConverter = new PopConverter();
-			    }
+			   // if (property.DeclaringType == typeof(Planet) && property.PropertyName.Equals(nameof(Planet.Pops),StringComparison.OrdinalIgnoreCase))
+			   // {
+				  //  property.PropertyType = typeof(string[]);
+				  //  property.ItemConverter = new PopConverter();
+			   // }
 
-			    return property;
-		    }
+			   // return property;
+		    //}
 
 
-		    class PopConverter : Newtonsoft.Json.JsonConverter<Pop>
-		    {
-			    public override void WriteJson(JsonWriter writer, Pop value, JsonSerializer serializer)
-			    {
-				    writer.WriteValue(value.Faction);
-			    }
+		    //class PopConverter : Newtonsoft.Json.JsonConverter<Pop>
+		    //{
+			   // public override void WriteJson(JsonWriter writer, Pop value, JsonSerializer serializer)
+			   // {
+				  //  writer.WriteValue(value.Faction);
+			   // }
 
-			    public override Pop ReadJson(JsonReader reader, Type objectType, Pop existingValue, bool hasExistingValue, JsonSerializer serializer)
-			    {
-				    throw new NotImplementedException();
-			    }
-		    }
+			   // public override Pop ReadJson(JsonReader reader, Type objectType, Pop existingValue, bool hasExistingValue, JsonSerializer serializer)
+			   // {
+				  //  throw new NotImplementedException();
+			   // }
+		    //}
 
 		}
 	}
