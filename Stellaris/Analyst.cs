@@ -381,12 +381,15 @@ namespace StellarisLedger
 			var planetTiles = new PlanetTiles();
 			planetTiles.Id = planetId;
 			planetTiles.Name = GetStringValue(planetData, "name");
-			planetTiles.Tiles = new Dictionary<int, Tile>(planetSize);
+			planetTiles.Tiles = new Dictionary<int, PlanetTiles.Tile>(planetSize);
 			for (int titleIndex = 0; titleIndex < planetSize; titleIndex++)
 			{
 				var tileData = tiles.GetChild(titleIndex);
 
-				var tile = new Tile();
+				var tile = new PlanetTiles.Tile();
+				tile.PopId = GetValue<int>(tileData.GetChild(2).GetChild(1), "pop");
+				
+
 				planetTiles.Tiles[Convert.ToInt32(tileData.GetChild(0).GetText())] = tile;
 
 				var resources = GetValue(tileData.GetChild(2).GetChild(1), "resources")?.GetChild(1);
@@ -512,6 +515,22 @@ namespace StellarisLedger
 		public static string GetStringValue(IParseTree tree, string key)
 		{
 			return GetValue(tree, key)?.GetText().Trim('"');
+		}
+
+
+		/// <summary>
+		/// 如果找不到则返回null。
+		/// </summary>
+		/// <param name="tree"></param>
+		/// <param name="key"></param>
+		/// <returns></returns>
+		public static T? GetValue<T>(IParseTree tree, string key) where T : struct
+		{
+			var t = GetValue(tree, key);
+			if (t == null)
+				return null;
+			else
+				return (T)Convert.ChangeType(t.GetText().Trim('"'), typeof(T));
 		}
 	}
 }
