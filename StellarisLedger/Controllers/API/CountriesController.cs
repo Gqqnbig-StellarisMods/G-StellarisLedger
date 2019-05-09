@@ -30,7 +30,7 @@ namespace StellarisLedger.Controllers.Api
 
         [ResponseCache(Duration = 3600 * 24 * 30)]
         [HttpGet(@"{gameId:regex(^[[\d_-]]+$)}/{saveName:regex(^[[\d.]]+\.sav$)}/Countries")]
-        public HttpResponseMessage GetCountries(string gameId, string saveName)
+        public IList<Country> GetCountries(string gameId, string saveName)
         {
             var fileName = Path.Combine(saveGamesPath, gameId, saveName);
             if (System.IO.File.Exists(fileName) == false)
@@ -47,16 +47,7 @@ namespace StellarisLedger.Controllers.Api
 
 
 			memoryCache.GetOrUpdateTag0IsMachineEmpire(true, () => countries[0].IsMachineEmpire, () => analyst.GetInGameDate());
-
-
-			string json = JsonConvert.SerializeObject(countries, new JsonSerializerSettings { ContractResolver = new SerializePopContractResolver(),
-																							  Formatting = serializerSettings.Formatting });
-
-			var response = new HttpResponseMessage(System.Net.HttpStatusCode.OK);
-#pragma warning disable DF0022 // Marks undisposed objects assinged to a property, originated in an object creation.
-			response.Content = new StringContent(json);
-#pragma warning restore DF0022 // Marks undisposed objects assinged to a property, originated in an object creation.
-			return response;
+			return countries;
 		}
 
 	    [ResponseCache(Duration = 3600 * 24 * 30)]

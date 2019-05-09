@@ -290,8 +290,12 @@ namespace StellarisLedger
 			var tilesData = GetValue(planetData, "tiles").GetChild(1);
 			var name = GetStringValue(planetData, "name");
 
-			var popCount = GetValue(planetData, "pop")?.GetChild(1)?.ChildCount ?? 0;
-
+			int popCount;
+			var popList = GetValue(planetData, "pop");
+			if (popList == null)
+				popCount = 0;
+			else
+				popCount = popList.ChildCount - 2;
 			return new Planet() { Id = planetId, Name = name, PopCount = popCount };
 		}
 

@@ -14,7 +14,7 @@ namespace StellarisLedger
         public double MilitaryPower { get; set; }
         public List<Planet> Colonies { get; set; }
         public int CivilianStations { get; internal set; }
-	    public int Population => Colonies.Sum(p => p.Pops.Count);
+	    public int Population => Colonies.Sum(p => p.PopCount);
         public double Energy { get; set; }
         public double Minerals { get; set; }
         public double Food { get; set; }
