@@ -26,7 +26,7 @@ namespace StellarisLedger.Controllers.Api
 
 		[ResponseCache(Duration = 3600 * 24 * 30)]
 		[HttpGet(@"{gameId}/{saveName}/Countries/{tag}/Planets")]
-		public HttpResponseMessage GetPlanetTilesData(string gameId, string saveName, string tag)
+		public List<PlanetTiles> GetPlanetTilesData(string gameId, string saveName, string tag)
 		{
 			if (tag.Equals("me",StringComparison.OrdinalIgnoreCase))
 				tag = "0";
@@ -34,14 +34,7 @@ namespace StellarisLedger.Controllers.Api
 			var content = Stellaris.GetGameSaveContent(Path.Combine(saveGamesPath,gameId,saveName));
 			var analyst = new Analyst(content);
 			var planetTilesData = analyst.GetCountryPlanetTiles(tag);
-
-			string json = JsonConvert.SerializeObject(planetTilesData, new JsonSerializerSettings { Formatting = serializerSettings.Formatting});
-
-			var response = new HttpResponseMessage(System.Net.HttpStatusCode.OK);
-#pragma warning disable DF0022 // Marks undisposed objects assinged to a property, originated in an object creation.
-			response.Content = new StringContent(json);
-#pragma warning restore DF0022 // Marks undisposed objects assinged to a property, originated in an object creation.
-			return response;
+			return planetTilesData;
 		}
 
 		[ResponseCache(Duration = 3600 * 24 * 30)]

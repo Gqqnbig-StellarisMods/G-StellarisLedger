@@ -161,9 +161,9 @@
 		{
 			$section.attr("index", index);
 
-			$section.find("legend").text(planet.Name);
+			$section.find("legend").text(planet.name);
 
-			buildTilesTable($section.find(".tiles"), planet.Tiles);
+			buildTilesTable($section.find(".tiles"), planet.tiles);
 
 			let $form = $section.find(".best-colony");
 			let $button = $form.find("button");
@@ -231,7 +231,7 @@
 			if (options.adjacencyBonus === 1)
 				options.allowNeuroElectricAmplifier = false;
 
-			let result = findBestTileForColonyCapital(planet.Tiles, options);
+			let result = findBestTileForColonyCapital(planet.tiles, options);
 			let maxBonus = result[0].totalBonus;
 			//并列第一的都列出来
 			for (let i = 0; i < result.length && (i < 3 || result[i].totalBonus === maxBonus); i++)
@@ -273,7 +273,7 @@
 					{
 						let technologies = 0;
 						let special = 0;
-						for (let [resourceName, amount] of Object.entries(tiles[id].Resources))
+						for (let [resourceName, amount] of Object.entries(tiles[id].resources))
 						{
 							switch (resourceName)
 							{
@@ -320,7 +320,7 @@
 					id++;
 					if (tiles[id])
 					{
-						if (options.notOnSpecial && tiles[id].Resources.special)
+						if (options.notOnSpecial && tiles[id].resources.special)
 							continue;
 
 						let node = new SearchNode(id);
@@ -353,7 +353,7 @@
 
 			if (id === capitalTileId)
 			{
-				let res = Object.assign({}, tiles[id].Resources);
+				let res = Object.assign({}, tiles[id].resources);
 				if (options.notOnSpecial && res.special)
 					return generateBonusTree(id - 1, tiles, capitalTileId, options, allowNeuroElectricAmplifier);
 
@@ -377,7 +377,7 @@
 				return [node];
 			} else if (isTileAdjacent(id, capitalTileId))
 			{
-				let res = Object.assign({}, tiles[id].Resources);
+				let res = Object.assign({}, tiles[id].resources);
 				let nodes = [];
 				if ((res.energy > 0 || res.minerals > 0) && allowNeuroElectricAmplifier)
 				{
@@ -390,7 +390,7 @@
 					let bestTileIdForNea = findBestCandidateForNeuroElectricAmplifier(tiles);
 					if (bestTileIdForNea != id && bestTileIdForNea>=0)
 					{
-						let lost = Math.min(tiles[bestTileIdForNea].Resources.energy, tiles[bestTileIdForNea].Resources.minerals);
+						let lost = Math.min(tiles[bestTileIdForNea].resources.energy, tiles[bestTileIdForNea].resources.minerals);
 						if (lost > 0)
 						{
 							neaNode.description = joinString(neaNode.description, `并导致<span class="tileId">${bestTileIdForNea}</span>不能造`);
@@ -425,9 +425,9 @@
 			let bestId = -1;
 			for (const [id, tile] of Object.entries(tiles))
 			{
-				if (tile.Resources.energy > 0 && tile.Resources.minerals > 0)
+				if (tile.resources.energy > 0 && tile.resources.minerals > 0)
 				{
-					let total = tile.Resources.energy+ tile.Resources.minerals;
+					let total = tile.resources.energy+ tile.resources.minerals;
 					if (total > best)
 					{
 						best = total;
