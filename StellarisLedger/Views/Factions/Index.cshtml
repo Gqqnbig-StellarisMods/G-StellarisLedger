@@ -29,7 +29,7 @@
 		document.saveGamePath = "@(((String)ViewData["LatestSaveGamesPath"]).Replace('\\', '/'))";
 		google.charts.setOnLoadCallback(() =>
 		{
-			fetch(`/api/${document.saveGamePath}/Countries/1/Factions`).then(response => response.json()).then(colonies =>
+			fetch(`/api/${document.saveGamePath}/Countries/0/Factions`).then(response => response.json()).then(colonies =>
 			{
 				for (let colony of colonies)
 				{

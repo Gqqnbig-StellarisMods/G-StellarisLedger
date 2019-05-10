@@ -288,7 +288,6 @@ namespace StellarisLedger
 		{
 			var planetData = GetPlanetParserTree(planetId);
 
-			var tilesData = GetValue(planetData, "tiles").GetChild(1);
 			var name = GetStringValue(planetData, "name");
 
 			int popCount;
@@ -363,6 +362,11 @@ namespace StellarisLedger
 			return GetStringValue(factionData, "name");
 		}
 
+		/// <summary>
+		/// 获取指定国家的行星表面详细数据
+		/// </summary>
+		/// <param name="tag"></param>
+		/// <returns></returns>
 		public List<PlanetTiles> GetCountryPlanetTiles(string tag)
 		{
 			var countryData = GetValue(countriesData, tag);
@@ -425,7 +429,7 @@ namespace StellarisLedger
 		}
 
 		/// <summary>
-		/// 返回{ ... }. [0]一定是{，[length-1]一定是}。
+		/// 返回{ ... }。其下标为0的元素一定是{，最后一个元素一定是}。
 		/// </summary>
 		/// <param name="content"></param>
 		/// <param name="scopeName"></param>
